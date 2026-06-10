@@ -28,7 +28,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  background: var(--navy);
+  background:
+    url('/images/hero-bg.jpg') center center / cover no-repeat fixed;
+  background-color: var(--navy);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 15px;
@@ -203,9 +205,7 @@ input  { outline: none; font-family: inherit; border: none; }
   padding: 72px 28px 56px;
   border-bottom: 1px solid var(--border);
   background:
-    linear-gradient(to right, rgba(13,17,23,0.82) 40%, rgba(13,17,23,0.45) 100%),
-    url('https://images.unsplash.com/photo-1762429727041-204cb9a9959b?q=85&w=2400&auto=format&fit=crop')
-    center center / cover no-repeat;
+    linear-gradient(to right, rgba(13,17,23,0.70) 40%, rgba(13,17,23,0.30) 100%);
   min-height: 520px;
   display: flex;
   flex-direction: column;
