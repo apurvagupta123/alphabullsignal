@@ -38,9 +38,8 @@ const { title } = Astro.props;
     </div>
 
     <!-- ── News Ticker Bar ──────────────────────── -->
-    <div class="news-ticker-bar">
-      <span class="news-ticker-label">NEWS</span>
-      <div class="news-ticker-track" id="newsTickerTrack">
+    <div class="ticker-bar news-bar">
+      <div class="ticker-track" id="newsTickerTrack">
         <span class="ticker-placeholder">Loading headlines…</span>
       </div>
     </div>
@@ -160,33 +159,28 @@ const { title } = Astro.props;
             const items = (d?.items || []).filter((i: any) => i.title);
             if (!items.length) continue;
             const html = items.map((item: any) =>
-              `<a class="nt-item" href="${item.link}" target="_blank" rel="noopener noreferrer">
-                <span class="nt-bullet">◆</span>${item.title}
-              </a>`
-            ).join('<span class="nt-sep">|</span>');
-            track.innerHTML = html + '<span class="nt-sep" style="padding:0 30px"> </span>' + html;
+              `<a class="ti" style="text-decoration:none;cursor:pointer;" href="${item.link}" target="_blank" rel="noopener noreferrer"><strong>◆</strong> ${item.title}</a>`
+            ).join('<span class="ti-sep">·</span>');
+            track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
             return;
           } catch { continue; }
         }
-        // fallback headlines
         const fallback = [
-          'Fed holds rates as inflation nears 2% target',
-          'S&P 500 hits record high on strong earnings',
-          'Apple unveils new AI features at WWDC',
-          'Oil climbs on Middle East supply concerns',
-          'Tesla beats delivery estimates, stock surges 8%',
-          'Goldman Sachs raises S&P 500 year-end target',
+          ['Fed holds rates as inflation nears 2% target','https://www.reuters.com/business/'],
+          ['S&P 500 hits record high on strong earnings','https://www.bloomberg.com/markets'],
+          ['Apple unveils new AI features at WWDC','https://www.cnbc.com/finance/'],
+          ['Oil climbs on Middle East supply concerns','https://www.reuters.com/business/'],
+          ['Tesla beats delivery estimates, stock surges 8%','https://www.wsj.com/finance'],
+          ['Goldman Sachs raises S&P 500 year-end target','https://www.ft.com/markets'],
         ];
-        const html = fallback.map(t =>
-          `<a class="nt-item" href="https://www.google.com/search?q=${encodeURIComponent(t)}&tbm=nws" target="_blank" rel="noopener noreferrer">
-            <span class="nt-bullet">◆</span>${t}
-          </a>`
-        ).join('<span class="nt-sep">|</span>');
-        track.innerHTML = html + '<span class="nt-sep" style="padding:0 30px"> </span>' + html;
+        const html = fallback.map(([t,u]) =>
+          `<a class="ti" style="text-decoration:none;cursor:pointer;" href="${u}" target="_blank" rel="noopener noreferrer"><strong>◆</strong> ${t}</a>`
+        ).join('<span class="ti-sep">·</span>');
+        track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
       }
 
       loadNewsTicker();
-      setInterval(loadNewsTicker, 300000); // refresh every 5 min
+      setInterval(loadNewsTicker, 300000);
     </script>
   </body>
 </html>
