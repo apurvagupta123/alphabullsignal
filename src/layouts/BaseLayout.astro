@@ -163,8 +163,8 @@ const { title } = Astro.props;
             const items = (d?.items || []).filter((i: any) => i.title);
             if (!items.length) continue;
             const html = items.map((item: any) =>
-              `<a class="ti" style="text-decoration:none;cursor:pointer;" href="${item.link}" target="_blank" rel="noopener noreferrer"><strong>◆</strong> ${item.title}</a>`
-            ).join('<span class="ti-sep">·</span>');
+              `<a class="ti" style="text-decoration:none;cursor:pointer;color:#c9a84c;" href="${item.link}" target="_blank" rel="noopener noreferrer"><strong style="color:#e8c97a;">◆</strong> ${item.title}</a>`
+            ).join('<span class="ti-sep" style="color:rgba(201,168,76,0.35);">·</span>');
             track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
             return;
           } catch { continue; }
@@ -178,8 +178,8 @@ const { title } = Astro.props;
           ['Goldman Sachs raises S&P 500 year-end target','https://www.ft.com/markets'],
         ];
         const html = fallback.map(([t,u]) =>
-          `<a class="ti" style="text-decoration:none;cursor:pointer;" href="${u}" target="_blank" rel="noopener noreferrer"><strong>◆</strong> ${t}</a>`
-        ).join('<span class="ti-sep">·</span>');
+          `<a class="ti" style="text-decoration:none;cursor:pointer;color:#c9a84c;" href="${u}" target="_blank" rel="noopener noreferrer"><strong style="color:#e8c97a;">◆</strong> ${t}</a>`
+        ).join('<span class="ti-sep" style="color:rgba(201,168,76,0.35);">·</span>');
         track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
       }
 
