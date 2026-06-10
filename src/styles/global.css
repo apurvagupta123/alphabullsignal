@@ -424,6 +424,7 @@ input  { outline: none; font-family: inherit; border: none; }
   border-radius: 8px;
   transition: background 0.15s, border-color 0.15s;
 }
+a.news-item { cursor: pointer; text-decoration: none; }
 a.news-item:hover { background: var(--navy-3); border-color: rgba(201,168,76,0.25); }
 
 .ni-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.5; margin-bottom: 5px; }
