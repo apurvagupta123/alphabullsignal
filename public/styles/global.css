@@ -829,7 +829,7 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
   margin: 44px auto 0;
   padding: 0 28px;
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 200px 1fr;
   gap: 28px;
 }
 .fg-heatmap-row .content-section { max-width: unset; margin: 0; padding: 0; }
@@ -837,8 +837,8 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
 .heatmap-section { display: flex; flex-direction: column; }
 
 /* Fear & Greed Widget */
-.fg-widget { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.fg-gauge-wrap { position: relative; width: 200px; }
+.fg-widget { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.fg-gauge-wrap { position: relative; width: 130px; }
 .fg-gauge { width: 100%; }
 .fg-center {
   position: absolute;
@@ -846,17 +846,17 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
   transform: translateX(-50%);
   text-align: center;
 }
-.fg-value { font-size: 2rem; font-weight: 900; line-height: 1; }
-.fg-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.fg-value { font-size: 1.3rem; font-weight: 900; line-height: 1; }
+.fg-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
 .fg-scale {
   display: flex;
   justify-content: space-between;
-  width: 100%;
-  font-size: 10px;
+  width: 130px;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
-.fg-prev { font-size: 12px; color: var(--text-muted); text-align: center; }
+.fg-prev { font-size: 11px; color: var(--text-muted); text-align: center; }
 
 /* Sector Heatmap */
 .heatmap-grid {
