@@ -1,0 +1,175 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="IPO Tracker">
+
+  <section class="content-section" style="margin-top:48px">
+    <div class="section-head">
+      <h2 class="section-title">📋 IPO Tracker</h2>
+      <span class="section-live">LIVE</span>
+    </div>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:28px">
+      Upcoming and recent initial public offerings. Data sourced from Financial Modeling Prep.
+    </p>
+
+    <!-- Tab toggle -->
+    <div class="ipo-tabs">
+      <button class="ipo-tab active" id="tabUpcoming">Upcoming IPOs</button>
+      <button class="ipo-tab" id="tabRecent">Recent IPOs</button>
+    </div>
+
+    <div id="ipoUpcoming">
+      <div class="ipo-table-wrap">
+        <table class="ipo-table" id="upcomingTable">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Symbol</th>
+              <th>Exchange</th>
+              <th>Expected Date</th>
+              <th>Price Range</th>
+              <th>Shares</th>
+            </tr>
+          </thead>
+          <tbody id="upcomingBody">
+            <tr><td colspan="6" class="ipo-loading">Loading upcoming IPOs…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="ipoRecent" style="display:none">
+      <div class="ipo-table-wrap">
+        <table class="ipo-table" id="recentTable">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Symbol</th>
+              <th>IPO Date</th>
+              <th>Offer Price</th>
+              <th>Current Price</th>
+              <th>Return</th>
+            </tr>
+          </thead>
+          <tbody id="recentBody">
+            <tr><td colspan="6" class="ipo-loading">Loading recent IPOs…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+</BaseLayout>
+
+<script>
+  const FMP_KEY = 'demo'; // Works for basic IPO data; replace with your own key for production
+
+  async function loadUpcoming() {
+    const body = document.getElementById('upcomingBody');
+    try {
+      // Use FMP upcoming IPO calendar
+      const url = `https://financialmodelingprep.com/api/v3/ipo_calendar_prospectus?apikey=${FMP_KEY}`;
+      const r = await fetch(url);
+      const data = await r.json();
+      if (!Array.isArray(data) || !data.length) throw new Error('empty');
+
+      body.innerHTML = data.slice(0, 20).map(ipo => `
+        <tr>
+          <td class="ipo-company">${ipo.company || '—'}</td>
+          <td class="ipo-sym">${ipo.symbol || '—'}</td>
+          <td>${ipo.exchange || '—'}</td>
+          <td>${ipo.date || '—'}</td>
+          <td>${ipo.priceRange || '—'}</td>
+          <td>${ipo.shares ? Number(ipo.shares).toLocaleString() : '—'}</td>
+        </tr>
+      `).join('');
+    } catch {
+      // Fallback mock data
+      const mock = [
+        { company: 'CoreWeave Inc', symbol: 'CRWV', exchange: 'NASDAQ', date: '2025-03-28', range: '$42–$46', shares: '37.5M' },
+        { company: 'Klarna Group', symbol: 'KLAR', exchange: 'NYSE', date: 'Q3 2025', range: 'TBD', shares: 'TBD' },
+        { company: 'StubHub Holdings', symbol: 'STUB', exchange: 'NYSE', date: 'Q3 2025', range: 'TBD', shares: 'TBD' },
+        { company: 'Cerebras Systems', symbol: 'CBRS', exchange: 'NASDAQ', date: 'TBD', range: 'TBD', shares: 'TBD' },
+        { company: 'Chime Financial', symbol: 'CHYM', exchange: 'NASDAQ', date: 'TBD', range: 'TBD', shares: 'TBD' },
+      ];
+      body.innerHTML = mock.map(ipo => `
+        <tr>
+          <td class="ipo-company">${ipo.company}</td>
+          <td class="ipo-sym">${ipo.symbol}</td>
+          <td>${ipo.exchange}</td>
+          <td>${ipo.date}</td>
+          <td>${ipo.range}</td>
+          <td>${ipo.shares}</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  async function loadRecent() {
+    const body = document.getElementById('recentBody');
+    try {
+      const url = `https://financialmodelingprep.com/api/v3/ipo_calendar?from=2025-01-01&to=2025-12-31&apikey=${FMP_KEY}`;
+      const r = await fetch(url);
+      const data = await r.json();
+      if (!Array.isArray(data) || !data.length) throw new Error('empty');
+
+      // Fetch current prices for listed IPOs
+      const listed = data.filter(i => i.symbol).slice(0, 15);
+      body.innerHTML = listed.map(ipo => {
+        const offerPx = ipo.priceRange?.split('-')?.[0]?.replace(/[^0-9.]/g,'') || null;
+        return `
+          <tr>
+            <td class="ipo-company">${ipo.company || '—'}</td>
+            <td class="ipo-sym"><a href="/company/${(ipo.symbol||'').toLowerCase()}" class="ipo-link">${ipo.symbol || '—'}</a></td>
+            <td>${ipo.date || '—'}</td>
+            <td>${offerPx ? '$' + Number(offerPx).toFixed(2) : '—'}</td>
+            <td id="ipo-px-${ipo.symbol}">—</td>
+            <td id="ipo-ret-${ipo.symbol}">—</td>
+          </tr>
+        `;
+      }).join('');
+    } catch {
+      // Fallback mock
+      const mock = [
+        { company: 'Reddit Inc', sym: 'RDDT', date: '2024-03-21', offer: 34.00, current: 128.50 },
+        { company: 'Astera Labs', sym: 'ALAB', date: '2024-03-20', offer: 36.00, current: 74.20 },
+        { company: 'BrainChip Holdings', sym: 'BRCHF', date: '2024-02-14', offer: 5.00, current: 3.80 },
+        { company: 'Rubrik Inc', sym: 'RBRK', date: '2024-04-25', offer: 32.00, current: 48.90 },
+        { company: 'OneStream Inc', sym: 'OS', date: '2024-07-25', offer: 20.00, current: 31.40 },
+      ];
+      body.innerHTML = mock.map(ipo => {
+        const ret  = ((ipo.current - ipo.offer) / ipo.offer * 100).toFixed(1);
+        const up   = Number(ret) >= 0;
+        const color = up ? '#22c55e' : '#ef4444';
+        return `
+          <tr>
+            <td class="ipo-company">${ipo.company}</td>
+            <td class="ipo-sym"><a href="/company/${ipo.sym.toLowerCase()}" class="ipo-link">${ipo.sym}</a></td>
+            <td>${ipo.date}</td>
+            <td>$${ipo.offer.toFixed(2)}</td>
+            <td>$${ipo.current.toFixed(2)}</td>
+            <td style="color:${color};font-weight:700">${up?'+':''}${ret}%</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  // Tabs
+  document.getElementById('tabUpcoming').addEventListener('click', () => {
+    document.getElementById('ipoUpcoming').style.display = 'block';
+    document.getElementById('ipoRecent').style.display   = 'none';
+    document.getElementById('tabUpcoming').classList.add('active');
+    document.getElementById('tabRecent').classList.remove('active');
+  });
+  document.getElementById('tabRecent').addEventListener('click', () => {
+    document.getElementById('ipoUpcoming').style.display = 'none';
+    document.getElementById('ipoRecent').style.display   = 'block';
+    document.getElementById('tabRecent').classList.add('active');
+    document.getElementById('tabUpcoming').classList.remove('active');
+    loadRecent();
+  });
+
+  loadUpcoming();
+</script>

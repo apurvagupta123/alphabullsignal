@@ -9,6 +9,19 @@ const { title } = Astro.props;
     <title>{title} | The Business Ledger</title>
     <meta name="description" content="Track markets, discover company insights, and stay ahead with curated financial news — all in one place." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Business Ledger" />
+    <meta property="og:title" content={`${title} | The Business Ledger`} />
+    <meta property="og:description" content="Track markets, discover company insights, and stay ahead with curated financial news — all in one place." />
+    <meta property="og:image" content="https://thebusinessledger.theapurva.com/og-image.png" />
+    <meta property="og:url" content="https://thebusinessledger.theapurva.com" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} | The Business Ledger`} />
+    <meta name="twitter:description" content="Track markets, discover company insights, and stay ahead with curated financial news." />
+    <meta name="twitter:image" content="https://thebusinessledger.theapurva.com/og-image.png" />
+    <!-- Sitemap -->
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />

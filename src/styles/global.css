@@ -631,3 +631,193 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
   .nav-search   { display: none; }
   .footer-top   { flex-direction: column; }
 }
+
+
+/* ── Company Deep-Dive Page ───────────────────────────────── */
+.company-page {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 32px 28px 80px;
+}
+
+.cp-back {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  transition: color 0.2s;
+}
+.cp-back:hover { color: var(--gold); }
+
+.cp-hero { margin-bottom: 24px; }
+.cp-sym  { font-size: 2rem; font-weight: 900; color: var(--gold); line-height: 1; }
+.cp-name { font-family: var(--font-serif); font-size: 1.3rem; color: #fff; margin-top: 4px; }
+.cp-name-loading { font-size: 1rem; color: var(--text-muted); margin-top: 4px; }
+
+.cp-price-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: 32px;
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.cps-item {
+  flex: 1;
+  min-width: 100px;
+  padding: 14px 16px;
+  border-right: 1px solid var(--border);
+}
+.cps-item:last-child { border-right: none; }
+.cps-label { display: block; font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+.cps-val   { display: block; font-size: 0.95rem; font-weight: 700; color: #fff; }
+
+.cp-main {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  margin-bottom: 44px;
+}
+
+.cp-chart-box {
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+}
+
+.cp-chart-controls {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.cpc-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  color: var(--text-muted);
+  background: var(--navy-3);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.cpc-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+.cpc-btn.active { color: var(--gold); border-color: var(--gold); background: var(--gold-dim); }
+
+.cp-chart-wrap { height: 280px; position: relative; }
+.cp-chart-wrap canvas { height: 100% !important; }
+
+.cp-about-box {
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+}
+.cp-box-title  { font-family: var(--font-serif); font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 12px; }
+.cp-about-text { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical; overflow: hidden; }
+.cp-about-meta { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted); }
+.cp-meta-link  { color: var(--gold); }
+.cp-meta-sep   { margin: 0 6px; color: var(--text-dim); }
+
+@media (max-width: 900px) {
+  .cp-main { grid-template-columns: 1fr; }
+  .cp-price-strip { overflow-x: auto; flex-wrap: nowrap; }
+}
+
+/* ── IPO Tracker ──────────────────────────────────────────── */
+.ipo-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+  width: fit-content;
+}
+.ipo-tab {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 6px;
+  background: transparent;
+  transition: all 0.2s;
+}
+.ipo-tab.active { background: var(--navy-4); color: var(--text); }
+.ipo-tab:hover  { color: var(--text); }
+
+.ipo-table-wrap { overflow-x: auto; }
+.ipo-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+.ipo-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ipo-table td {
+  padding: 13px 14px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.ipo-table tr:last-child td { border-bottom: none; }
+.ipo-table tr:hover td { background: var(--navy-3); }
+.ipo-company { font-weight: 600; color: #fff; }
+.ipo-sym     { font-weight: 700; color: var(--gold); }
+.ipo-link    { color: var(--gold); }
+.ipo-loading { text-align: center; padding: 40px; color: var(--text-muted); }
+
+/* ── Sector Pages ─────────────────────────────────────────── */
+.sector-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px 28px;
+  flex-wrap: wrap;
+}
+.tech-sector    { border-top: 3px solid #6366f1; }
+.finance-sector { border-top: 3px solid var(--gold); }
+
+.sh-icon  { font-size: 2.5rem; }
+.sh-title { font-family: var(--font-serif); font-size: 1.6rem; font-weight: 800; color: #fff; }
+.sh-sub   { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+.sh-perf  { margin-left: auto; text-align: right; }
+.shp-label { display: block; font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+.shp-val   { display: block; font-size: 1.5rem; font-weight: 800; }
+
+.sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+.sector-card { text-decoration: none; }
+
+.sector-pills { display: flex; gap: 12px; flex-wrap: wrap; }
+.sector-pill {
+  padding: 10px 20px;
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+.sector-pill:hover { color: var(--gold); border-color: rgba(201,168,76,0.3); background: var(--navy-3); }

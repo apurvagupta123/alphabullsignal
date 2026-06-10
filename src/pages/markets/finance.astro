@@ -1,0 +1,105 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const STOCKS = [
+  { sym: 'JPM',   name: 'JPMorgan Chase' },
+  { sym: 'BAC',   name: 'Bank of America' },
+  { sym: 'WFC',   name: 'Wells Fargo' },
+  { sym: 'GS',    name: 'Goldman Sachs' },
+  { sym: 'MS',    name: 'Morgan Stanley' },
+  { sym: 'C',     name: 'Citigroup' },
+  { sym: 'BLK',   name: 'BlackRock' },
+  { sym: 'V',     name: 'Visa' },
+  { sym: 'MA',    name: 'Mastercard' },
+  { sym: 'AXP',   name: 'American Express' },
+  { sym: 'BRK-B', name: 'Berkshire Hathaway' },
+  { sym: 'SCHW',  name: 'Charles Schwab' },
+];
+---
+<BaseLayout title="Finance Sector — Market Overview">
+
+  <section class="content-section" style="margin-top:48px">
+    <div class="sector-hero finance-sector">
+      <div class="sh-icon">💰</div>
+      <div>
+        <h1 class="sh-title">Finance Sector</h1>
+        <p class="sh-sub">Banks, asset managers, payment networks, and insurance companies</p>
+      </div>
+      <div class="sh-perf">
+        <span class="shp-label">SECTOR TODAY</span>
+        <span class="shp-val" id="sectorChg">Loading…</span>
+      </div>
+    </div>
+
+    <div class="section-head" style="margin-top:32px">
+      <h2 class="section-title">Finance Stocks</h2>
+      <span class="section-live">LIVE</span>
+    </div>
+
+    <div class="sector-grid" id="sectorGrid">
+      {STOCKS.map(s => (
+        <a href={`/company/${s.sym.toLowerCase()}`} class="mkt-card sector-card" id={`sc-${s.sym}`}>
+          <div class="mkt-top">
+            <div>
+              <div class="mkt-sym">{s.sym}</div>
+              <div class="mkt-name">{s.name}</div>
+            </div>
+            <div class="mkt-badge" id={`scb-${s.sym}`}>—</div>
+          </div>
+          <div class="mkt-price" id={`scp-${s.sym}`}>—</div>
+          <div class="mkt-chg"   id={`scc-${s.sym}`}>—</div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section" style="margin-top:48px">
+    <div class="section-head">
+      <h2 class="section-title">Other Sectors</h2>
+    </div>
+    <div class="sector-pills">
+      <a href="/markets/tech" class="sector-pill">💻 Technology</a>
+      <a href="/markets/energy" class="sector-pill">⚡ Energy</a>
+      <a href="/markets/healthcare" class="sector-pill">🏥 Healthcare</a>
+      <a href="/markets/consumer" class="sector-pill">🛍️ Consumer</a>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<script define:vars={{ stocks: ['JPM','BAC','WFC','GS','MS','C','BLK','V','MA','AXP','BRK-B','SCHW'] }}>
+  const P = 'https://api.allorigins.win/get?url=';
+
+  async function loadSector() {
+    try {
+      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${stocks.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+      const r = await fetch(P + encodeURIComponent(url));
+      const w = await r.json();
+      const quotes = JSON.parse(w.contents)?.quoteResponse?.result || [];
+      let totalPct = 0;
+
+      quotes.forEach(q => {
+        const chg = q.regularMarketChange ?? 0;
+        const pct = q.regularMarketChangePercent ?? 0;
+        const up  = chg >= 0;
+        const color = up ? '#22c55e' : '#ef4444';
+        totalPct += pct;
+
+        const card = document.getElementById(`sc-${q.symbol}`);
+        if (card) card.classList.add(up ? 'up' : 'dn');
+        const bEl = document.getElementById(`scb-${q.symbol}`);
+        if (bEl) { bEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; bEl.classList.add(up?'badge-up':'badge-dn'); }
+        const pEl = document.getElementById(`scp-${q.symbol}`);
+        if (pEl) pEl.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
+        const cEl = document.getElementById(`scc-${q.symbol}`);
+        if (cEl) { cEl.textContent = `${up?'▲':'▼'} $${Math.abs(chg).toFixed(2)}`; cEl.style.color = color; }
+      });
+
+      const avg = totalPct / quotes.length;
+      const el = document.getElementById('sectorChg');
+      if (el) { el.textContent = `${avg>=0?'+':''}${avg.toFixed(2)}%`; el.style.color = avg>=0?'#22c55e':'#ef4444'; }
+    } catch {}
+  }
+
+  loadSector();
+</script>
