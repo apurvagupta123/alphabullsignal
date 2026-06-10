@@ -226,21 +226,21 @@ const sorted = posts.sort((a: any, b: any) =>
 </BaseLayout>
 
 <script>
-  const P = 'https://api.allorigins.win/get?url=';
+  const P = 'https://corsproxy.io/?';
   const FMP_KEY = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
 
   async function yf(syms: string, fields: string) {
     const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`;
     const r = await fetch(P + encodeURIComponent(url));
     const w = await r.json();
-    return JSON.parse(w.contents)?.quoteResponse?.result || [];
+    return w?.quoteResponse?.result || [];
   }
 
   async function yfChart(sym: string, range = '1mo', interval = '1d') {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=${range}&interval=${interval}`;
     const r = await fetch(P + encodeURIComponent(url));
     const w = await r.json();
-    return JSON.parse(w.contents)?.chart?.result?.[0] || null;
+    return w?.chart?.result?.[0] || null;
   }
 
   // ── Indices ───────────────────────────────────────────────────────────

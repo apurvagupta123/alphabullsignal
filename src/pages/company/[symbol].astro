@@ -94,7 +94,7 @@ export async function getStaticPaths() {
 </BaseLayout>
 
 <script define:vars={{ sym }}>
-  const P = 'https://api.allorigins.win/get?url=';
+  const P = 'https://corsproxy.io/?';
   let chartInstance = null;
 
   const rangeMap = { 30: ['1mo','1d'], 90: ['3mo','1d'], 180: ['6mo','1wk'], 365: ['1y','1wk'], 1825: ['5y','1mo'] };
@@ -103,14 +103,14 @@ export async function getStaticPaths() {
     const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=${fields}`;
     const r = await fetch(P + encodeURIComponent(url));
     const w = await r.json();
-    return JSON.parse(w.contents)?.quoteResponse?.result?.[0] || null;
+    return w?.quoteResponse?.result?.[0] || null;
   }
 
   async function yfChart(range, interval) {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=${range}&interval=${interval}`;
     const r = await fetch(P + encodeURIComponent(url));
     const w = await r.json();
-    return JSON.parse(w.contents)?.chart?.result?.[0] || null;
+    return w?.chart?.result?.[0] || null;
   }
 
   async function loadQuote() {
@@ -195,7 +195,7 @@ export async function getStaticPaths() {
         const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${s}&fields=regularMarketPrice,regularMarketChangePercent`;
         const r = await fetch(P + encodeURIComponent(url));
         const w = await r.json();
-        const q = JSON.parse(w.contents)?.quoteResponse?.result?.[0];
+        const q = w?.quoteResponse?.result?.[0];
         if (q) {
           const pct = q.regularMarketChangePercent ?? 0;
           const up  = pct >= 0;

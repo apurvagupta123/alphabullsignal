@@ -92,7 +92,7 @@ const { title } = Astro.props;
     <script>
       // ── Ticker ────────────────────────────────────────────────────────
       const TICKER_SYMS = ['NVDA','META','TSLA','JPM','AAPL','MSFT','GOOGL','AMZN','SPY','QQQ','GS','NFLX','AMD','INTC','BRK-B'];
-      const P = 'https://api.allorigins.win/get?url=';
+      const P = 'https://corsproxy.io/?';
 
       async function loadTicker() {
         const track = document.getElementById('tickerTrack');
@@ -101,7 +101,7 @@ const { title } = Astro.props;
           const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${TICKER_SYMS.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
           const res = await fetch(P + encodeURIComponent(url));
           const w   = await res.json();
-          const quotes = JSON.parse(w.contents)?.quoteResponse?.result || [];
+          const quotes = w?.quoteResponse?.result || [];
           if (!quotes.length) throw new Error('empty');
 
           const html = quotes.map(q => {

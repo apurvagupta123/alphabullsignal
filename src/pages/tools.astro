@@ -104,7 +104,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <script>
-  const P = 'https://api.allorigins.win/get?url=';
+  const P = 'https://corsproxy.io/?';
   const FMP_KEY = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
 
   // ── Currency Converter ──────────────────────────────────────
@@ -169,7 +169,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${WATCHSYMS.join(',')}&fields=symbol,regularMarketPrice,fiftyTwoWeekHigh,fiftyTwoWeekLow,regularMarketChangePercent`;
       const r = await fetch(P + encodeURIComponent(url));
       const w = await r.json();
-      const quotes = JSON.parse(w.contents)?.quoteResponse?.result || [];
+      const quotes = w?.quoteResponse?.result || [];
 
       const highs = quotes
         .filter(q => q.regularMarketPrice && q.fiftyTwoWeekHigh)
@@ -242,7 +242,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickers.join(',')}&fields=symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
       const r = await fetch(P + encodeURIComponent(url));
       const w = await r.json();
-      const quotes = JSON.parse(w.contents)?.quoteResponse?.result || [];
+      const quotes = w?.quoteResponse?.result || [];
 
       grid.innerHTML = quotes.map(q => {
         const chg = q.regularMarketChange ?? 0;

@@ -68,14 +68,14 @@ const STOCKS = [
 </BaseLayout>
 
 <script define:vars={{ stocks: ['JPM','BAC','WFC','GS','MS','C','BLK','V','MA','AXP','BRK-B','SCHW'] }}>
-  const P = 'https://api.allorigins.win/get?url=';
+  const P = 'https://corsproxy.io/?';
 
   async function loadSector() {
     try {
       const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${stocks.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
       const r = await fetch(P + encodeURIComponent(url));
       const w = await r.json();
-      const quotes = JSON.parse(w.contents)?.quoteResponse?.result || [];
+      const quotes = w?.quoteResponse?.result || [];
       let totalPct = 0;
       quotes.forEach(q => {
         const chg = q.regularMarketChange ?? 0;
