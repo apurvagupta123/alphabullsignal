@@ -226,43 +226,37 @@ const sorted = posts.sort((a: any, b: any) =>
 </BaseLayout>
 
 <script>
-  const POLY_KEY = 'qczUHLpgL7HeJGazAePXSrcYsoAIULbC';
-  const FMP_KEY  = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
+  const P = 'https://api.allorigins.win/get?url=';
+  const FMP_KEY = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
 
-  // ── Polygon batch snapshot ────────────────────────────────────────────
-  async function polySnap(syms: string[]) {
-    const r = await fetch(`https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers?tickers=${syms.join(',')}&apikey=${POLY_KEY}`);
-    const d = await r.json();
-    return (d.tickers || []).map((t: any) => ({
-      symbol:    t.ticker,
-      price:     t.lastTrade?.p || t.day?.c || t.prevDay?.c || 0,
-      change:    t.todaysChange || 0,
-      changePct: t.todaysChangePerc || 0,
-    }));
+  async function yf(syms: string, fields: string) {
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`;
+    const r = await fetch(P + encodeURIComponent(url));
+    const w = await r.json();
+    return JSON.parse(w.contents)?.quoteResponse?.result || [];
   }
 
-  // ── Polygon 30-day aggregates (for sparklines) ────────────────────────
-  async function polyAggs(sym: string, days = 30) {
-    const to   = new Date().toISOString().split('T')[0];
-    const from = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
-    const r = await fetch(`https://api.polygon.io/v2/aggs/ticker/${sym}/range/1/day/${from}/${to}?adjusted=true&sort=asc&limit=60&apikey=${POLY_KEY}`);
-    const d = await r.json();
-    return (d.results || []).map((b: any) => b.c);
+  async function yfChart(sym: string, range = '1mo', interval = '1d') {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=${range}&interval=${interval}`;
+    const r = await fetch(P + encodeURIComponent(url));
+    const w = await r.json();
+    return JSON.parse(w.contents)?.chart?.result?.[0] || null;
   }
 
   // ── Indices ───────────────────────────────────────────────────────────
   async function loadIndices() {
     try {
-      const quotes = await polySnap(['SPY','QQQ','DIA','IWM']);
-      const nameMap: Record<string,string> = { SPY:'S&P 500', QQQ:'NASDAQ', DIA:'DOW JONES', IWM:'RUSSELL 2000' };
+      const quotes = await yf('SPY,QQQ,DIA,IWM', 'symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
       quotes.forEach((q: any) => {
         const el = document.getElementById(`idx-${q.symbol}`);
         if (!el) return;
-        const up = q.changePct >= 0;
+        const chg = q.regularMarketChange ?? 0;
+        const pct = q.regularMarketChangePercent ?? 0;
+        const up  = chg >= 0;
         el.classList.remove('skeleton');
         el.classList.add(up ? 'up' : 'dn');
-        el.querySelector('.idx-price')!.textContent = q.price.toFixed(2);
-        el.querySelector('.idx-chg')!.textContent   = `${up ? '▲' : '▼'} ${Math.abs(q.changePct).toFixed(2)}%`;
+        el.querySelector('.idx-price')!.textContent = q.regularMarketPrice?.toFixed(2);
+        el.querySelector('.idx-chg')!.textContent   = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
       });
     } catch {}
   }
@@ -271,27 +265,28 @@ const sorted = posts.sort((a: any, b: any) =>
   async function loadMarkets() {
     const syms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','GS','NFLX'];
     try {
-      const quotes = await polySnap(syms);
+      const quotes = await yf(syms.join(','), 'symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
       for (const q of quotes) {
-        const up    = q.changePct >= 0;
+        const chg = q.regularMarketChange ?? 0;
+        const pct = q.regularMarketChangePercent ?? 0;
+        const up  = chg >= 0;
         const color = up ? '#22c55e' : '#ef4444';
-        const sign  = up ? '+' : '';
 
+        const nameEl  = document.getElementById(`mn-${q.symbol}`);
+        const badgeEl = document.getElementById(`mb-${q.symbol}`);
         const priceEl = document.getElementById(`mp-${q.symbol}`);
         const chgEl   = document.getElementById(`mch-${q.symbol}`);
-        const badgeEl = document.getElementById(`mb-${q.symbol}`);
         const card    = document.getElementById(`mc-${q.symbol}`);
 
-        if (priceEl) priceEl.textContent = `$${q.price.toFixed(2)}`;
-        if (chgEl) {
-          chgEl.textContent = `${up?'▲':'▼'} $${Math.abs(q.change).toFixed(2)} ${sign}${q.changePct.toFixed(2)}%`;
-          (chgEl as HTMLElement).style.color = color;
-        }
-        if (badgeEl) { badgeEl.textContent = `${up?'▲':'▼'} ${Math.abs(q.changePct).toFixed(2)}%`; badgeEl.classList.add(up?'badge-up':'badge-dn'); }
+        if (nameEl)  nameEl.textContent  = q.shortName || '';
+        if (priceEl) priceEl.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
+        if (chgEl) { chgEl.textContent = `${up?'▲':'▼'} $${Math.abs(chg).toFixed(2)} ${up?'+':''}${pct.toFixed(2)}%`; (chgEl as HTMLElement).style.color = color; }
+        if (badgeEl) { badgeEl.textContent = `${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`; badgeEl.classList.add(up?'badge-up':'badge-dn'); }
         if (card) card.classList.add(up ? 'up' : 'dn');
 
         // Sparkline (non-blocking)
-        polyAggs(q.symbol, 30).then(closes => {
+        yfChart(q.symbol).then(cd => {
+          const closes = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
           if (closes.length < 2) return;
           const canvas = document.getElementById(`chart-${q.symbol}`) as HTMLCanvasElement;
           if (!canvas) return;
@@ -309,31 +304,32 @@ const sorted = posts.sort((a: any, b: any) =>
     } catch {}
   }
 
-  // ── News (FMP) ────────────────────────────────────────────────────────
+  // ── News (Reuters RSS) ────────────────────────────────────────────────
   async function loadNews() {
     const list = document.getElementById('newsList');
     if (!list) return;
     try {
-      const r = await fetch(`https://financialmodelingprep.com/api/v3/stock_news?limit=8&apikey=${FMP_KEY}`);
-      const items = await r.json();
-      if (!Array.isArray(items) || !items.length) throw new Error('empty');
+      const rss = 'https://feeds.reuters.com/reuters/businessNews';
+      const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=8`);
+      const d = await r.json();
+      const items = d?.items || [];
+      if (!items.length) throw new Error('empty');
       list.innerHTML = items.map((item: any) => {
-        const date = new Date(item.publishedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        return `<a href="${item.url}" class="news-item" target="_blank" rel="noopener">
+        const date = new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `<a href="${item.link}" class="news-item" target="_blank" rel="noopener">
           <div class="ni-title">${item.title}</div>
-          <div class="ni-meta">${item.site || 'Financial News'} · ${date}</div>
+          <div class="ni-meta">${item.author || 'Reuters'} · ${date}</div>
         </a>`;
       }).join('');
     } catch {
-      const fallback = [
+      list.innerHTML = [
         ['Fed holds rates as inflation nears 2% target','Reuters','2h ago'],
-        ['S&P 500 hits record high on strong earnings season','Bloomberg','4h ago'],
+        ['S&P 500 hits record high on strong earnings','Bloomberg','4h ago'],
         ['Apple unveils new AI features at WWDC','CNBC','5h ago'],
         ['Oil climbs on Middle East supply concerns','Reuters','6h ago'],
         ['Tesla beats delivery estimates, stock surges 8%','WSJ','8h ago'],
         ['Goldman Sachs raises S&P 500 year-end target','FT','10h ago'],
-      ];
-      list.innerHTML = fallback.map(([t, s, d]) => `<div class="news-item"><div class="ni-title">${t}</div><div class="ni-meta">${s} · ${d}</div></div>`).join('');
+      ].map(([t,s,d]) => `<div class="news-item"><div class="ni-title">${t}</div><div class="ni-meta">${s} · ${d}</div></div>`).join('');
     }
   }
 
@@ -344,42 +340,39 @@ const sorted = posts.sort((a: any, b: any) =>
     result.innerHTML = `<p class="sl-hint">Loading ${sym.toUpperCase()}…</p>`;
     try {
       const s = sym.toUpperCase().trim();
-      const [snapArr, fmpArr] = await Promise.all([
-        polySnap([s]),
-        fetch(`https://financialmodelingprep.com/api/v3/quote/${s}?apikey=${FMP_KEY}`).then(r => r.json())
+      const [quotes, cd] = await Promise.all([
+        yf(s, 'symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent,marketCap,trailingPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageVolume'),
+        yfChart(s)
       ]);
-      const snap = snapArr[0];
-      const fq   = Array.isArray(fmpArr) ? fmpArr[0] : null;
-      if (!snap) throw new Error('not found');
-
-      const price = snap.price;
-      const chg   = snap.change;
-      const pct   = snap.changePct;
+      const q = quotes[0];
+      if (!q) throw new Error('not found');
+      const chg   = q.regularMarketChange ?? 0;
+      const pct   = q.regularMarketChangePercent ?? 0;
       const up    = chg >= 0;
       const color = up ? '#22c55e' : '#ef4444';
-      const mcap  = fq?.marketCap ? (fq.marketCap >= 1e12 ? `$${(fq.marketCap/1e12).toFixed(2)}T` : `$${(fq.marketCap/1e9).toFixed(1)}B`) : '—';
+      const mcap  = q.marketCap ? (q.marketCap >= 1e12 ? `$${(q.marketCap/1e12).toFixed(2)}T` : `$${(q.marketCap/1e9).toFixed(1)}B`) : '—';
 
       result.innerHTML = `
-        <div class="sl-company">${fq?.name || s}</div>
+        <div class="sl-company">${q.longName || q.shortName || s}</div>
         <div class="sl-price-row">
-          <span class="sl-price" style="color:var(--gold)">$${price.toFixed(2)}</span>
+          <span class="sl-price" style="color:var(--gold)">$${q.regularMarketPrice?.toFixed(2)}</span>
           <span class="sl-delta" style="color:${color}">${up?'▲':'▼'} $${Math.abs(chg).toFixed(2)} (${up?'+':''}${pct.toFixed(2)}%)</span>
         </div>
         <div class="sl-stats">
           <div class="sl-stat"><span>Market Cap</span><strong>${mcap}</strong></div>
-          <div class="sl-stat"><span>P/E Ratio</span><strong>${fq?.pe?.toFixed(1) || '—'}</strong></div>
-          <div class="sl-stat"><span>52W High</span><strong>$${fq?.yearHigh?.toFixed(2) || '—'}</strong></div>
-          <div class="sl-stat"><span>52W Low</span><strong>$${fq?.yearLow?.toFixed(2) || '—'}</strong></div>
-          <div class="sl-stat"><span>Avg Volume</span><strong>${fq?.avgVolume ? (fq.avgVolume/1e6).toFixed(1)+'M' : '—'}</strong></div>
+          <div class="sl-stat"><span>P/E Ratio</span><strong>${q.trailingPE?.toFixed(1) || '—'}</strong></div>
+          <div class="sl-stat"><span>52W High</span><strong>$${q.fiftyTwoWeekHigh?.toFixed(2) || '—'}</strong></div>
+          <div class="sl-stat"><span>52W Low</span><strong>$${q.fiftyTwoWeekLow?.toFixed(2) || '—'}</strong></div>
+          <div class="sl-stat"><span>Avg Volume</span><strong>${q.averageVolume ? (q.averageVolume/1e6).toFixed(1)+'M' : '—'}</strong></div>
         </div>
         <canvas id="slChart" style="height:130px;width:100%"></canvas>
       `;
-
-      const closes = await polyAggs(s, 30);
+      const closes     = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
+      const timestamps = cd?.timestamp || [];
       if (closes.length > 1) {
         new (window as any).Chart(document.getElementById('slChart') as HTMLCanvasElement, {
           type: 'line',
-          data: { labels: closes.map((_: any, i: number) => i),
+          data: { labels: timestamps.map((t: number) => new Date(t*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'})),
             datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0,
               fill: true, backgroundColor: up ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }] },
           options: { animation: false, responsive: true, maintainAspectRatio: false,
@@ -387,8 +380,7 @@ const sorted = posts.sort((a: any, b: any) =>
             scales: {
               x: { ticks: { color: '#8892a4', maxTicksLimit: 5 }, grid: { color: 'rgba(255,255,255,0.04)' } },
               y: { ticks: { color: '#8892a4', callback: (v: any) => `$${v}` }, grid: { color: 'rgba(255,255,255,0.04)' } }
-            }
-          }
+            } }
         });
       }
     } catch {
@@ -415,35 +407,31 @@ const sorted = posts.sort((a: any, b: any) =>
       const cur  = d?.data?.[0];
       const prev = d?.data?.[1];
       if (!cur) throw new Error('empty');
-
       const val   = parseInt(cur.value);
       const label = cur.value_classification;
       const color = val >= 75 ? '#22c55e' : val >= 55 ? '#84cc16' : val >= 45 ? '#eab308' : val >= 25 ? '#f97316' : '#ef4444';
-
       document.getElementById('fgValue').textContent = val.toString();
       document.getElementById('fgValue').style.color = color;
       document.getElementById('fgLabel').textContent = label;
       document.getElementById('fgLabel').style.color = color;
-
       const angle = (val / 100) * 180 - 90;
       const needle = document.getElementById('fgNeedle');
       if (needle) needle.setAttribute('transform', `rotate(${angle} 100 100)`);
-
       if (prev) {
         const prevVal = parseInt(prev.value);
-        const diff    = val - prevVal;
+        const diff = val - prevVal;
         document.getElementById('fgPrev').innerHTML = `Yesterday: <strong>${prevVal}</strong> ${prev.value_classification} <span style="color:${diff>=0?'#22c55e':'#ef4444'}">${diff>=0?'+':''}${diff}</span>`;
       }
     } catch {}
   }
 
-  // ── Sector Heatmap (Polygon) ──────────────────────────────────
+  // ── Sector Heatmap (Yahoo Finance) ───────────────────────────
   async function loadHeatmap() {
     const sectors = ['XLK','XLF','XLE','XLV','XLY','XLP','XLI','XLU','XLB','XLRE'];
     try {
-      const quotes = await polySnap(sectors);
+      const quotes = await yf(sectors.join(','), 'symbol,regularMarketChangePercent');
       quotes.forEach((q: any) => {
-        const pct  = q.changePct;
+        const pct  = q.regularMarketChangePercent ?? 0;
         const cell = document.getElementById(`hm-${q.symbol}`);
         const pEl  = document.getElementById(`hmp-${q.symbol}`);
         if (!cell || !pEl) return;
@@ -453,8 +441,8 @@ const sorted = posts.sort((a: any, b: any) =>
         const color = pct >= 0 ? '#22c55e' : '#ef4444';
         cell.style.background  = bg;
         cell.style.borderColor = color + '40';
-        pEl.textContent        = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
-        pEl.style.color        = color;
+        pEl.textContent = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+        pEl.style.color = color;
       });
     } catch {}
   }
