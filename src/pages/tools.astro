@@ -1,0 +1,288 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Market Tools">
+
+  <div class="content-section" style="margin-top:48px">
+    <div class="section-head">
+      <h2 class="section-title">🛠️ Market Tools</h2>
+    </div>
+  </div>
+
+  <!-- Tools Grid -->
+  <div class="tools-grid">
+
+    <!-- Currency Converter -->
+    <div class="tool-card">
+      <h3 class="tool-title">💱 Currency Converter</h3>
+      <div class="cc-row">
+        <div class="cc-field">
+          <label>Amount</label>
+          <input type="number" id="ccAmount" value="1000" class="cc-input" />
+        </div>
+        <div class="cc-field">
+          <label>From</label>
+          <select id="ccFrom" class="cc-select">
+            <option value="USD">USD — US Dollar</option>
+            <option value="EUR">EUR — Euro</option>
+            <option value="GBP">GBP — British Pound</option>
+            <option value="JPY">JPY — Japanese Yen</option>
+            <option value="INR">INR — Indian Rupee</option>
+            <option value="CAD">CAD — Canadian Dollar</option>
+            <option value="AUD">AUD — Australian Dollar</option>
+            <option value="CHF">CHF — Swiss Franc</option>
+            <option value="CNY">CNY — Chinese Yuan</option>
+            <option value="SGD">SGD — Singapore Dollar</option>
+            <option value="HKD">HKD — Hong Kong Dollar</option>
+            <option value="MXN">MXN — Mexican Peso</option>
+            <option value="BRL">BRL — Brazilian Real</option>
+            <option value="AED">AED — UAE Dirham</option>
+          </select>
+        </div>
+        <div class="cc-arrow">⇄</div>
+        <div class="cc-field">
+          <label>To</label>
+          <select id="ccTo" class="cc-select">
+            <option value="EUR">EUR — Euro</option>
+            <option value="USD">USD — US Dollar</option>
+            <option value="GBP">GBP — British Pound</option>
+            <option value="JPY">JPY — Japanese Yen</option>
+            <option value="INR">INR — Indian Rupee</option>
+            <option value="CAD">CAD — Canadian Dollar</option>
+            <option value="AUD">AUD — Australian Dollar</option>
+            <option value="CHF">CHF — Swiss Franc</option>
+            <option value="CNY">CNY — Chinese Yuan</option>
+            <option value="SGD">SGD — Singapore Dollar</option>
+            <option value="HKD">HKD — Hong Kong Dollar</option>
+            <option value="MXN">MXN — Mexican Peso</option>
+            <option value="BRL">BRL — Brazilian Real</option>
+            <option value="AED">AED — UAE Dirham</option>
+          </select>
+        </div>
+      </div>
+      <button class="cc-convert-btn" id="ccConvert">Convert</button>
+      <div class="cc-result" id="ccResult">
+        <span class="ccr-amount" id="ccrAmount">—</span>
+        <span class="ccr-rate" id="ccrRate"></span>
+      </div>
+      <div class="cc-rates-grid" id="ccRatesGrid"></div>
+    </div>
+
+    <!-- 52-Week Tracker -->
+    <div class="tool-card">
+      <h3 class="tool-title">📈 52-Week Tracker</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Stocks near their 52-week highs and lows today.</p>
+
+      <div class="tabs-row">
+        <button class="ipo-tab active" id="tab52High">Near 52W High</button>
+        <button class="ipo-tab" id="tab52Low">Near 52W Low</button>
+      </div>
+
+      <div id="list52High">
+        <div class="ec-loading">Loading…</div>
+      </div>
+      <div id="list52Low" style="display:none">
+        <div class="ec-loading">Loading…</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Watchlist (full width) -->
+  <div class="content-section" style="margin-top:44px">
+    <div class="section-head">
+      <h2 class="section-title">⭐ My Watchlist</h2>
+    </div>
+    <div class="wl-add-row">
+      <input type="text" id="wlInput" class="sl-input" placeholder="Add ticker (e.g. AAPL)" style="max-width:240px" />
+      <button id="wlAdd" class="sl-btn">Add</button>
+    </div>
+    <div id="wlEmpty" class="wl-empty">Your watchlist is empty. Add tickers above to track them here.</div>
+    <div class="markets-grid" id="wlGrid" style="margin-top:16px"></div>
+  </div>
+
+</BaseLayout>
+
+<script>
+  const P = 'https://api.allorigins.win/get?url=';
+
+  // ── Currency Converter ──────────────────────────────────────
+  let fxRates = {};
+
+  async function loadFX(base = 'USD') {
+    try {
+      const r = await fetch(`https://api.exchangerate-api.com/v4/latest/${base}`);
+      const d = await r.json();
+      fxRates = d.rates || {};
+      renderFXRates(base);
+    } catch {
+      fxRates = { EUR:0.92, GBP:0.79, JPY:149.5, INR:83.2, CAD:1.36, AUD:1.53, CHF:0.90, CNY:7.23, SGD:1.34 };
+      renderFXRates(base);
+    }
+  }
+
+  function convert() {
+    const amount = parseFloat((document.getElementById('ccAmount') as HTMLInputElement).value) || 0;
+    const from   = (document.getElementById('ccFrom') as HTMLSelectElement).value;
+    const to     = (document.getElementById('ccTo')   as HTMLSelectElement).value;
+    if (!Object.keys(fxRates).length) { loadFX(from); return; }
+
+    let result = amount;
+    if (from !== 'USD' && fxRates['USD']) result = amount / fxRates[from] * fxRates['USD'];
+    const converted = result * (fxRates[to] || 1);
+    const rate      = (fxRates[to] || 1) / (fxRates[from] || 1);
+
+    document.getElementById('ccrAmount').textContent = `${amount.toLocaleString()} ${from} = ${converted.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ${to}`;
+    document.getElementById('ccrRate').textContent   = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+  }
+
+  function renderFXRates(base) {
+    const major = ['USD','EUR','GBP','JPY','INR','CAD','AUD','CHF','CNY','SGD','HKD','AED'];
+    const grid  = document.getElementById('ccRatesGrid');
+    if (!grid) return;
+    grid.innerHTML = major.filter(c => c !== base).map(c => `
+      <div class="fx-rate-item">
+        <span class="fx-code">${c}</span>
+        <span class="fx-val">${(fxRates[c]||0).toFixed(4)}</span>
+      </div>
+    `).join('');
+    convert();
+  }
+
+  document.getElementById('ccConvert')?.addEventListener('click', () => {
+    const from = (document.getElementById('ccFrom') as HTMLSelectElement).value;
+    loadFX(from);
+  });
+  document.getElementById('ccFrom')?.addEventListener('change', () => {
+    const from = (document.getElementById('ccFrom') as HTMLSelectElement).value;
+    loadFX(from);
+  });
+
+  loadFX('USD');
+
+  // ── 52-Week Tracker ─────────────────────────────────────────
+  const WATCHSYMS = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','GS','NFLX','AMD','V','MA','DIS','PYPL'];
+
+  async function load52Week() {
+    try {
+      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${WATCHSYMS.join(',')}&fields=symbol,shortName,regularMarketPrice,fiftyTwoWeekHigh,fiftyTwoWeekLow,regularMarketChangePercent`;
+      const r = await fetch(P + encodeURIComponent(url));
+      const w = await r.json();
+      const quotes = JSON.parse(w.contents)?.quoteResponse?.result || [];
+
+      const highs = quotes
+        .filter(q => q.regularMarketPrice && q.fiftyTwoWeekHigh)
+        .map(q => ({ ...q, pctFrom52H: (q.regularMarketPrice / q.fiftyTwoWeekHigh - 1) * 100 }))
+        .sort((a, b) => b.pctFrom52H - a.pctFrom52H)
+        .filter(q => q.pctFrom52H > -10);
+
+      const lows = quotes
+        .filter(q => q.regularMarketPrice && q.fiftyTwoWeekLow)
+        .map(q => ({ ...q, pctFrom52L: (q.regularMarketPrice / q.fiftyTwoWeekLow - 1) * 100 }))
+        .sort((a, b) => a.pctFrom52L - b.pctFrom52L)
+        .filter(q => q.pctFrom52L < 20);
+
+      const render52 = (items, type) => items.slice(0,8).map(q => {
+        const pct  = type === 'high' ? q.pctFrom52H : q.pctFrom52L;
+        const ref  = type === 'high' ? q.fiftyTwoWeekHigh : q.fiftyTwoWeekLow;
+        const lbl  = type === 'high' ? 'From 52W High' : 'Above 52W Low';
+        const color = type === 'high' ? '#22c55e' : '#ef4444';
+        const barW  = type === 'high' ? Math.max(0, 100+pct) : Math.min(100, pct);
+        return `<div class="w52-item">
+          <a href="/company/${q.symbol.toLowerCase()}" class="w52-sym">${q.symbol}</a>
+          <span class="w52-price">$${q.regularMarketPrice?.toFixed(2)}</span>
+          <div class="w52-bar-wrap">
+            <div class="w52-bar" style="width:${barW}%;background:${color}"></div>
+          </div>
+          <span style="font-size:11px;color:${color}">${pct.toFixed(1)}% ${lbl}</span>
+          <span style="font-size:11px;color:var(--text-muted)">52W: $${ref?.toFixed(2)}</span>
+        </div>`;
+      }).join('');
+
+      document.getElementById('list52High').innerHTML = highs.length ? render52(highs,'high') : '<div class="ec-loading">No stocks near 52W highs.</div>';
+      document.getElementById('list52Low').innerHTML  = lows.length  ? render52(lows,'low')  : '<div class="ec-loading">No stocks near 52W lows.</div>';
+    } catch {
+      document.getElementById('list52High').innerHTML = '<div class="ec-loading">Could not load data.</div>';
+      document.getElementById('list52Low').innerHTML  = '<div class="ec-loading">Could not load data.</div>';
+    }
+  }
+
+  document.getElementById('tab52High')?.addEventListener('click', () => {
+    document.getElementById('list52High').style.display = 'block';
+    document.getElementById('list52Low').style.display  = 'none';
+    document.getElementById('tab52High').classList.add('active');
+    document.getElementById('tab52Low').classList.remove('active');
+  });
+  document.getElementById('tab52Low')?.addEventListener('click', () => {
+    document.getElementById('list52High').style.display = 'none';
+    document.getElementById('list52Low').style.display  = 'block';
+    document.getElementById('tab52Low').classList.add('active');
+    document.getElementById('tab52High').classList.remove('active');
+  });
+
+  load52Week();
+
+  // ── Watchlist ────────────────────────────────────────────────
+  function getWatchlist() {
+    try { return JSON.parse(localStorage.getItem('bl_watchlist') || '[]'); } catch { return []; }
+  }
+  function saveWatchlist(list) {
+    localStorage.setItem('bl_watchlist', JSON.stringify(list));
+  }
+
+  async function renderWatchlist() {
+    const tickers = getWatchlist();
+    const empty   = document.getElementById('wlEmpty');
+    const grid    = document.getElementById('wlGrid');
+    if (!tickers.length) { empty.style.display = 'block'; grid.innerHTML = ''; return; }
+    empty.style.display = 'none';
+
+    try {
+      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickers.join(',')}&fields=symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+      const r = await fetch(P + encodeURIComponent(url));
+      const w = await r.json();
+      const quotes = JSON.parse(w.contents)?.quoteResponse?.result || [];
+
+      grid.innerHTML = quotes.map(q => {
+        const chg = q.regularMarketChange ?? 0;
+        const pct = q.regularMarketChangePercent ?? 0;
+        const up  = chg >= 0;
+        const color = up ? '#22c55e' : '#ef4444';
+        return `<div class="mkt-card ${up?'up':'dn'}">
+          <div class="mkt-top">
+            <div>
+              <a href="/company/${q.symbol.toLowerCase()}" class="mkt-sym">${q.symbol}</a>
+              <div class="mkt-name">${q.shortName||''}</div>
+            </div>
+            <button class="wl-remove" onclick="removeFromWatchlist('${q.symbol}')" title="Remove">✕</button>
+          </div>
+          <div class="mkt-price">$${q.regularMarketPrice?.toFixed(2)}</div>
+          <div class="mkt-chg" style="color:${color}">${up?'▲':'▼'} $${Math.abs(chg).toFixed(2)} (${up?'+':''}${pct.toFixed(2)}%)</div>
+        </div>`;
+      }).join('');
+    } catch {
+      grid.innerHTML = tickers.map(t => `<div class="mkt-card"><div class="mkt-sym">${t}</div><div class="mkt-price" style="color:var(--text-muted)">—</div></div>`).join('');
+    }
+  }
+
+  (window as any).removeFromWatchlist = (sym) => {
+    const list = getWatchlist().filter(s => s !== sym);
+    saveWatchlist(list);
+    renderWatchlist();
+  };
+
+  document.getElementById('wlAdd')?.addEventListener('click', () => {
+    const input = document.getElementById('wlInput') as HTMLInputElement;
+    const sym   = input.value.trim().toUpperCase();
+    if (!sym) return;
+    const list = getWatchlist();
+    if (!list.includes(sym)) { list.push(sym); saveWatchlist(list); }
+    input.value = '';
+    renderWatchlist();
+  });
+  document.getElementById('wlInput')?.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter') document.getElementById('wlAdd')?.click();
+  });
+
+  renderWatchlist();
+</script>

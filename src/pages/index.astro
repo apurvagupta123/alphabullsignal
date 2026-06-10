@@ -74,6 +74,74 @@ const sorted = posts.sort((a: any, b: any) =>
     </div>
   </section>
 
+  <!-- ── Fear & Greed + Sector Heatmap ───────────────── -->
+  <div class="fg-heatmap-row">
+
+    <!-- Fear & Greed -->
+    <div class="content-section fg-section">
+      <div class="section-head">
+        <h2 class="section-title">😱 Fear &amp; Greed Index</h2>
+      </div>
+      <div class="fg-widget" id="fgWidget">
+        <div class="fg-gauge-wrap">
+          <svg class="fg-gauge" viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="fgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#ef4444"/>
+                <stop offset="25%"  stop-color="#f97316"/>
+                <stop offset="50%"  stop-color="#eab308"/>
+                <stop offset="75%"  stop-color="#84cc16"/>
+                <stop offset="100%" stop-color="#22c55e"/>
+              </linearGradient>
+            </defs>
+            <path d="M 10 100 A 90 90 0 0 1 190 100" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="16" stroke-linecap="round"/>
+            <path d="M 10 100 A 90 90 0 0 1 190 100" fill="none" stroke="url(#fgGrad)" stroke-width="16" stroke-linecap="round"/>
+            <line id="fgNeedle" x1="100" y1="100" x2="100" y2="20" stroke="#fff" stroke-width="3" stroke-linecap="round" transform="rotate(-90 100 100)"/>
+            <circle cx="100" cy="100" r="5" fill="#fff"/>
+          </svg>
+          <div class="fg-center">
+            <div class="fg-value" id="fgValue">—</div>
+            <div class="fg-label" id="fgLabel">Loading…</div>
+          </div>
+        </div>
+        <div class="fg-scale">
+          <span style="color:#ef4444">Fear</span>
+          <span style="color:#eab308">Neutral</span>
+          <span style="color:#22c55e">Greed</span>
+        </div>
+        <div class="fg-prev" id="fgPrev"></div>
+      </div>
+    </div>
+
+    <!-- Sector Heatmap -->
+    <div class="content-section heatmap-section">
+      <div class="section-head">
+        <h2 class="section-title">🌡️ Sector Heatmap</h2>
+        <span class="section-live">LIVE</span>
+      </div>
+      <div class="heatmap-grid" id="heatmapGrid">
+        {[
+          {sym:'XLK',name:'Technology'},
+          {sym:'XLF',name:'Finance'},
+          {sym:'XLE',name:'Energy'},
+          {sym:'XLV',name:'Health Care'},
+          {sym:'XLY',name:'Consumer Disc.'},
+          {sym:'XLP',name:'Consumer Staples'},
+          {sym:'XLI',name:'Industrials'},
+          {sym:'XLU',name:'Utilities'},
+          {sym:'XLB',name:'Materials'},
+          {sym:'XLRE',name:'Real Estate'},
+        ].map(s => (
+          <div class="hm-cell skeleton" id={`hm-${s.sym}`}>
+            <span class="hm-name">{s.name}</span>
+            <span class="hm-pct" id={`hmp-${s.sym}`}>—</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+  </div>
+
   <!-- ── Today's Markets ─────────────────────────────── -->
   <section class="content-section" id="markets">
     <div class="section-head">
@@ -350,8 +418,72 @@ const sorted = posts.sort((a: any, b: any) =>
     }
   });
 
+  // ── Fear & Greed ─────────────────────────────────────────────
+  async function loadFearGreed() {
+    try {
+      const r = await fetch('https://api.alternative.me/fng/?limit=2');
+      const d = await r.json();
+      const cur  = d?.data?.[0];
+      const prev = d?.data?.[1];
+      if (!cur) throw new Error('empty');
+
+      const val   = parseInt(cur.value);
+      const label = cur.value_classification;
+      const color = val >= 75 ? '#22c55e' : val >= 55 ? '#84cc16' : val >= 45 ? '#eab308' : val >= 25 ? '#f97316' : '#ef4444';
+
+      document.getElementById('fgValue').textContent = val.toString();
+      document.getElementById('fgValue').style.color = color;
+      document.getElementById('fgLabel').textContent = label;
+      document.getElementById('fgLabel').style.color = color;
+
+      // Rotate needle: -90deg = 0 (fear), 0deg = 50 (neutral), +90deg = 100 (greed)
+      const angle = (val / 100) * 180 - 90;
+      const needle = document.getElementById('fgNeedle');
+      if (needle) needle.setAttribute('transform', `rotate(${angle} 100 100)`);
+
+      if (prev) {
+        const prevVal = parseInt(prev.value);
+        const diff    = val - prevVal;
+        document.getElementById('fgPrev').innerHTML = `Yesterday: <strong>${prevVal}</strong> ${prev.value_classification} <span style="color:${diff>=0?'#22c55e':'#ef4444'}">${diff>=0?'+':''}${diff}</span>`;
+      }
+    } catch {}
+  }
+
+  // ── Sector Heatmap ───────────────────────────────────────────
+  async function loadHeatmap() {
+    const sectors = ['XLK','XLF','XLE','XLV','XLY','XLP','XLI','XLU','XLB','XLRE'];
+    try {
+      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sectors.join(',')}&fields=symbol,regularMarketChangePercent`;
+      const r = await fetch(P + encodeURIComponent(url));
+      const w = await r.json();
+      const quotes = JSON.parse(w.contents)?.quoteResponse?.result || [];
+
+      quotes.forEach((q: any) => {
+        const pct  = q.regularMarketChangePercent ?? 0;
+        const cell = document.getElementById(`hm-${q.symbol}`);
+        const pEl  = document.getElementById(`hmp-${q.symbol}`);
+        if (!cell || !pEl) return;
+        cell.classList.remove('skeleton');
+
+        // Color intensity based on % change
+        const intensity = Math.min(Math.abs(pct) / 3, 1);
+        const bg = pct >= 0
+          ? `rgba(34,197,94,${0.1 + intensity * 0.5})`
+          : `rgba(239,68,68,${0.1 + intensity * 0.5})`;
+        const color = pct >= 0 ? '#22c55e' : '#ef4444';
+
+        cell.style.background    = bg;
+        cell.style.borderColor   = color + '40';
+        pEl.textContent          = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+        pEl.style.color          = color;
+      });
+    } catch {}
+  }
+
   loadIndices();
   loadMarkets();
   loadNews();
-  setInterval(() => { loadIndices(); loadMarkets(); }, 60000);
+  loadFearGreed();
+  loadHeatmap();
+  setInterval(() => { loadIndices(); loadMarkets(); loadHeatmap(); }, 60000);
 </script>

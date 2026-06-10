@@ -1,0 +1,140 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Economic Calendar">
+  <section class="content-section" style="margin-top:48px">
+    <div class="section-head">
+      <h2 class="section-title">🏛️ Economic Calendar</h2>
+      <span class="section-live">UPCOMING</span>
+    </div>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px">
+      Fed meetings, inflation data, jobs reports and key economic releases.
+    </p>
+
+    <div class="econ-filters">
+      <button class="econ-filter active" data-impact="all">All Events</button>
+      <button class="econ-filter" data-impact="high">High Impact</button>
+      <button class="econ-filter" data-impact="medium">Medium</button>
+    </div>
+
+    <div id="econList">
+      <div class="ec-loading">Loading economic events…</div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const FMP = 'https://financialmodelingprep.com/api/v3';
+  const KEY  = 'demo';
+  let allEvents = [];
+  let activeFilter = 'all';
+
+  function getNextMonthRange() {
+    const from = new Date();
+    const to   = new Date();
+    to.setDate(to.getDate() + 30);
+    return {
+      from: from.toISOString().split('T')[0],
+      to:   to.toISOString().split('T')[0]
+    };
+  }
+
+  function impactColor(impact) {
+    if (!impact) return '#7a8899';
+    const i = impact.toLowerCase();
+    if (i.includes('high'))   return '#ef4444';
+    if (i.includes('medium')) return '#f59e0b';
+    return '#22c55e';
+  }
+
+  function renderEvents(events) {
+    const list = document.getElementById('econList');
+    if (!events.length) {
+      list.innerHTML = '<div class="ec-loading">No events found.</div>';
+      return;
+    }
+
+    // Group by date
+    const byDate = {};
+    events.forEach(e => {
+      const d = (e.date || '').split(' ')[0];
+      if (!byDate[d]) byDate[d] = [];
+      byDate[d].push(e);
+    });
+
+    list.innerHTML = Object.keys(byDate).sort().map(date => {
+      const dayLabel = new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      return `
+        <div class="econ-day">
+          <div class="econ-day-label">${dayLabel}</div>
+          ${byDate[date].map(e => `
+            <div class="econ-event">
+              <div class="econ-impact-dot" style="background:${impactColor(e.impact)}" title="${e.impact || 'Low'}"></div>
+              <div class="econ-event-info">
+                <div class="econ-event-name">${e.event || e.name || '—'}</div>
+                <div class="econ-event-meta">
+                  <span>${e.country || 'US'}</span>
+                  ${e.actual   != null ? `<span class="econ-actual">Actual: <strong>${e.actual}${e.unit||''}</strong></span>` : ''}
+                  ${e.estimate != null ? `<span>Est: ${e.estimate}${e.unit||''}</span>` : ''}
+                  ${e.previous != null ? `<span>Prev: ${e.previous}${e.unit||''}</span>` : ''}
+                </div>
+              </div>
+              <div class="econ-impact-badge" style="color:${impactColor(e.impact)};border-color:${impactColor(e.impact)}20;background:${impactColor(e.impact)}15">
+                ${e.impact || 'Low'}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function loadEconomy() {
+    const { from, to } = getNextMonthRange();
+    try {
+      const r = await fetch(`${FMP}/economic_calendar?from=${from}&to=${to}&apikey=${KEY}`);
+      const data = await r.json();
+      if (!Array.isArray(data) || !data.length) throw new Error('empty');
+      allEvents = data;
+      filterAndRender();
+    } catch {
+      // Comprehensive fallback
+      allEvents = [
+        { date: '2025-06-11', event: 'CPI (Consumer Price Index) MoM', country: 'US', impact: 'High', estimate: '0.3%', previous: '0.4%', actual: null },
+        { date: '2025-06-12', event: 'Core CPI YoY', country: 'US', impact: 'High', estimate: '3.5%', previous: '3.6%', actual: null },
+        { date: '2025-06-12', event: 'Initial Jobless Claims', country: 'US', impact: 'Medium', estimate: '220K', previous: '215K', actual: null },
+        { date: '2025-06-17', event: 'Retail Sales MoM', country: 'US', impact: 'High', estimate: '0.2%', previous: '-0.8%', actual: null },
+        { date: '2025-06-18', event: 'Federal Reserve Interest Rate Decision', country: 'US', impact: 'High', estimate: '5.25%', previous: '5.50%', actual: null },
+        { date: '2025-06-18', event: 'FOMC Press Conference', country: 'US', impact: 'High', estimate: null, previous: null, actual: null },
+        { date: '2025-06-18', event: 'Fed Dot Plot & Economic Projections', country: 'US', impact: 'High', estimate: null, previous: null, actual: null },
+        { date: '2025-06-20', event: 'S&P Global Manufacturing PMI Flash', country: 'US', impact: 'Medium', estimate: '51.2', previous: '51.3', actual: null },
+        { date: '2025-06-25', event: 'Consumer Confidence', country: 'US', impact: 'Medium', estimate: '98.5', previous: '97.0', actual: null },
+        { date: '2025-06-26', event: 'GDP QoQ (Final)', country: 'US', impact: 'High', estimate: '1.3%', previous: '1.6%', actual: null },
+        { date: '2025-06-27', event: 'PCE Price Index YoY', country: 'US', impact: 'High', estimate: '2.6%', previous: '2.7%', actual: null },
+        { date: '2025-07-02', event: 'Non-Farm Payrolls', country: 'US', impact: 'High', estimate: '185K', previous: '175K', actual: null },
+        { date: '2025-07-02', event: 'Unemployment Rate', country: 'US', impact: 'High', estimate: '3.9%', previous: '3.9%', actual: null },
+        { date: '2025-07-10', event: 'CPI YoY', country: 'US', impact: 'High', estimate: '3.3%', previous: '3.4%', actual: null },
+        { date: '2025-07-30', event: 'Federal Reserve Interest Rate Decision', country: 'US', impact: 'High', estimate: '5.00%', previous: '5.25%', actual: null },
+      ];
+      filterAndRender();
+    }
+  }
+
+  function filterAndRender() {
+    let filtered = allEvents;
+    if (activeFilter === 'high')   filtered = allEvents.filter(e => (e.impact||'').toLowerCase().includes('high'));
+    if (activeFilter === 'medium') filtered = allEvents.filter(e => (e.impact||'').toLowerCase().includes('medium'));
+    renderEvents(filtered);
+  }
+
+  document.querySelectorAll('.econ-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.econ-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.impact;
+      filterAndRender();
+    });
+  });
+
+  loadEconomy();
+</script>

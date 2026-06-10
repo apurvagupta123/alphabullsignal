@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Earnings Calendar">
+  <section class="content-section" style="margin-top:48px">
+    <div class="section-head">
+      <h2 class="section-title">📊 Earnings Calendar</h2>
+      <span class="section-live">THIS WEEK</span>
+    </div>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px">
+      Companies reporting earnings this week. Estimates via Financial Modeling Prep.
+    </p>
+
+    <div class="ec-week-nav">
+      <button class="ec-week-btn" id="prevWeek">← Prev Week</button>
+      <span class="ec-week-label" id="weekLabel">Loading…</span>
+      <button class="ec-week-btn" id="nextWeek">Next Week →</button>
+    </div>
+
+    <div class="ec-days" id="ecDays">
+      <div class="ec-loading">Loading earnings data…</div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const FMP = 'https://financialmodelingprep.com/api/v3';
+  const KEY = 'demo';
+  let weekOffset = 0;
+
+  function getWeekRange(offset = 0) {
+    const now = new Date();
+    const day = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1) + offset * 7);
+    const friday = new Date(monday);
+    friday.setDate(monday.getDate() + 4);
+    const fmt = (d) => d.toISOString().split('T')[0];
+    return { from: fmt(monday), to: fmt(friday), monday, friday };
+  }
+
+  function fmtDate(s) {
+    const d = new Date(s);
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  function dayName(s) {
+    return new Date(s).toLocaleDateString('en-US', { weekday: 'long' });
+  }
+
+  async function loadEarnings(offset = 0) {
+    const { from, to, monday, friday } = getWeekRange(offset);
+    document.getElementById('weekLabel').textContent =
+      `${monday.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${friday.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+
+    const container = document.getElementById('ecDays');
+    container.innerHTML = '<div class="ec-loading">Loading…</div>';
+
+    try {
+      const r = await fetch(`${FMP}/earning_calendar?from=${from}&to=${to}&apikey=${KEY}`);
+      const data = await r.json();
+      if (!Array.isArray(data) || !data.length) throw new Error('empty');
+
+      // Group by date
+      const byDate = {};
+      data.forEach(e => {
+        if (!byDate[e.date]) byDate[e.date] = [];
+        byDate[e.date].push(e);
+      });
+
+      const days = Object.keys(byDate).sort();
+      container.innerHTML = days.map(date => `
+        <div class="ec-day">
+          <div class="ec-day-header">
+            <span class="ec-day-name">${dayName(date)}</span>
+            <span class="ec-day-date">${fmtDate(date)}</span>
+            <span class="ec-day-count">${byDate[date].length} reports</span>
+          </div>
+          <div class="ec-table-wrap">
+            <table class="ipo-table">
+              <thead><tr>
+                <th>Company</th><th>Symbol</th>
+                <th>EPS Est.</th><th>EPS Actual</th>
+                <th>Rev Est.</th><th>Time</th>
+              </tr></thead>
+              <tbody>
+                ${byDate[date].slice(0,15).map(e => {
+                  const beat = e.epsActual != null && e.epsEstimated != null
+                    ? e.epsActual >= e.epsEstimated ? 'beat' : 'miss' : '';
+                  const beatCls = beat === 'beat' ? 'ec-beat' : beat === 'miss' ? 'ec-miss' : '';
+                  const fmtRev = v => v >= 1e9 ? `$${(v/1e9).toFixed(1)}B` : v >= 1e6 ? `$${(v/1e6).toFixed(0)}M` : '—';
+                  return `<tr>
+                    <td class="ipo-company">${e.company || '—'}</td>
+                    <td class="ipo-sym"><a href="/company/${(e.symbol||'').toLowerCase()}" class="ipo-link">${e.symbol||'—'}</a></td>
+                    <td>${e.epsEstimated != null ? '$'+e.epsEstimated.toFixed(2) : '—'}</td>
+                    <td class="${beatCls}">${e.epsActual != null ? '$'+e.epsActual.toFixed(2) : '—'}</td>
+                    <td>${e.revenueEstimated ? fmtRev(e.revenueEstimated) : '—'}</td>
+                    <td style="font-size:11px;color:var(--text-muted)">${e.time || '—'}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `).join('');
+    } catch {
+      // Fallback mock data
+      container.innerHTML = `
+        <div class="ec-day">
+          <div class="ec-day-header">
+            <span class="ec-day-name">This Week</span>
+            <span class="ec-day-count">Sample Data</span>
+          </div>
+          <div class="ec-table-wrap">
+            <table class="ipo-table">
+              <thead><tr><th>Company</th><th>Symbol</th><th>EPS Est.</th><th>EPS Actual</th><th>Rev Est.</th><th>Time</th></tr></thead>
+              <tbody>
+                ${[
+                  ['Apple Inc','AAPL','$1.43','$1.53','$89.5B','AMC'],
+                  ['Microsoft','MSFT','$2.82','$2.94','$60.2B','AMC'],
+                  ['Alphabet','GOOGL','$1.84','—','$78.1B','AMC'],
+                  ['Meta Platforms','META','$4.32','$4.71','$36.4B','AMC'],
+                  ['Amazon','AMZN','$0.83','—','$142.6B','AMC'],
+                ].map(([co,sym,est,act,rev,time]) => `<tr>
+                  <td class="ipo-company">${co}</td>
+                  <td class="ipo-sym"><a href="/company/${sym.toLowerCase()}" class="ipo-link">${sym}</a></td>
+                  <td>${est}</td>
+                  <td class="${act!=='—'?'ec-beat':''}">${act}</td>
+                  <td>${rev}</td>
+                  <td style="font-size:11px;color:var(--text-muted)">${time}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+  }
+
+  document.getElementById('prevWeek').addEventListener('click', () => { weekOffset--; loadEarnings(weekOffset); });
+  document.getElementById('nextWeek').addEventListener('click', () => { weekOffset++; loadEarnings(weekOffset); });
+
+  loadEarnings(0);
+</script>
