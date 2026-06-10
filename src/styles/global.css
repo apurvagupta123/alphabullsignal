@@ -105,6 +105,15 @@ input  { outline: none; font-family: inherit; border: none; }
   background: rgba(201,168,76,0.07);
 }
 
+.news-ticker-overflow {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
 .news-ticker-track {
   display: flex;
   align-items: center;
@@ -112,8 +121,8 @@ input  { outline: none; font-family: inherit; border: none; }
   animation: tickerScroll 80s linear infinite;
   font-size: 12px;
   font-weight: 500;
-  padding: 0 16px;
   gap: 0;
+  will-change: transform;
 }
 .news-ticker-track:hover { animation-play-state: paused; }
 
