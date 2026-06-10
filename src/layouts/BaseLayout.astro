@@ -45,6 +45,31 @@ const { title } = Astro.props;
       body { background: #0d1117 !important; }
       body::before { display: none !important; }
       .hero { background: #0d1117 !important; }
+      /* Sector pill bar — single horizontal row, no wrap */
+      .sector-pill-bar {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 8px !important;
+        padding: 4px 0 !important;
+        overflow-x: auto !important;
+        scrollbar-width: none !important;
+      }
+      .sector-pill-bar::-webkit-scrollbar { display: none !important; }
+      .sector-pill-bar .sector-pill {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 6px 14px !important;
+        background: var(--navy-2) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 20px !important;
+        font-size: 12px !important;
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        cursor: default !important;
+      }
+      .sp-name { color: var(--text-muted) !important; font-weight: 500 !important; }
+      .sp-pct  { font-weight: 700 !important; font-size: 12px !important; }
       /* News ticker text — gold to match site accent */
       .news-bar .ti { color: #c9a84c !important; }
       .news-bar .ti strong { color: #e8c97a !important; }
