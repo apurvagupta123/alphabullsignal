@@ -6,97 +6,149 @@ const sorted = posts.sort((a: any, b: any) =>
   new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
 );
 ---
-<BaseLayout title="Markets & Business News">
+<BaseLayout title="Business Intelligence, Daily">
 
-  <!-- Hero -->
+  <!-- ── Hero ────────────────────────────────────────── -->
   <section class="hero">
     <div class="hero-inner">
-      <div class="hero-badge">LIVE MARKETS</div>
-      <h1 class="hero-title">The Business<br /><span class="hero-accent">Ledger</span></h1>
-      <p class="hero-sub">Real-time markets. Daily business intelligence. Your edge in commerce.</p>
-    </div>
-    <!-- Indices Bar -->
-    <div class="indices-bar" id="indicesBar">
-      <div class="index-card skeleton" id="idx-SPY"><span class="idx-name">S&P 500</span><span class="idx-price">—</span><span class="idx-chg">—</span></div>
-      <div class="index-card skeleton" id="idx-QQQ"><span class="idx-name">NASDAQ</span><span class="idx-price">—</span><span class="idx-chg">—</span></div>
-      <div class="index-card skeleton" id="idx-DIA"><span class="idx-name">DOW</span><span class="idx-price">—</span><span class="idx-chg">—</span></div>
-      <div class="index-card skeleton" id="idx-GC=F"><span class="idx-name">GOLD</span><span class="idx-price">—</span><span class="idx-chg">—</span></div>
-      <div class="index-card skeleton" id="idx-CL=F"><span class="idx-name">OIL</span><span class="idx-price">—</span><span class="idx-chg">—</span></div>
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          LIVE MARKET DATA
+        </div>
+        <h1 class="hero-title">
+          Business Intelligence,<br />
+          <span class="hero-accent">Daily.</span>
+        </h1>
+        <p class="hero-desc">
+          Track markets, discover company insights, and stay ahead with<br />
+          curated financial news — all in one place.
+        </p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hs-num">500+</span>
+            <span class="hs-label">STOCKS TRACKED</span>
+          </div>
+          <div class="hs-divider"></div>
+          <div class="hero-stat">
+            <span class="hs-num">Daily</span>
+            <span class="hs-label">NEWS UPDATES</span>
+          </div>
+          <div class="hs-divider"></div>
+          <div class="hero-stat">
+            <span class="hs-num">Real-Time</span>
+            <span class="hs-label">MARKET DATA</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="document.getElementById('markets').scrollIntoView({behavior:'smooth'})">Explore Markets →</button>
+          <button class="btn-outline" onclick="document.getElementById('news').scrollIntoView({behavior:'smooth'})">Latest News</button>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- Markets Grid -->
-  <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">📈 Market Movers</h2>
-      <span class="section-live">LIVE</span>
+  <!-- ── Indices Bar ──────────────────────────────────── -->
+  <section class="indices-section">
+    <div class="indices-grid" id="indicesBar">
+      <div class="idx-card skeleton" id="idx-SPY">
+        <span class="idx-name">S&P 500</span>
+        <span class="idx-price">—</span>
+        <span class="idx-chg">—</span>
+      </div>
+      <div class="idx-card skeleton" id="idx-QQQ">
+        <span class="idx-name">NASDAQ</span>
+        <span class="idx-price">—</span>
+        <span class="idx-chg">—</span>
+      </div>
+      <div class="idx-card skeleton" id="idx-DIA">
+        <span class="idx-name">DOW JONES</span>
+        <span class="idx-price">—</span>
+        <span class="idx-chg">—</span>
+      </div>
+      <div class="idx-card skeleton" id="idx-IWM">
+        <span class="idx-name">RUSSELL 2000</span>
+        <span class="idx-price">—</span>
+        <span class="idx-chg">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Today's Markets ─────────────────────────────── -->
+  <section class="content-section" id="markets">
+    <div class="section-head">
+      <h2 class="section-title">Today's Markets</h2>
+      <a href="/" class="section-more">View all markets →</a>
     </div>
     <div class="markets-grid" id="marketsGrid">
-      {['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM'].map((sym) => (
-        <div class="market-card" id={`mc-${sym}`}>
-          <div class="mc-header">
-            <span class="mc-symbol">{sym}</span>
-            <span class="mc-badge skeleton-inline">—</span>
+      {['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','GS','NFLX'].map((sym) => (
+        <div class="mkt-card" id={`mc-${sym}`}>
+          <div class="mkt-top">
+            <div>
+              <div class="mkt-sym">{sym}</div>
+              <div class="mkt-name" id={`mn-${sym}`}>—</div>
+            </div>
+            <div class="mkt-badge" id={`mb-${sym}`}>—</div>
           </div>
-          <div class="mc-price skeleton-inline">—</div>
-          <div class="mc-chg skeleton-inline">—</div>
-          <canvas class="mc-chart" id={`chart-${sym}`} height="50"></canvas>
+          <div class="mkt-price" id={`mp-${sym}`}>—</div>
+          <div class="mkt-chg" id={`mch-${sym}`}>—</div>
+          <canvas class="mkt-chart" id={`chart-${sym}`} height="60"></canvas>
         </div>
       ))}
     </div>
   </section>
 
-  <!-- News + Spotlight -->
+  <!-- ── News + Spotlight ─────────────────────────────── -->
   <div class="two-col">
 
     <!-- Business News -->
-    <section class="section">
-      <div class="section-header">
-        <h2 class="section-title">📰 Business News</h2>
+    <section class="content-section" id="news">
+      <div class="section-head">
+        <h2 class="section-title">Business News</h2>
       </div>
       <div class="news-list" id="newsList">
-        {[1,2,3,4,5].map(() => (
-          <div class="news-item news-skeleton">
-            <div class="ns-line ns-title"></div>
-            <div class="ns-line ns-meta"></div>
+        {[1,2,3,4,5,6].map(() => (
+          <div class="news-item">
+            <div class="news-shimmer news-shimmer-title"></div>
+            <div class="news-shimmer news-shimmer-meta"></div>
           </div>
         ))}
       </div>
     </section>
 
     <!-- Company Spotlight -->
-    <section class="section">
-      <div class="section-header">
-        <h2 class="section-title">🔍 Company Spotlight</h2>
+    <section class="content-section">
+      <div class="section-head">
+        <h2 class="section-title">Company Spotlight</h2>
       </div>
-      <div class="spotlight" id="spotlight">
+      <div class="spotlight-box">
         <div class="spotlight-search">
-          <input type="text" id="spotlightInput" class="spotlight-input" placeholder="Enter ticker (e.g. AAPL)" />
-          <button id="spotlightBtn" class="spotlight-btn">Search</button>
+          <input id="slInput" type="text" class="sl-input" placeholder="Enter ticker symbol (e.g. AAPL)" />
+          <button id="slBtn" class="sl-btn">Search</button>
         </div>
-        <div class="spotlight-result" id="spotlightResult">
-          <p class="spotlight-hint">Enter a stock ticker above to see company details, price, and chart.</p>
+        <div id="slResult">
+          <p class="sl-hint">Enter a stock ticker above to see company details, live price, and 3-month chart.</p>
         </div>
       </div>
     </section>
 
   </div>
 
-  <!-- Blog Posts -->
+  <!-- ── Blog Posts ───────────────────────────────────── -->
   {sorted.length > 0 && (
-    <section class="section">
-      <div class="section-header">
-        <h2 class="section-title">📋 From the Ledger</h2>
+    <section class="content-section">
+      <div class="section-head">
+        <h2 class="section-title">From the Ledger</h2>
       </div>
       <div class="posts-grid">
         {sorted.map((post: any) => (
           <a href={post.url} class="post-card">
-            <div class="post-card-date">
+            <div class="pc-date">
               {new Date(post.frontmatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
             </div>
-            <h3 class="post-card-title">{post.frontmatter.title}</h3>
-            <p class="post-card-desc">{post.frontmatter.description}</p>
-            <span class="post-card-read">Read more →</span>
+            <h3 class="pc-title">{post.frontmatter.title}</h3>
+            <p class="pc-desc">{post.frontmatter.description}</p>
+            <span class="pc-read">Read more →</span>
           </a>
         ))}
       </div>
@@ -106,78 +158,87 @@ const sorted = posts.sort((a: any, b: any) =>
 </BaseLayout>
 
 <script>
-  const PROXY = 'https://api.allorigins.win/get?url=';
+  const P = 'https://api.allorigins.win/get?url=';
 
-  async function yf(symbols: string, fields: string) {
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=${fields}`;
-    const res = await fetch(PROXY + encodeURIComponent(url));
-    const w = await res.json();
+  async function yf(syms: string, fields: string) {
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`;
+    const r = await fetch(P + encodeURIComponent(url));
+    const w = await r.json();
     return JSON.parse(w.contents)?.quoteResponse?.result || [];
   }
 
-  async function yfChart(symbol: string, range: string = '1mo', interval: string = '1d') {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=${range}&interval=${interval}`;
-    const res = await fetch(PROXY + encodeURIComponent(url));
-    const w = await res.json();
+  async function yfChart(sym: string) {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=1mo&interval=1d`;
+    const r = await fetch(P + encodeURIComponent(url));
+    const w = await r.json();
     return JSON.parse(w.contents)?.chart?.result?.[0] || null;
   }
 
-  // ── Indices Bar ─────────────────────────────────────────────────────
+  // ── Indices ───────────────────────────────────────────────────────────
   async function loadIndices() {
-    const syms = ['SPY','QQQ','DIA','GC=F','CL=F'];
-    const names: Record<string, string> = {'SPY':'S&P 500','QQQ':'NASDAQ','DIA':'DOW','GC=F':'GOLD','CL=F':'OIL'};
+    const map: Record<string, string> = { SPY: 'S&P 500', QQQ: 'NASDAQ', DIA: 'DOW JONES', IWM: 'RUSSELL 2000' };
     try {
-      const quotes = await yf(syms.join(','), 'symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
+      const quotes = await yf(Object.keys(map).join(','), 'symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
       quotes.forEach((q: any) => {
         const el = document.getElementById(`idx-${q.symbol}`);
         if (!el) return;
         const chg = q.regularMarketChange ?? 0;
         const pct = q.regularMarketChangePercent ?? 0;
-        const sign = chg >= 0 ? '+' : '';
+        const up  = chg >= 0;
         el.classList.remove('skeleton');
-        el.classList.add(chg >= 0 ? 'up' : 'dn');
-        el.querySelector('.idx-price')!.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
-        el.querySelector('.idx-chg')!.textContent = `${sign}${pct.toFixed(2)}%`;
+        el.classList.add(up ? 'up' : 'dn');
+        el.querySelector('.idx-price')!.textContent = `${q.regularMarketPrice?.toFixed(2)}`;
+        el.querySelector('.idx-chg')!.textContent   = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
       });
     } catch {}
   }
 
-  // ── Markets Grid ────────────────────────────────────────────────────
+  // ── Markets Grid ──────────────────────────────────────────────────────
   async function loadMarkets() {
-    const syms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM'];
+    const syms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','GS','NFLX'];
     try {
       const quotes = await yf(syms.join(','), 'symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
       for (const q of quotes) {
-        const card = document.getElementById(`mc-${q.symbol}`);
-        if (!card) continue;
         const chg = q.regularMarketChange ?? 0;
         const pct = q.regularMarketChangePercent ?? 0;
-        const sign = chg >= 0 ? '+' : '';
-        const color = chg >= 0 ? '#22c55e' : '#ef4444';
-        card.classList.add(chg >= 0 ? 'up' : 'dn');
-        card.querySelector('.mc-badge')!.textContent = q.shortName?.split(' ')[0] || q.symbol;
-        (card.querySelector('.mc-badge') as HTMLElement).classList.remove('skeleton-inline');
-        card.querySelector('.mc-price')!.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
-        (card.querySelector('.mc-price') as HTMLElement).classList.remove('skeleton-inline');
-        card.querySelector('.mc-chg')!.textContent = `${sign}${chg.toFixed(2)} (${sign}${pct.toFixed(2)}%)`;
-        (card.querySelector('.mc-chg') as HTMLElement).classList.remove('skeleton-inline');
-        (card.querySelector('.mc-chg') as HTMLElement).style.color = color;
+        const up  = chg >= 0;
+        const color = up ? '#22c55e' : '#ef4444';
+        const sign  = up ? '+' : '';
+
+        const nameEl  = document.getElementById(`mn-${q.symbol}`);
+        const badgeEl = document.getElementById(`mb-${q.symbol}`);
+        const priceEl = document.getElementById(`mp-${q.symbol}`);
+        const chgEl   = document.getElementById(`mch-${q.symbol}`);
+        const card    = document.getElementById(`mc-${q.symbol}`);
+
+        if (nameEl)  nameEl.textContent  = q.shortName || '';
+        if (priceEl) priceEl.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
+        if (chgEl) {
+          chgEl.textContent = `${up ? '▲' : '▼'} $${Math.abs(chg).toFixed(2)} ${sign}${pct.toFixed(2)}%`;
+          (chgEl as HTMLElement).style.color = color;
+        }
+        if (badgeEl) {
+          badgeEl.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
+          badgeEl.classList.add(up ? 'badge-up' : 'badge-dn');
+        }
+        if (card) card.classList.add(up ? 'up' : 'dn');
 
         // Sparkline
         try {
-          const chart = await yfChart(q.symbol, '1mo', '1d');
-          const closes = chart?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
+          const cd = await yfChart(q.symbol);
+          const closes = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
           if (closes.length > 1) {
             const canvas = document.getElementById(`chart-${q.symbol}`) as HTMLCanvasElement;
             new (window as any).Chart(canvas, {
               type: 'line',
               data: {
                 labels: closes.map((_: any, i: number) => i),
-                datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0, fill: true,
-                  backgroundColor: chg >= 0 ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }]
+                datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0,
+                  fill: true, backgroundColor: up ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }]
               },
-              options: { animation: false, plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                scales: { x: { display: false }, y: { display: false } }, responsive: true, maintainAspectRatio: false }
+              options: { animation: false, responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                scales: { x: { display: false }, y: { display: false } } }
             });
           }
         } catch {}
@@ -185,65 +246,64 @@ const sorted = posts.sort((a: any, b: any) =>
     } catch {}
   }
 
-  // ── Business News ───────────────────────────────────────────────────
+  // ── News ──────────────────────────────────────────────────────────────
   async function loadNews() {
     const list = document.getElementById('newsList');
     if (!list) return;
     try {
       const rss = 'https://feeds.reuters.com/reuters/businessNews';
-      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=8`;
-      const res = await fetch(apiUrl);
-      const data = await res.json();
-      const items = data?.items || [];
-      if (!items.length) throw new Error('no items');
+      const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=8`);
+      const d = await r.json();
+      const items = d?.items || [];
+      if (!items.length) throw new Error('empty');
       list.innerHTML = items.map((item: any) => {
         const date = new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const source = item.author || 'Reuters';
         return `<a href="${item.link}" class="news-item" target="_blank" rel="noopener">
-          <div class="news-title">${item.title}</div>
-          <div class="news-meta">${source} · ${date}</div>
+          <div class="ni-title">${item.title}</div>
+          <div class="ni-meta">${item.author || 'Reuters'} · ${date}</div>
         </a>`;
       }).join('');
     } catch {
       const fallback = [
-        { title: 'Fed holds rates steady as inflation cools toward 2% target', src: 'Reuters', t: '2h ago' },
-        { title: 'S&P 500 hits record high amid strong earnings season', src: 'Bloomberg', t: '4h ago' },
-        { title: 'Apple unveils new AI features at WWDC developer conference', src: 'CNBC', t: '5h ago' },
-        { title: 'Oil prices rise on geopolitical tensions in Middle East', src: 'Reuters', t: '6h ago' },
-        { title: 'Tesla beats delivery estimates, shares surge 8%', src: 'WSJ', t: '8h ago' },
+        ['Fed holds rates as inflation nears 2% target', 'Reuters', '2h ago'],
+        ['S&P 500 hits record high on strong earnings season', 'Bloomberg', '4h ago'],
+        ['Apple unveils new AI features at WWDC', 'CNBC', '5h ago'],
+        ['Oil climbs on Middle East supply concerns', 'Reuters', '6h ago'],
+        ['Tesla beats delivery estimates, stock surges 8%', 'WSJ', '8h ago'],
+        ['Goldman Sachs raises S&P 500 year-end target', 'FT', '10h ago'],
       ];
-      list.innerHTML = fallback.map(f => `<div class="news-item">
-        <div class="news-title">${f.title}</div>
-        <div class="news-meta">${f.src} · ${f.t}</div>
+      list.innerHTML = fallback.map(([t, s, d]) => `<div class="news-item">
+        <div class="ni-title">${t}</div>
+        <div class="ni-meta">${s} · ${d}</div>
       </div>`).join('');
     }
   }
 
-  // ── Company Spotlight ───────────────────────────────────────────────
-  async function loadSpotlight(symbol: string) {
-    const result = document.getElementById('spotlightResult');
+  // ── Spotlight ─────────────────────────────────────────────────────────
+  async function loadSpotlight(sym: string) {
+    const result = document.getElementById('slResult');
     if (!result) return;
-    result.innerHTML = `<div class="spotlight-loading">Loading ${symbol.toUpperCase()}…</div>`;
+    result.innerHTML = `<p class="sl-hint">Loading ${sym.toUpperCase()}…</p>`;
     try {
-      const sym = symbol.toUpperCase().trim();
-      const [quotes, chartData] = await Promise.all([
-        yf(sym, 'symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent,marketCap,trailingPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageVolume'),
-        yfChart(sym, '3mo', '1d')
+      const s = sym.toUpperCase().trim();
+      const [quotes, cd] = await Promise.all([
+        yf(s, 'symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent,marketCap,trailingPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageVolume'),
+        yfChart(s)
       ]);
       const q = quotes[0];
       if (!q) throw new Error('not found');
-
-      const chg = q.regularMarketChange ?? 0;
-      const pct = q.regularMarketChangePercent ?? 0;
-      const sign = chg >= 0 ? '+' : '';
-      const color = chg >= 0 ? '#22c55e' : '#ef4444';
-      const mcap = q.marketCap ? (q.marketCap >= 1e12 ? `$${(q.marketCap/1e12).toFixed(2)}T` : `$${(q.marketCap/1e9).toFixed(1)}B`) : '—';
+      const chg   = q.regularMarketChange ?? 0;
+      const pct   = q.regularMarketChangePercent ?? 0;
+      const up    = chg >= 0;
+      const color = up ? '#22c55e' : '#ef4444';
+      const sign  = up ? '+' : '';
+      const mcap  = q.marketCap ? (q.marketCap >= 1e12 ? `$${(q.marketCap/1e12).toFixed(2)}T` : `$${(q.marketCap/1e9).toFixed(1)}B`) : '—';
 
       result.innerHTML = `
-        <div class="sl-company">${q.longName || q.shortName || sym}</div>
+        <div class="sl-company">${q.longName || q.shortName || s}</div>
         <div class="sl-price-row">
-          <span class="sl-price">$${q.regularMarketPrice?.toFixed(2)}</span>
-          <span class="sl-chg" style="color:${color}">${sign}${chg.toFixed(2)} (${sign}${pct.toFixed(2)}%)</span>
+          <span class="sl-price" style="color:var(--gold)">$${q.regularMarketPrice?.toFixed(2)}</span>
+          <span class="sl-delta" style="color:${color}">${up ? '▲' : '▼'} $${Math.abs(chg).toFixed(2)} (${sign}${pct.toFixed(2)}%)</span>
         </div>
         <div class="sl-stats">
           <div class="sl-stat"><span>Market Cap</span><strong>${mcap}</strong></div>
@@ -252,51 +312,46 @@ const sorted = posts.sort((a: any, b: any) =>
           <div class="sl-stat"><span>52W Low</span><strong>$${q.fiftyTwoWeekLow?.toFixed(2) || '—'}</strong></div>
           <div class="sl-stat"><span>Avg Volume</span><strong>${q.averageVolume ? (q.averageVolume/1e6).toFixed(1)+'M' : '—'}</strong></div>
         </div>
-        <canvas id="spotlightChart" height="120"></canvas>
+        <canvas id="slChart" style="height:130px;width:100%"></canvas>
       `;
-
-      const closes = chartData?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
-      const timestamps = chartData?.timestamp || [];
+      const closes    = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
+      const timestamps = cd?.timestamp || [];
       if (closes.length > 1) {
-        const labels = timestamps.map((t: number) => new Date(t * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-        new (window as any).Chart(document.getElementById('spotlightChart') as HTMLCanvasElement, {
+        new (window as any).Chart(document.getElementById('slChart') as HTMLCanvasElement, {
           type: 'line',
           data: {
-            labels,
-            datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0, fill: true,
-              backgroundColor: chg >= 0 ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }]
+            labels: timestamps.map((t: number) => new Date(t*1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+            datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0,
+              fill: true, backgroundColor: up ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }]
           },
-          options: {
-            animation: false,
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx: any) => `$${ctx.parsed.y.toFixed(2)}` } } },
+          options: { animation: false, responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false },
+              tooltip: { callbacks: { label: (ctx: any) => `$${ctx.parsed.y.toFixed(2)}` } } },
             scales: {
-              x: { ticks: { color: '#8892a4', maxTicksLimit: 6 }, grid: { color: 'rgba(255,255,255,0.05)' } },
-              y: { ticks: { color: '#8892a4', callback: (v: any) => `$${v}` }, grid: { color: 'rgba(255,255,255,0.05)' } }
-            },
-            responsive: true, maintainAspectRatio: false
+              x: { ticks: { color: '#8892a4', maxTicksLimit: 5 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+              y: { ticks: { color: '#8892a4', callback: (v: any) => `$${v}` }, grid: { color: 'rgba(255,255,255,0.04)' } }
+            }
           }
         });
       }
     } catch {
-      result.innerHTML = `<p class="spotlight-hint" style="color:#ef4444">Could not load data for "${symbol}". Check the ticker and try again.</p>`;
+      result.innerHTML = `<p class="sl-hint" style="color:#ef4444">Ticker "${sym}" not found. Try AAPL, MSFT, TSLA…</p>`;
     }
   }
 
-  document.getElementById('spotlightBtn')?.addEventListener('click', () => {
-    const val = (document.getElementById('spotlightInput') as HTMLInputElement).value;
-    if (val.trim()) loadSpotlight(val.trim());
+  document.getElementById('slBtn')?.addEventListener('click', () => {
+    const v = (document.getElementById('slInput') as HTMLInputElement).value;
+    if (v.trim()) loadSpotlight(v.trim());
   });
-  document.getElementById('spotlightInput')?.addEventListener('keydown', (e: KeyboardEvent) => {
+  document.getElementById('slInput')?.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      const val = (document.getElementById('spotlightInput') as HTMLInputElement).value;
-      if (val.trim()) loadSpotlight(val.trim());
+      const v = (document.getElementById('slInput') as HTMLInputElement).value;
+      if (v.trim()) loadSpotlight(v.trim());
     }
   });
 
-  // Load everything
   loadIndices();
   loadMarkets();
   loadNews();
-  // Auto-refresh every 60s
   setInterval(() => { loadIndices(); loadMarkets(); }, 60000);
 </script>

@@ -7,34 +7,44 @@ const { title } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title} | The Business Ledger</title>
-    <meta name="description" content="Insights on business, finance, and entrepreneurship. Your daily edge in the world of commerce." />
+    <meta name="description" content="Track markets, discover company insights, and stay ahead with curated financial news — all in one place." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
-    <!-- Ticker Bar -->
+
+    <!-- ── Ticker Bar ───────────────────────────── -->
     <div class="ticker-bar">
-      <div class="ticker-label">LIVE</div>
       <div class="ticker-track" id="tickerTrack">
-        <span class="ticker-loading">Loading markets…</span>
+        <span class="ticker-placeholder">Loading market data…</span>
       </div>
     </div>
 
-    <!-- Navigation -->
+    <!-- ── Navigation ──────────────────────────── -->
     <nav class="site-nav">
       <div class="nav-inner">
-        <a href="/" class="nav-logo">
-          <span class="nav-logo-icon">▲</span>
-          The Business Ledger
+        <a href="/" class="nav-brand">
+          <div class="nav-logo-box">BL</div>
+          <div class="nav-brand-text">
+            <span class="nav-brand-name">The Business Ledger</span>
+            <span class="nav-brand-sub">BUSINESS INTELLIGENCE</span>
+          </div>
         </a>
         <div class="nav-links">
-          <a href="/">Markets</a>
-          <a href="/">News</a>
-          <a href="/about">About</a>
+          <a href="/" class="nav-link active">Home</a>
+          <a href="/" class="nav-link">Markets</a>
+          <a href="/" class="nav-link">News</a>
+          <a href="/" class="nav-link">Companies</a>
+          <a href="/" class="nav-link">Analysis</a>
+          <a href="/about" class="nav-link">About</a>
+        </div>
+        <div class="nav-search">
+          <span class="nav-search-icon">🔍</span>
+          <input type="text" class="nav-search-input" placeholder="Search companies, news…" />
         </div>
       </div>
     </nav>
@@ -45,47 +55,52 @@ const { title } = Astro.props;
 
     <footer class="site-footer">
       <div class="footer-inner">
-        <div class="footer-brand">
-          <span class="nav-logo-icon">▲</span>
-          The Business Ledger
+        <div class="footer-top">
+          <div class="footer-brand">
+            <div class="nav-logo-box">BL</div>
+            <div class="nav-brand-text">
+              <span class="nav-brand-name">The Business Ledger</span>
+              <span class="nav-brand-sub">BUSINESS INTELLIGENCE</span>
+            </div>
+          </div>
+          <p class="footer-desc">Track markets, discover company insights, and stay ahead with curated financial news — all in one place.</p>
         </div>
-        <p class="footer-tagline">Your daily edge in the world of commerce.</p>
-        <div class="footer-links">
-          <a href="/">Home</a>
-          <a href="/about">About</a>
+        <div class="footer-bottom">
+          <p class="footer-copy">&copy; {new Date().getFullYear()} The Business Ledger. Market data for informational purposes only.</p>
+          <div class="footer-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+          </div>
         </div>
-        <p class="footer-copy">&copy; {new Date().getFullYear()} The Business Ledger. Market data for informational purposes only.</p>
       </div>
     </footer>
 
     <script>
-      // ── Ticker Bar ──────────────────────────────────────────────────
-      const TICKER_SYMBOLS = ['SPY','QQQ','DIA','AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','GS','BRK-B','XOM','WMT'];
+      // ── Ticker ────────────────────────────────────────────────────────
+      const TICKER_SYMS = ['NVDA','META','TSLA','JPM','AAPL','MSFT','GOOGL','AMZN','SPY','QQQ','GS','NFLX','AMD','INTC','BRK-B'];
 
       async function loadTicker() {
         const track = document.getElementById('tickerTrack');
         if (!track) return;
         try {
-          const symbols = TICKER_SYMBOLS.join(',');
-          const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+          const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${TICKER_SYMS.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
           const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-          const wrapper = await res.json();
-          const data = JSON.parse(wrapper.contents);
-          const quotes = data?.quoteResponse?.result || [];
-          if (!quotes.length) throw new Error('no data');
+          const w = await res.json();
+          const quotes = JSON.parse(w.contents)?.quoteResponse?.result || [];
+          if (!quotes.length) throw new Error('empty');
 
-          const items = quotes.map(q => {
+          const html = quotes.map(q => {
             const chg = q.regularMarketChange ?? 0;
             const pct = q.regularMarketChangePercent ?? 0;
-            const sign = chg >= 0 ? '+' : '';
-            const cls  = chg >= 0 ? 'up' : 'dn';
-            return `<span class="ticker-item ${cls}"><strong>${q.symbol}</strong> $${q.regularMarketPrice?.toFixed(2)} <span>${sign}${pct.toFixed(2)}%</span></span>`;
-          }).join('<span class="ticker-sep">|</span>');
+            const up  = chg >= 0;
+            const arrow = up ? '▲' : '▼';
+            const cls   = up ? 'up' : 'dn';
+            return `<span class="ti ${cls}"><strong>${q.symbol}</strong> $${q.regularMarketPrice?.toFixed(2)} <em>${arrow} ${Math.abs(pct).toFixed(2)}%</em></span>`;
+          }).join('<span class="ti-sep">·</span>');
 
-          // Duplicate for seamless loop
-          track.innerHTML = items + '<span class="ticker-sep">·</span>' + items;
+          track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
         } catch {
-          track.innerHTML = TICKER_SYMBOLS.map(s => `<span class="ticker-item"><strong>${s}</strong> —</span>`).join('<span class="ticker-sep">|</span>');
+          track.innerHTML = TICKER_SYMS.map(s => `<span class="ti"><strong>${s}</strong> —</span>`).join('');
         }
       }
 
