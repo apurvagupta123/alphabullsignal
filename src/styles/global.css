@@ -212,6 +212,30 @@ input  { outline: none; font-family: inherit; border: none; }
 .hero-inner {
   max-width: var(--max-w);
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  width: 100%;
+}
+.hero-left { flex: 1; min-width: 0; }
+.hero-right { flex: 0 0 340px; }
+
+/* Hero spotlight widget */
+.hero-spotlight {
+  background: rgba(19,25,32,0.85);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px;
+  backdrop-filter: blur(8px);
+}
+.hs-title {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  padding-left: 12px;
+  border-left: 3px solid var(--gold);
+  margin-bottom: 18px;
 }
 
 .hero-badge {
