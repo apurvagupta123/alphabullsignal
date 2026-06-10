@@ -892,7 +892,7 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
   margin: 44px auto 0;
   padding: 0 28px;
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 1fr;
   gap: 28px;
 }
 .fg-heatmap-row .content-section { max-width: unset; margin: 0; padding: 0; }
