@@ -37,14 +37,18 @@ const { title } = Astro.props;
       }
       body { padding-top: 128px !important; }
       .site-nav { top: 72px !important; }
-      /* Full-page background on body — inline to bypass Cloudflare CSS cache */
-      body {
-        background: url('/images/hero-bg.jpg') center center / cover no-repeat fixed !important;
-        background-color: #0d1117 !important;
+      /* Full-page fixed background via pseudo-element (avoids overflow:hidden bug) */
+      body { background: #0d1117 !important; }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: url('/images/hero-bg.jpg') center center / cover no-repeat;
+        z-index: -1;
       }
-      /* Hero: transparent so body background shows through */
+      /* Hero: transparent so the fixed bg shows through */
       .hero {
-        background: linear-gradient(to right, rgba(13,17,23,0.70) 40%, rgba(13,17,23,0.30) 100%) !important;
+        background: linear-gradient(to right, rgba(13,17,23,0.65) 40%, rgba(13,17,23,0.25) 100%) !important;
       }
       /* News ticker text — cyan/sky-blue, clearly distinct from market data */
       .news-bar .ti { color: #38bdf8 !important; }
