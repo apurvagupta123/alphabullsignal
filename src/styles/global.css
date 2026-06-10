@@ -900,7 +900,7 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
 /* Sector Heatmap */
 .heatmap-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(10, 1fr);
   gap: 6px;
   flex: 1;
 }
