@@ -327,29 +327,56 @@ const sorted = posts.sort((a: any, b: any) =>
   async function loadNews() {
     const list = document.getElementById('newsList');
     if (!list) return;
-    try {
-      const rss = 'https://feeds.reuters.com/reuters/businessNews';
-      const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=8`);
-      const d = await r.json();
-      const items = d?.items || [];
-      if (!items.length) throw new Error('empty');
-      list.innerHTML = items.map((item: any) => {
-        const date = new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        return `<a href="${item.link}" class="news-item" target="_blank" rel="noopener">
-          <div class="ni-title">${item.title}</div>
-          <div class="ni-meta">${item.author || 'Reuters'} · ${date}</div>
-        </a>`;
-      }).join('');
-    } catch {
-      list.innerHTML = [
-        ['Fed holds rates as inflation nears 2% target','Reuters','2h ago'],
-        ['S&P 500 hits record high on strong earnings','Bloomberg','4h ago'],
-        ['Apple unveils new AI features at WWDC','CNBC','5h ago'],
-        ['Oil climbs on Middle East supply concerns','Reuters','6h ago'],
-        ['Tesla beats delivery estimates, stock surges 8%','WSJ','8h ago'],
-        ['Goldman Sachs raises S&P 500 year-end target','FT','10h ago'],
-      ].map(([t,s,d]) => `<div class="news-item"><div class="ni-title">${t}</div><div class="ni-meta">${s} · ${d}</div></div>`).join('');
+
+    const sourceSearchUrl: Record<string, string> = {
+      'Reuters':   'https://www.reuters.com/business/',
+      'Bloomberg': 'https://www.bloomberg.com/markets',
+      'CNBC':      'https://www.cnbc.com/finance/',
+      'WSJ':       'https://www.wsj.com/finance',
+      'FT':        'https://www.ft.com/markets',
+    };
+
+    // Try multiple RSS feeds in order
+    const feeds = [
+      { url: 'https://feeds.reuters.com/reuters/businessNews', source: 'Reuters' },
+      { url: 'https://feeds.bbci.co.uk/news/business/rss.xml', source: 'BBC Business' },
+    ];
+
+    for (const feed of feeds) {
+      try {
+        const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}&count=8`);
+        const d = await r.json();
+        const items = d?.items || [];
+        if (!items.length) continue;
+        list.innerHTML = items.map((item: any) => {
+          const date = new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const link = item.link || `https://www.google.com/search?q=${encodeURIComponent(item.title)}`;
+          return `<a href="${link}" class="news-item" target="_blank" rel="noopener noreferrer">
+            <div class="ni-title">${item.title}</div>
+            <div class="ni-meta">${item.author || feed.source} · ${date}</div>
+          </a>`;
+        }).join('');
+        return; // success — stop trying feeds
+      } catch { continue; }
     }
+
+    // Final fallback — link each item to a Google News search for the headline
+    const fallback = [
+      ['Fed holds rates as inflation nears 2% target','Reuters'],
+      ['S&P 500 hits record high on strong earnings','Bloomberg'],
+      ['Apple unveils new AI features at WWDC','CNBC'],
+      ['Oil climbs on Middle East supply concerns','Reuters'],
+      ['Tesla beats delivery estimates, stock surges 8%','WSJ'],
+      ['Goldman Sachs raises S&P 500 year-end target','FT'],
+    ];
+    list.innerHTML = fallback.map(([t, s]) => {
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(t)}&tbm=nws`;
+      const sourceUrl = sourceSearchUrl[s] || searchUrl;
+      return `<a href="${sourceUrl}" class="news-item" target="_blank" rel="noopener noreferrer">
+        <div class="ni-title">${t}</div>
+        <div class="ni-meta">${s} · <span style="color:var(--gold);font-size:10px">Read more →</span></div>
+      </a>`;
+    }).join('');
   }
 
   // ── Spotlight ─────────────────────────────────────────────────────────
