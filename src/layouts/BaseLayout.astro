@@ -27,6 +27,17 @@ const { title } = Astro.props;
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/styles/global.css" />
+    <style>
+      /* News ticker positioning — inline to avoid CDN cache delay */
+      .news-bar {
+        top: 36px !important;
+        z-index: 998 !important;
+        background: #0d1420 !important;
+        border-bottom: 1px solid rgba(201,168,76,0.15) !important;
+      }
+      body { padding-top: 128px !important; }
+      .site-nav { top: 72px !important; }
+    </style>
   </head>
   <body>
 
