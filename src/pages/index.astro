@@ -226,40 +226,38 @@ const sorted = posts.sort((a: any, b: any) =>
 </BaseLayout>
 
 <script>
-  const FH_KEY = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
-  const P = 'https://corsproxy.io/?';
   const FMP_KEY = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
+  const P = 'https://corsproxy.io/?';
 
-  async function yf(syms: string, fields: string) {
-    // Try Finnhub first, fall back to Yahoo Finance
-    try {
-      const symArr = syms.split(',');
-      const fhRes = await Promise.all(symArr.map((s: string) =>
-        fetch(`https://finnhub.io/api/v1/quote?symbol=${s}&token=${FH_KEY}`).then((r: Response) => r.json())
-      ));
-      const quotes = symArr.map((s: string, i: number) => ({
-        symbol: s, shortName: s,
-        regularMarketPrice: fhRes[i].c,
-        regularMarketChange: fhRes[i].d,
-        regularMarketChangePercent: fhRes[i].dp,
-        marketCap: null, trailingPE: null,
-        fiftyTwoWeekHigh: null, fiftyTwoWeekLow: null, averageVolume: null
-      }));
-      if (!quotes.some((q: any) => q.regularMarketPrice > 0)) throw new Error('empty');
-      return quotes;
-    } catch {
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`;
-      const r = await fetch(P + encodeURIComponent(url));
-      const w = await r.json();
-      return w?.quoteResponse?.result || [];
-    }
+  // FMP batch quote — one request, no CORS issues
+  async function yf(syms: string, _fields: string) {
+    const res = await fetch(
+      `https://financialmodelingprep.com/api/v3/quote/${syms}?apikey=${FMP_KEY}`
+    );
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) throw new Error('empty');
+    // Normalize to the shape the rest of the code expects
+    return data.map((q: any) => ({
+      symbol: q.symbol,
+      shortName: q.name || q.symbol,
+      regularMarketPrice: q.price,
+      regularMarketChange: q.change,
+      regularMarketChangePercent: q.changesPercentage,
+      marketCap: q.marketCap,
+      trailingPE: q.pe,
+      fiftyTwoWeekHigh: q.yearHigh,
+      fiftyTwoWeekLow: q.yearLow,
+      averageVolume: q.avgVolume,
+    }));
   }
 
   async function yfChart(sym: string, range = '1mo', interval = '1d') {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=${range}&interval=${interval}`;
-    const r = await fetch(P + encodeURIComponent(url));
-    const w = await r.json();
-    return w?.chart?.result?.[0] || null;
+    try {
+      const r = await fetch(P + encodeURIComponent(url));
+      const w = await r.json();
+      return w?.chart?.result?.[0] || null;
+    } catch { return null; }
   }
 
   // ── Indices ───────────────────────────────────────────────────────────
