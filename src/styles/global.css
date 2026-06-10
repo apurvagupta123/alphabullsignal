@@ -929,10 +929,14 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
 /* ── Sector Pill Bar (homepage compact row) ─────────────── */
 .sector-pill-bar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   padding: 4px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.sector-pill-bar::-webkit-scrollbar { display: none; }
 .sector-pill-bar .sector-pill {
   display: flex;
   align-items: center;
@@ -944,6 +948,8 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
   font-size: 12px;
   transition: all 0.2s;
   cursor: default;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .sector-pill-bar .sector-pill:hover { border-color: rgba(201,168,76,0.3); background: var(--navy-3); }
 .sp-name { color: var(--text-muted); font-weight: 500; }
