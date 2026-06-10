@@ -28,12 +28,16 @@ const { title } = Astro.props;
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/styles/global.css" />
     <style>
-      /* News ticker positioning — inline to avoid CDN cache delay */
+      /* Ticker positioning — inline to avoid CDN cache delay */
       .news-bar {
-        top: 36px !important;
-        z-index: 998 !important;
+        top: 0 !important;
+        z-index: 999 !important;
         background: #0d1420 !important;
         border-bottom: 1px solid rgba(201,168,76,0.15) !important;
+      }
+      .ticker-bar:not(.news-bar) {
+        top: 36px !important;
+        z-index: 998 !important;
       }
       body { padding-top: 128px !important; }
       .site-nav { top: 72px !important; }
@@ -49,17 +53,17 @@ const { title } = Astro.props;
   </head>
   <body>
 
-    <!-- ── Market Ticker Bar ───────────────────── -->
-    <div class="ticker-bar">
-      <div class="ticker-track" id="tickerTrack">
-        <span class="ticker-placeholder">Loading market data…</span>
-      </div>
-    </div>
-
     <!-- ── News Ticker Bar ──────────────────────── -->
     <div class="ticker-bar news-bar">
       <div class="ticker-track" id="newsTickerTrack">
         <span class="ticker-placeholder">Loading headlines…</span>
+      </div>
+    </div>
+
+    <!-- ── Market Ticker Bar ───────────────────── -->
+    <div class="ticker-bar">
+      <div class="ticker-track" id="tickerTrack">
+        <span class="ticker-placeholder">Loading market data…</span>
       </div>
     </div>
 
