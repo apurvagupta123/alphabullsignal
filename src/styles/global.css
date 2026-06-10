@@ -28,9 +28,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  background:
-    url('/images/hero-bg.jpg') center center / cover no-repeat fixed;
-  background-color: var(--navy);
+  background: var(--navy);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 15px;
@@ -204,8 +202,7 @@ input  { outline: none; font-family: inherit; border: none; }
   position: relative;
   padding: 72px 28px 56px;
   border-bottom: 1px solid var(--border);
-  background:
-    linear-gradient(to right, rgba(13,17,23,0.70) 40%, rgba(13,17,23,0.30) 100%);
+  background: var(--navy);
   min-height: 520px;
   display: flex;
   flex-direction: column;
