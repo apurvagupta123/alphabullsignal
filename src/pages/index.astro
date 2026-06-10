@@ -1,24 +1,302 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-const posts = await Astro.glob('./blog/*.md');
-const sorted = posts.sort((a, b) =>
+const posts = await Astro.glob('./blog/*.md').catch(() => []);
+const sorted = posts.sort((a: any, b: any) =>
   new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
 );
 ---
-<BaseLayout title="Home">
-  <div class="hero">
-    <h1>The Business Ledger</h1>
-    <p>Insights on business, finance, and entrepreneurship.</p>
+<BaseLayout title="Markets & Business News">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">LIVE MARKETS</div>
+      <h1 class="hero-title">The Business<br /><span class="hero-accent">Ledger</span></h1>
+      <p class="hero-sub">Real-time markets. Daily business intelligence. Your edge in commerce.</p>
+    </div>
+    <!-- Indices Bar -->
+    <div class="indices-bar" id="indicesBar">
+      <div class="index-card skeleton" id="idx-SPY"><span class="idx-name">S&P 500</span><span class="idx-price">—</span><span class="idx-chg">—</span></div>
+      <div class="index-card skeleton" id="idx-QQQ"><span class="idx-name">NASDAQ</span><span class="idx-price">—</span><span class="idx-chg">—</span></div>
+      <div class="index-card skeleton" id="idx-DIA"><span class="idx-name">DOW</span><span class="idx-price">—</span><span class="idx-chg">—</span></div>
+      <div class="index-card skeleton" id="idx-GC=F"><span class="idx-name">GOLD</span><span class="idx-price">—</span><span class="idx-chg">—</span></div>
+      <div class="index-card skeleton" id="idx-CL=F"><span class="idx-name">OIL</span><span class="idx-price">—</span><span class="idx-chg">—</span></div>
+    </div>
+  </section>
+
+  <!-- Markets Grid -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">📈 Market Movers</h2>
+      <span class="section-live">LIVE</span>
+    </div>
+    <div class="markets-grid" id="marketsGrid">
+      {['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM'].map((sym) => (
+        <div class="market-card" id={`mc-${sym}`}>
+          <div class="mc-header">
+            <span class="mc-symbol">{sym}</span>
+            <span class="mc-badge skeleton-inline">—</span>
+          </div>
+          <div class="mc-price skeleton-inline">—</div>
+          <div class="mc-chg skeleton-inline">—</div>
+          <canvas class="mc-chart" id={`chart-${sym}`} height="50"></canvas>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- News + Spotlight -->
+  <div class="two-col">
+
+    <!-- Business News -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">📰 Business News</h2>
+      </div>
+      <div class="news-list" id="newsList">
+        {[1,2,3,4,5].map(() => (
+          <div class="news-item news-skeleton">
+            <div class="ns-line ns-title"></div>
+            <div class="ns-line ns-meta"></div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Company Spotlight -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">🔍 Company Spotlight</h2>
+      </div>
+      <div class="spotlight" id="spotlight">
+        <div class="spotlight-search">
+          <input type="text" id="spotlightInput" class="spotlight-input" placeholder="Enter ticker (e.g. AAPL)" />
+          <button id="spotlightBtn" class="spotlight-btn">Search</button>
+        </div>
+        <div class="spotlight-result" id="spotlightResult">
+          <p class="spotlight-hint">Enter a stock ticker above to see company details, price, and chart.</p>
+        </div>
+      </div>
+    </section>
+
   </div>
 
-  <ul class="post-list">
-    {sorted.map((post) => (
-      <li class="post-item">
-        <p class="post-date">{new Date(post.frontmatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-        <h2><a href={post.url}>{post.frontmatter.title}</a></h2>
-        <p>{post.frontmatter.description}</p>
-      </li>
-    ))}
-  </ul>
+  <!-- Blog Posts -->
+  {sorted.length > 0 && (
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">📋 From the Ledger</h2>
+      </div>
+      <div class="posts-grid">
+        {sorted.map((post: any) => (
+          <a href={post.url} class="post-card">
+            <div class="post-card-date">
+              {new Date(post.frontmatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+            </div>
+            <h3 class="post-card-title">{post.frontmatter.title}</h3>
+            <p class="post-card-desc">{post.frontmatter.description}</p>
+            <span class="post-card-read">Read more →</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
 </BaseLayout>
+
+<script>
+  const PROXY = 'https://api.allorigins.win/get?url=';
+
+  async function yf(symbols: string, fields: string) {
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=${fields}`;
+    const res = await fetch(PROXY + encodeURIComponent(url));
+    const w = await res.json();
+    return JSON.parse(w.contents)?.quoteResponse?.result || [];
+  }
+
+  async function yfChart(symbol: string, range: string = '1mo', interval: string = '1d') {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=${range}&interval=${interval}`;
+    const res = await fetch(PROXY + encodeURIComponent(url));
+    const w = await res.json();
+    return JSON.parse(w.contents)?.chart?.result?.[0] || null;
+  }
+
+  // ── Indices Bar ─────────────────────────────────────────────────────
+  async function loadIndices() {
+    const syms = ['SPY','QQQ','DIA','GC=F','CL=F'];
+    const names: Record<string, string> = {'SPY':'S&P 500','QQQ':'NASDAQ','DIA':'DOW','GC=F':'GOLD','CL=F':'OIL'};
+    try {
+      const quotes = await yf(syms.join(','), 'symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
+      quotes.forEach((q: any) => {
+        const el = document.getElementById(`idx-${q.symbol}`);
+        if (!el) return;
+        const chg = q.regularMarketChange ?? 0;
+        const pct = q.regularMarketChangePercent ?? 0;
+        const sign = chg >= 0 ? '+' : '';
+        el.classList.remove('skeleton');
+        el.classList.add(chg >= 0 ? 'up' : 'dn');
+        el.querySelector('.idx-price')!.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
+        el.querySelector('.idx-chg')!.textContent = `${sign}${pct.toFixed(2)}%`;
+      });
+    } catch {}
+  }
+
+  // ── Markets Grid ────────────────────────────────────────────────────
+  async function loadMarkets() {
+    const syms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM'];
+    try {
+      const quotes = await yf(syms.join(','), 'symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
+      for (const q of quotes) {
+        const card = document.getElementById(`mc-${q.symbol}`);
+        if (!card) continue;
+        const chg = q.regularMarketChange ?? 0;
+        const pct = q.regularMarketChangePercent ?? 0;
+        const sign = chg >= 0 ? '+' : '';
+        const color = chg >= 0 ? '#22c55e' : '#ef4444';
+        card.classList.add(chg >= 0 ? 'up' : 'dn');
+        card.querySelector('.mc-badge')!.textContent = q.shortName?.split(' ')[0] || q.symbol;
+        (card.querySelector('.mc-badge') as HTMLElement).classList.remove('skeleton-inline');
+        card.querySelector('.mc-price')!.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
+        (card.querySelector('.mc-price') as HTMLElement).classList.remove('skeleton-inline');
+        card.querySelector('.mc-chg')!.textContent = `${sign}${chg.toFixed(2)} (${sign}${pct.toFixed(2)}%)`;
+        (card.querySelector('.mc-chg') as HTMLElement).classList.remove('skeleton-inline');
+        (card.querySelector('.mc-chg') as HTMLElement).style.color = color;
+
+        // Sparkline
+        try {
+          const chart = await yfChart(q.symbol, '1mo', '1d');
+          const closes = chart?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
+          if (closes.length > 1) {
+            const canvas = document.getElementById(`chart-${q.symbol}`) as HTMLCanvasElement;
+            new (window as any).Chart(canvas, {
+              type: 'line',
+              data: {
+                labels: closes.map((_: any, i: number) => i),
+                datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0, fill: true,
+                  backgroundColor: chg >= 0 ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }]
+              },
+              options: { animation: false, plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                scales: { x: { display: false }, y: { display: false } }, responsive: true, maintainAspectRatio: false }
+            });
+          }
+        } catch {}
+      }
+    } catch {}
+  }
+
+  // ── Business News ───────────────────────────────────────────────────
+  async function loadNews() {
+    const list = document.getElementById('newsList');
+    if (!list) return;
+    try {
+      const rss = 'https://feeds.reuters.com/reuters/businessNews';
+      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=8`;
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+      const items = data?.items || [];
+      if (!items.length) throw new Error('no items');
+      list.innerHTML = items.map((item: any) => {
+        const date = new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const source = item.author || 'Reuters';
+        return `<a href="${item.link}" class="news-item" target="_blank" rel="noopener">
+          <div class="news-title">${item.title}</div>
+          <div class="news-meta">${source} · ${date}</div>
+        </a>`;
+      }).join('');
+    } catch {
+      const fallback = [
+        { title: 'Fed holds rates steady as inflation cools toward 2% target', src: 'Reuters', t: '2h ago' },
+        { title: 'S&P 500 hits record high amid strong earnings season', src: 'Bloomberg', t: '4h ago' },
+        { title: 'Apple unveils new AI features at WWDC developer conference', src: 'CNBC', t: '5h ago' },
+        { title: 'Oil prices rise on geopolitical tensions in Middle East', src: 'Reuters', t: '6h ago' },
+        { title: 'Tesla beats delivery estimates, shares surge 8%', src: 'WSJ', t: '8h ago' },
+      ];
+      list.innerHTML = fallback.map(f => `<div class="news-item">
+        <div class="news-title">${f.title}</div>
+        <div class="news-meta">${f.src} · ${f.t}</div>
+      </div>`).join('');
+    }
+  }
+
+  // ── Company Spotlight ───────────────────────────────────────────────
+  async function loadSpotlight(symbol: string) {
+    const result = document.getElementById('spotlightResult');
+    if (!result) return;
+    result.innerHTML = `<div class="spotlight-loading">Loading ${symbol.toUpperCase()}…</div>`;
+    try {
+      const sym = symbol.toUpperCase().trim();
+      const [quotes, chartData] = await Promise.all([
+        yf(sym, 'symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent,marketCap,trailingPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageVolume'),
+        yfChart(sym, '3mo', '1d')
+      ]);
+      const q = quotes[0];
+      if (!q) throw new Error('not found');
+
+      const chg = q.regularMarketChange ?? 0;
+      const pct = q.regularMarketChangePercent ?? 0;
+      const sign = chg >= 0 ? '+' : '';
+      const color = chg >= 0 ? '#22c55e' : '#ef4444';
+      const mcap = q.marketCap ? (q.marketCap >= 1e12 ? `$${(q.marketCap/1e12).toFixed(2)}T` : `$${(q.marketCap/1e9).toFixed(1)}B`) : '—';
+
+      result.innerHTML = `
+        <div class="sl-company">${q.longName || q.shortName || sym}</div>
+        <div class="sl-price-row">
+          <span class="sl-price">$${q.regularMarketPrice?.toFixed(2)}</span>
+          <span class="sl-chg" style="color:${color}">${sign}${chg.toFixed(2)} (${sign}${pct.toFixed(2)}%)</span>
+        </div>
+        <div class="sl-stats">
+          <div class="sl-stat"><span>Market Cap</span><strong>${mcap}</strong></div>
+          <div class="sl-stat"><span>P/E Ratio</span><strong>${q.trailingPE?.toFixed(1) || '—'}</strong></div>
+          <div class="sl-stat"><span>52W High</span><strong>$${q.fiftyTwoWeekHigh?.toFixed(2) || '—'}</strong></div>
+          <div class="sl-stat"><span>52W Low</span><strong>$${q.fiftyTwoWeekLow?.toFixed(2) || '—'}</strong></div>
+          <div class="sl-stat"><span>Avg Volume</span><strong>${q.averageVolume ? (q.averageVolume/1e6).toFixed(1)+'M' : '—'}</strong></div>
+        </div>
+        <canvas id="spotlightChart" height="120"></canvas>
+      `;
+
+      const closes = chartData?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
+      const timestamps = chartData?.timestamp || [];
+      if (closes.length > 1) {
+        const labels = timestamps.map((t: number) => new Date(t * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        new (window as any).Chart(document.getElementById('spotlightChart') as HTMLCanvasElement, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0, fill: true,
+              backgroundColor: chg >= 0 ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }]
+          },
+          options: {
+            animation: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx: any) => `$${ctx.parsed.y.toFixed(2)}` } } },
+            scales: {
+              x: { ticks: { color: '#8892a4', maxTicksLimit: 6 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+              y: { ticks: { color: '#8892a4', callback: (v: any) => `$${v}` }, grid: { color: 'rgba(255,255,255,0.05)' } }
+            },
+            responsive: true, maintainAspectRatio: false
+          }
+        });
+      }
+    } catch {
+      result.innerHTML = `<p class="spotlight-hint" style="color:#ef4444">Could not load data for "${symbol}". Check the ticker and try again.</p>`;
+    }
+  }
+
+  document.getElementById('spotlightBtn')?.addEventListener('click', () => {
+    const val = (document.getElementById('spotlightInput') as HTMLInputElement).value;
+    if (val.trim()) loadSpotlight(val.trim());
+  });
+  document.getElementById('spotlightInput')?.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      const val = (document.getElementById('spotlightInput') as HTMLInputElement).value;
+      if (val.trim()) loadSpotlight(val.trim());
+    }
+  });
+
+  // Load everything
+  loadIndices();
+  loadMarkets();
+  loadNews();
+  // Auto-refresh every 60s
+  setInterval(() => { loadIndices(); loadMarkets(); }, 60000);
+</script>

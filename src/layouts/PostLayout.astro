@@ -3,16 +3,18 @@ const { frontmatter } = Astro.props;
 import BaseLayout from './BaseLayout.astro';
 ---
 <BaseLayout title={frontmatter.title}>
-  <article>
-    <div class="post-header">
-      <h1>{frontmatter.title}</h1>
-      <p class="meta">
-        {new Date(frontmatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-        {frontmatter.author ? ` · ${frontmatter.author}` : ''}
-      </p>
-    </div>
-    <div class="post-content">
-      <slot />
-    </div>
-  </article>
+  <div class="post-page">
+    <article>
+      <div class="post-header">
+        <h1>{frontmatter.title}</h1>
+        <p class="meta">
+          {new Date(frontmatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          {frontmatter.author ? ` · ${frontmatter.author}` : ''}
+        </p>
+      </div>
+      <div class="post-content">
+        <slot />
+      </div>
+    </article>
+  </div>
 </BaseLayout>
