@@ -92,16 +92,32 @@ const { title } = Astro.props;
     <script>
       // ── Ticker ────────────────────────────────────────────────────────
       const TICKER_SYMS = ['NVDA','META','TSLA','JPM','AAPL','MSFT','GOOGL','AMZN','SPY','QQQ','GS','NFLX','AMD','INTC','BRK-B'];
+      const FH_KEY = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
       const P = 'https://corsproxy.io/?';
 
       async function loadTicker() {
         const track = document.getElementById('tickerTrack');
         if (!track) return;
         try {
-          const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${TICKER_SYMS.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-          const res = await fetch(P + encodeURIComponent(url));
-          const w   = await res.json();
-          const quotes = w?.quoteResponse?.result || [];
+          let quotes = [];
+          try {
+            const fhRes = await Promise.all(TICKER_SYMS.map(s =>
+              fetch(`https://finnhub.io/api/v1/quote?symbol=${s}&token=${FH_KEY}`).then(r => r.json())
+            ));
+            const fhQ = TICKER_SYMS.map((s, i) => ({
+              symbol: s,
+              regularMarketPrice: fhRes[i].c,
+              regularMarketChange: fhRes[i].d,
+              regularMarketChangePercent: fhRes[i].dp
+            }));
+            if (fhQ.some(q => q.regularMarketPrice > 0)) quotes = fhQ;
+            else throw new Error('empty');
+          } catch {
+            const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${TICKER_SYMS.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+            const res = await fetch(P + encodeURIComponent(url));
+            const w   = await res.json();
+            quotes = w?.quoteResponse?.result || [];
+          }
           if (!quotes.length) throw new Error('empty');
 
           const html = quotes.map(q => {

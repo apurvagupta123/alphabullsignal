@@ -104,6 +104,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <script>
+  const FH_KEY = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
   const P = 'https://corsproxy.io/?';
   const FMP_KEY = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
 
@@ -239,10 +240,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     empty.style.display = 'none';
 
     try {
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickers.join(',')}&fields=symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-      const r = await fetch(P + encodeURIComponent(url));
-      const w = await r.json();
-      const quotes = w?.quoteResponse?.result || [];
+      let quotes = [];
+      try {
+        const fhRes = await Promise.all(tickers.map(s =>
+          fetch(`https://finnhub.io/api/v1/quote?symbol=${s}&token=${FH_KEY}`).then(r => r.json())
+        ));
+        const fhQ = tickers.map((s, i) => ({symbol:s, shortName:s, regularMarketPrice:fhRes[i].c, regularMarketChange:fhRes[i].d, regularMarketChangePercent:fhRes[i].dp}));
+        if (fhQ.some(q => q.regularMarketPrice > 0)) quotes = fhQ;
+        else throw new Error('empty');
+      } catch {
+        const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickers.join(',')}&fields=symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+        const r = await fetch(P + encodeURIComponent(url));
+        const w = await r.json();
+        quotes = w?.quoteResponse?.result || [];
+      }
 
       grid.innerHTML = quotes.map(q => {
         const chg = q.regularMarketChange ?? 0;

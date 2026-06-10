@@ -68,14 +68,27 @@ const STOCKS = [
 </BaseLayout>
 
 <script define:vars={{ stocks: ['JPM','BAC','WFC','GS','MS','C','BLK','V','MA','AXP','BRK-B','SCHW'] }}>
+  const FH_KEY = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
   const P = 'https://corsproxy.io/?';
 
   async function loadSector() {
+    let quotes = [];
     try {
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${stocks.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-      const r = await fetch(P + encodeURIComponent(url));
-      const w = await r.json();
-      const quotes = w?.quoteResponse?.result || [];
+      const fhRes = await Promise.all(stocks.map(s =>
+        fetch(`https://finnhub.io/api/v1/quote?symbol=${s}&token=${FH_KEY}`).then(r => r.json())
+      ));
+      const fhQ = stocks.map((s, i) => ({symbol: s, regularMarketPrice: fhRes[i].c, regularMarketChange: fhRes[i].d, regularMarketChangePercent: fhRes[i].dp}));
+      if (fhQ.some(q => q.regularMarketPrice > 0)) quotes = fhQ;
+      else throw new Error('empty');
+    } catch {
+      try {
+        const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${stocks.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+        const r = await fetch(P + encodeURIComponent(url));
+        const w = await r.json();
+        quotes = w?.quoteResponse?.result || [];
+      } catch {}
+    }
+    try {
       let totalPct = 0;
       quotes.forEach(q => {
         const chg = q.regularMarketChange ?? 0;
