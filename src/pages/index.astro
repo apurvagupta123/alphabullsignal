@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const posts = await Astro.glob('./blog/*.md');
+const sorted = posts.sort((a, b) =>
+  new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
+);
+---
+<BaseLayout title="Home">
+  <div class="hero">
+    <h1>The Business Ledger</h1>
+    <p>Insights on business, finance, and entrepreneurship.</p>
+  </div>
+
+  <ul class="post-list">
+    {sorted.map((post) => (
+      <li class="post-item">
+        <p class="post-date">{new Date(post.frontmatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <h2><a href={post.url}>{post.frontmatter.title}</a></h2>
+        <p>{post.frontmatter.description}</p>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
