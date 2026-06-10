@@ -926,6 +926,29 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
   .heatmap-grid   { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ── Sector Pill Bar (homepage compact row) ─────────────── */
+.sector-pill-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 0;
+}
+.sector-pill-bar .sector-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  transition: all 0.2s;
+  cursor: default;
+}
+.sector-pill-bar .sector-pill:hover { border-color: rgba(201,168,76,0.3); background: var(--navy-3); }
+.sp-name { color: var(--text-muted); font-weight: 500; }
+.sp-pct  { font-weight: 700; font-size: 12px; }
+
 /* ── Earnings Calendar ───────────────────────────────────── */
 .ec-week-nav {
   display: flex;
