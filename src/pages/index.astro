@@ -85,22 +85,22 @@ const sorted = posts.sort((a: any, b: any) =>
         <h2 class="section-title">Sector Performance</h2>
         <span class="section-live">LIVE</span>
       </div>
-      <div class="heatmap-grid" id="heatmapGrid">
+      <div class="sector-pill-bar" id="heatmapGrid">
         {[
           {sym:'XLK',name:'Technology'},
-          {sym:'XLF',name:'Finance'},
+          {sym:'XLF',name:'Financials'},
           {sym:'XLE',name:'Energy'},
           {sym:'XLV',name:'Health Care'},
-          {sym:'XLY',name:'Consumer Disc.'},
-          {sym:'XLP',name:'Consumer Staples'},
+          {sym:'XLY',name:'Cons. Disc.'},
+          {sym:'XLP',name:'Cons. Staples'},
           {sym:'XLI',name:'Industrials'},
           {sym:'XLU',name:'Utilities'},
           {sym:'XLB',name:'Materials'},
           {sym:'XLRE',name:'Real Estate'},
         ].map(s => (
-          <div class="hm-cell skeleton" id={`hm-${s.sym}`}>
-            <span class="hm-name">{s.name}</span>
-            <span class="hm-pct" id={`hmp-${s.sym}`}>—</span>
+          <div class="sector-pill" id={`hm-${s.sym}`}>
+            <span class="sp-name">{s.name}</span>
+            <span class="sp-pct" id={`hmp-${s.sym}`}>—</span>
           </div>
         ))}
       </div>
