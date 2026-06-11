@@ -153,8 +153,12 @@ async function loadTicker() {
   if (!track) return;
   try {
     const quotes: any[] = await Promise.all(
-      TICKER_SYMS.map((s: string) =>
-        fetch(`https://finnhub.io/api/v1/quote?symbol=${s}&token=${FH_KEY}`).then((r: any) => r.json()).then((q: any) => ({ s, q }))
+      TICKER_SYMS.map((s: string, i: number) =>
+        new Promise<void>(r => setTimeout(r, i * 100))
+          .then(() => fetch(`https://finnhub.io/api/v1/quote?symbol=${s}&token=${FH_KEY}`))
+          .then((r: any) => r.json())
+          .then((q: any) => ({ s, q: (q.error || !q.c) ? null : q }))
+          .catch(() => ({ s, q: null }))
       )
     );
     const html = quotes.map(({ s, q }: any) => {
@@ -199,7 +203,7 @@ async function loadNewsTicker() {
 
 loadTicker();
 loadNewsTicker();
-setInterval(loadTicker, 60000);
+setInterval(loadTicker, 300000);
 setInterval(loadNewsTicker, 300000);
 </script>
   </body>
