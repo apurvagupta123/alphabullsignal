@@ -201,7 +201,7 @@ async function loadNewsTicker() {
   track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
 }
 
-loadTicker();
+setTimeout(loadTicker, 2000);
 loadNewsTicker();
 setInterval(loadTicker, 300000);
 setInterval(loadNewsTicker, 300000);
