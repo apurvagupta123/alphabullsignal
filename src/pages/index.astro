@@ -190,7 +190,11 @@ async function tdQuote(symbols: string[]) {
 }
 
 async function fhQuote(sym: string) {
-  return fetch(`${FH_BASE}/quote?symbol=${sym}&token=${FH_KEY}`).then((r: any) => r.json());
+  try {
+    const r = await fetch(`${FH_BASE}/quote?symbol=${sym}&token=${FH_KEY}`);
+    const d = await r.json();
+    return (d.error || !d.c) ? null : d;
+  } catch { return null; }
 }
 
 async function fhCandles(sym: string) {
@@ -224,7 +228,7 @@ async function loadIndices() {
 async function loadMarkets() {
   const syms = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'JPM', 'GS', 'NFLX'];
   try {
-    const quotes: any[] = await Promise.all(syms.map((s: string, i: number) => new Promise<void>(r => setTimeout(r, i * 80)).then(() => fhQuote(s).then((q: any) => ({ sym: s, q })))));
+    const quotes: any[] = await Promise.all(syms.map((s: string, i: number) => new Promise<void>(r => setTimeout(r, i * 80)).then(() => fhQuote(s).then((q: any) => ({ sym: s, q })).catch(() => ({ sym: s, q: null })))));
     for (const { sym, q } of quotes) {
       if (!q || !q.c) continue;
       const up = q.dp >= 0;
@@ -378,5 +382,5 @@ loadMarkets();
 loadNews();
 loadFearGreed();
 loadHeatmap();
-setInterval(() => { loadIndices(); loadMarkets(); loadHeatmap(); }, 60000);
+setInterval(() => { loadIndices(); loadMarkets(); loadHeatmap(); }, 300000);
 </script>
