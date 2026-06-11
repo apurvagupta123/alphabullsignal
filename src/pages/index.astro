@@ -224,7 +224,7 @@ async function loadIndices() {
 async function loadMarkets() {
   const syms = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'JPM', 'GS', 'NFLX'];
   try {
-    const quotes: any[] = await Promise.all(syms.map((s: string) => fhQuote(s).then((q: any) => ({ sym: s, q }))));
+    const quotes: any[] = await Promise.all(syms.map((s: string, i: number) => new Promise<void>(r => setTimeout(r, i * 80)).then(() => fhQuote(s).then((q: any) => ({ sym: s, q })))));
     for (const { sym, q } of quotes) {
       if (!q || !q.c) continue;
       const up = q.dp >= 0;
@@ -266,7 +266,7 @@ async function loadMarkets() {
 async function loadHeatmap() {
   const sectors = ['XLK', 'XLF', 'XLE', 'XLV', 'XLY', 'XLP', 'XLI', 'XLU', 'XLB', 'XLRE'];
   try {
-    const quotes: any[] = await Promise.all(sectors.map((s: string) => fhQuote(s).then((q: any) => ({ sym: s, q }))));
+    const quotes: any[] = await Promise.all(sectors.map((s: string, i: number) => new Promise<void>(r => setTimeout(r, i * 80)).then(() => fhQuote(s).then((q: any) => ({ sym: s, q })))));
     quotes.forEach(({ sym, q }: any) => {
       if (!q || !q.c) return;
       const pct = q.dp ?? 0;
