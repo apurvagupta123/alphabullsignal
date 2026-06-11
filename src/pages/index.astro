@@ -270,7 +270,7 @@ async function loadMarkets() {
 async function loadHeatmap() {
   const sectors = ['XLK', 'XLF', 'XLE', 'XLV', 'XLY', 'XLP', 'XLI', 'XLU', 'XLB', 'XLRE'];
   try {
-    const quotes: any[] = await Promise.all(sectors.map((s: string, i: number) => new Promise<void>(r => setTimeout(r, i * 80)).then(() => fhQuote(s).then((q: any) => ({ sym: s, q })))));
+    const quotes: any[] = await Promise.all(sectors.map((s: string, i: number) => new Promise<void>(r => setTimeout(r, (i + 10) * 80)).then(() => fhQuote(s).then((q: any) => ({ sym: s, q })))));
     quotes.forEach(({ sym, q }: any) => {
       if (!q || !q.c) return;
       const pct = q.dp ?? 0;
