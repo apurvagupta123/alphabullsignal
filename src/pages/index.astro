@@ -258,26 +258,7 @@ async function loadIndices() {
     });
   } catch {}
 
-  // Indian indices via Twelve Data
-  setTimeout(async () => {
-    try {
-      const ir = await fetch(TD_BASE + '/quote?symbol=NIFTY%2050,SENSEX&apikey=' + TD_KEY);
-      const id2: any = await ir.json();
-      const imap: Record<string,string> = { 'NIFTY 50': 'NIFTY50', 'SENSEX': 'SENSEX' };
-      for (const [key, elId] of Object.entries(imap)) {
-        const q = id2[key];
-        if (!q || q.status === 'error' || !q.close) continue;
-        const el = document.getElementById('idx-' + elId);
-        if (!el) continue;
-        const pct = parseFloat(q.percent_change);
-        const up = pct >= 0;
-        el.classList.remove('skeleton');
-        el.classList.add(up ? 'up' : 'dn');
-        el.querySelector('.idx-price')!.textContent = '₹' + fmtPrice(parseFloat(q.close));
-        el.querySelector('.idx-chg')!.textContent = (up ? '▲' : '▼') + ' ' + Math.abs(pct).toFixed(2) + '%';
-      }
-    } catch(e2) {}
-  }, 600);
+  
 }
 
 // ── Markets Grid (Finnhub) ────────────────────────────────────────────
@@ -347,45 +328,41 @@ async function loadHeatmap() {
 
 // ── Indian Markets (Finnhub NSE) ────────────────────────────────
 async function loadIndianMarkets() {
-  const stocks = [
-    { api: 'NSE:RELIANCE', sym: 'RELIANCE' },
-    { api: 'NSE:TCS', sym: 'TCS' },
-    { api: 'NSE:HDFCBANK', sym: 'HDFCBANK' },
-    { api: 'NSE:INFY', sym: 'INFY' },
-    { api: 'NSE:WIPRO', sym: 'WIPRO' },
-    { api: 'NSE:ICICIBANK', sym: 'ICICIBANK' },
-  ];
   try {
-    const quotes = await Promise.all(stocks.map((s, i) =>
-      new Promise(r => setTimeout(r, i * 120 + 1800)).then(() =>
-        fhQuote(s.api).then(q => ({ ...s, q })).catch(() => ({ ...s, q: null }))
-      )
-    ));
-    for (const { sym, api, q } of quotes) {
-      if (!q || !q.c) continue;
-      const up = q.dp >= 0;
+    const r = await fetch('/api/indian-stocks');
+    const d: any = await r.json();
+    const results: any[] = d?.quoteResponse?.result || [];
+    for (const q of results) {
+      const sym = q.symbol;
+      const price = q.regularMarketPrice;
+      const change = q.regularMarketChange;
+      const pct = q.regularMarketChangePercent;
+      if (!price) continue;
+      const up = pct >= 0;
       const color = up ? '#22c55e' : '#ef4444';
-      const id = 'IN-' + sym;
-      const priceEl = document.getElementById('mp-' + id);
-      const chgEl = document.getElementById('mch-' + id);
-      const badgeEl = document.getElementById('mb-' + id);
-      const card = document.getElementById('mc-' + id);
-      if (priceEl) priceEl.textContent = '₹' + fmtPrice(q.c);
-      if (chgEl) { chgEl.textContent = (up ? '▲' : '▼') + ' ₹' + Math.abs(q.d).toFixed(2) + ' (' + (up?'+':'') + q.dp.toFixed(2) + '%)'; chgEl.style.color = color; }
-      if (badgeEl) { badgeEl.textContent = (up ? '▲' : '▼') + ' ' + Math.abs(q.dp).toFixed(2) + '%'; badgeEl.classList.add(up ? 'badge-up' : 'badge-dn'); }
+      if (sym === '^NSEI' || sym === '^BSESN') {
+        const idxId = sym === '^NSEI' ? 'idx-NIFTY50' : 'idx-SENSEX';
+        const el = document.getElementById(idxId);
+        if (!el) continue;
+        el.classList.remove('skeleton');
+        el.classList.add(up ? 'up' : 'dn');
+        el.querySelector('.idx-price')!.textContent = fmtPrice(price);
+        el.querySelector('.idx-chg')!.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
+        continue;
+      }
+      const baseSym = sym.replace('.NS', '');
+      const priceEl = document.getElementById(`mp-IN-${baseSym}`);
+      const chgEl = document.getElementById(`mch-IN-${baseSym}`);
+      const badgeEl = document.getElementById(`mb-IN-${baseSym}`);
+      const card = document.getElementById(`mc-IN-${baseSym}`);
+      if (!priceEl) continue;
+      priceEl.textContent = `₹${fmtPrice(price)}`;
+      if (chgEl) {
+        chgEl.textContent = `${up ? '▲' : '▼'} ₹${Math.abs(change).toFixed(2)} ${up ? '+' : ''}${pct.toFixed(2)}%`;
+        (chgEl as HTMLElement).style.color = color;
+      }
+      if (badgeEl) { badgeEl.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`; badgeEl.classList.add(up ? 'badge-up' : 'badge-dn'); }
       if (card) card.classList.add(up ? 'up' : 'dn');
-      const capApi = api; const capId = id; const capColor = color; const capUp = up;
-      fhCandles(capApi).then(cd => {
-        if (!cd) return;
-        const canvas = document.getElementById('chart-' + capId);
-        if (!canvas) return;
-        const ex = window.Chart?.getChart?.(canvas); if (ex) ex.destroy();
-        new window.Chart(canvas, {
-          type: 'line',
-          data: { labels: cd.closes.map((_,i) => i), datasets: [{ data: cd.closes, borderColor: capColor, borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: capUp ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }] },
-          options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
-        });
-      }).catch(()=>{});
     }
   } catch(e) {}
 }
