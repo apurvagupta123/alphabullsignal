@@ -148,13 +148,51 @@ export async function getStaticPaths() {
     document.getElementById('cpLow').textContent    = `${curr}${q.fiftyTwoWeekLow?.toFixed(2) || '—'}`;
     document.getElementById('cpVol').textContent    = q.averageVolume ? (q.averageVolume/1e6).toFixed(1)+'M' : '—';
     document.getElementById('cpDiv').textContent    = q.dividendYield ? `${(q.dividendYield*100).toFixed(2)}%` : 'N/A';
-    document.getElementById('cpAbout').textContent  = q.longBusinessSummary || 'No description available.';
+    // show Yahoo summary immediately, then enrich with Wikipedia
+    const yahooBio = q.longBusinessSummary || '';
+    document.getElementById('cpAbout').textContent = yahooBio || 'Loading description…';
+
     if (q.website || q.country || q.fullTimeEmployees) {
       document.getElementById('cpAboutMeta').innerHTML = [
         q.website ? `<a href="${q.website}" target="_blank" class="cp-meta-link">${q.website.replace('https://','')}</a>` : '',
         q.country ? `<span>${q.country}</span>` : '',
         q.fullTimeEmployees ? `<span>${Number(q.fullTimeEmployees).toLocaleString()} employees</span>` : ''
       ].filter(Boolean).join('<span class="cp-meta-sep">·</span>');
+    }
+
+    // enrich with Wikipedia description
+    fetchWikipedia(q.longName || q.shortName || sym, yahooBio);
+  }
+
+  async function fetchWikipedia(companyName, fallback) {
+    try {
+      // try exact name first, then simplified
+      const attempts = [
+        companyName,
+        companyName.replace(/,?\s*(Inc\.?|Corp\.?|Ltd\.?|plc|Limited|Group|Holdings?|Technologies?|Platforms?|Industries?)\.?$/i, '').trim(),
+      ];
+      for (const name of attempts) {
+        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`;
+        const r = await fetch(url);
+        if (!r.ok) continue;
+        const d = await r.json();
+        if (d.extract && d.extract.length > 80 && d.type !== 'disambiguation') {
+          document.getElementById('cpAbout').textContent = d.extract;
+          // add wikipedia link
+          const meta = document.getElementById('cpAboutMeta');
+          if (meta && d.content_urls?.desktop?.page) {
+            const existing = meta.innerHTML;
+            const wikLink = `<a href="${d.content_urls.desktop.page}" target="_blank" class="cp-meta-link">Wikipedia →</a>`;
+            meta.innerHTML = existing ? existing + '<span class="cp-meta-sep">·</span>' + wikLink : wikLink;
+          }
+          return;
+        }
+      }
+      // fallback to Yahoo summary if Wikipedia didn't work
+      if (fallback) document.getElementById('cpAbout').textContent = fallback;
+      else document.getElementById('cpAbout').textContent = 'No description available.';
+    } catch {
+      if (fallback) document.getElementById('cpAbout').textContent = fallback;
     }
   }
 
