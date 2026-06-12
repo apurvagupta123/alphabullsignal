@@ -177,6 +177,38 @@ const SECTOR_TAGS: Record<string, string> = {
   const FMP_KEY  = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
   const FH_KEY   = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
   const PROXY    = 'https://corsproxy.io/?';
+  const PROXIES  = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?url=',
+  ];
+
+  // ── Cache helpers (instant load on refresh) ──────────────────
+  const CACHE_TTL = 90 * 1000; // 90 seconds
+  function getCache(key: string) {
+    try {
+      const c = JSON.parse(localStorage.getItem(key) || 'null');
+      if (c && Date.now() - c.ts < CACHE_TTL) return c.data;
+    } catch {}
+    return null;
+  }
+  function setCache(key: string, data: any) {
+    try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch {}
+  }
+
+  // ── Yahoo Finance fetch with multiple proxy fallbacks ─────────
+  async function yfFetch(url: string) {
+    for (const px of PROXIES) {
+      try {
+        const r = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(6000) });
+        if (!r.ok) continue;
+        const d = await r.json();
+        const result = d?.quoteResponse?.result;
+        if (result && result.length > 0) return result;
+      } catch {}
+    }
+    return [];
+  }
 
   async function fetchQuotes(syms: string[]) {
     // 1) FMP batch
@@ -218,20 +250,24 @@ const SECTOR_TAGS: Record<string, string> = {
     return w?.chart?.result?.[0] || null;
   }
   // ── Indices ───────────────────────────────────────────────────────────
+  function renderIndex(q: any) {
+    const el = document.getElementById(`idx-${q.symbol}`);
+    if (!el) return;
+    const chg = q.regularMarketChange ?? 0;
+    const pct = q.regularMarketChangePercent ?? 0;
+    const up  = chg >= 0;
+    el.classList.remove('skeleton');
+    el.classList.add(up ? 'up' : 'dn');
+    el.querySelector('.idx-price')!.textContent = q.regularMarketPrice?.toFixed(2);
+    el.querySelector('.idx-chg')!.textContent   = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
+  }
+
   async function loadIndices() {
+    const cached = getCache('indices_v2');
+    if (cached) cached.forEach(renderIndex);
     try {
-      const quotes = await yf('SPY,QQQ,DIA,IWM', 'symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
-      quotes.forEach((q: any) => {
-        const el = document.getElementById(`idx-${q.symbol}`);
-        if (!el) return;
-        const chg = q.regularMarketChange ?? 0;
-        const pct = q.regularMarketChangePercent ?? 0;
-        const up  = chg >= 0;
-        el.classList.remove('skeleton');
-        el.classList.add(up ? 'up' : 'dn');
-        el.querySelector('.idx-price')!.textContent = q.regularMarketPrice?.toFixed(2);
-        el.querySelector('.idx-chg')!.textContent   = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
-      });
+      const quotes = await yf('SPY,QQQ,DIA,IWM', '');
+      if (quotes.length > 0) { quotes.forEach(renderIndex); setCache('indices_v2', quotes); }
     } catch {}
   }
 
@@ -274,16 +310,33 @@ const SECTOR_TAGS: Record<string, string> = {
   }
 
   async function loadMarkets() {
-    const usSyms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM'];
-    const inSyms = ['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'];
+    const allSyms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'];
+
+    // Show cached data instantly
+    const cached = getCache('markets_v2');
+    if (cached) cached.forEach(renderMarketCard);
+
+    // Fetch all in one Yahoo Finance call (supports both US + IN)
     try {
-      const usQuotes = await yf(usSyms.join(','), 'symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
+      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${allSyms.join(',')}&fields=symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+      const quotes = await yfFetch(url);
+      if (quotes.length > 0) {
+        quotes.forEach(renderMarketCard);
+        setCache('markets_v2', quotes);
+        return;
+      }
+    } catch {}
+
+    // Fallback: US via fetchQuotes, India via separate yfFetch
+    const usSyms = allSyms.filter(s => !s.includes('.'));
+    const inSyms = allSyms.filter(s => s.includes('.'));
+    try {
+      const usQuotes = await yf(usSyms.join(','), '');
       usQuotes.forEach(renderMarketCard);
     } catch {}
     try {
       const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${inSyms.join(',')}&fields=symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-      const res = await fetch(PROXY + encodeURIComponent(url));
-      const inQuotes = (await res.json())?.quoteResponse?.result || [];
+      const inQuotes = await yfFetch(url);
       inQuotes.forEach(renderMarketCard);
     } catch {}
   }
@@ -437,27 +490,33 @@ const SECTOR_TAGS: Record<string, string> = {
   }
 
   // ── India Indices ─────────────────────────────────────────────
+  function renderIndiaIndex(q: any) {
+    const idMap: Record<string,string> = {'^NSEI':'NSEI','^BSESN':'BSESN','^NSEBANK':'NSEBANK','^NIFTYMIDCAP150':'MID'};
+    const key = idMap[q.symbol];
+    if (!key) return;
+    const chg = q.regularMarketChange ?? 0;
+    const pct = q.regularMarketChangePercent ?? 0;
+    const up  = chg >= 0;
+    const color = up ? '#22c55e' : '#ef4444';
+    const card = document.getElementById(`hidx-${key}`);
+    if (card) { card.classList.remove('skeleton'); card.classList.add(up ? 'up' : 'dn'); }
+    const pEl = document.getElementById(`hidx-${key}-price`);
+    if (pEl) pEl.textContent = q.regularMarketPrice?.toLocaleString('en-IN', {maximumFractionDigits:2});
+    const cEl = document.getElementById(`hidx-${key}-chg`);
+    if (cEl) { cEl.textContent = `${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`; (cEl as HTMLElement).style.color = color; }
+  }
+
   async function loadIndiaIndices() {
-    try {
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5ENSEI,%5EBSESN,%5ENSEBANK,%5ENIFTYMIDCAP150&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-      const res = await fetch(PROXY + encodeURIComponent(url));
-      const quotes = (await res.json())?.quoteResponse?.result || [];
-      const idMap: Record<string,string> = {'^NSEI':'NSEI','^BSESN':'BSESN','^NSEBANK':'NSEBANK','^NIFTYMIDCAP150':'MID'};
-      quotes.forEach((q: any) => {
-        const key = idMap[q.symbol];
-        if (!key) return;
-        const chg = q.regularMarketChange ?? 0;
-        const pct = q.regularMarketChangePercent ?? 0;
-        const up  = chg >= 0;
-        const color = up ? '#22c55e' : '#ef4444';
-        const card = document.getElementById(`hidx-${key}`);
-        if (card) { card.classList.remove('skeleton'); card.classList.add(up ? 'up' : 'dn'); }
-        const pEl = document.getElementById(`hidx-${key}-price`);
-        if (pEl) pEl.textContent = q.regularMarketPrice?.toLocaleString('en-IN', {maximumFractionDigits:2});
-        const cEl = document.getElementById(`hidx-${key}-chg`);
-        if (cEl) { cEl.textContent = `${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`; (cEl as HTMLElement).style.color = color; }
-      });
-    } catch {}
+    // Show cached instantly
+    const cached = getCache('india_idx_v2');
+    if (cached) cached.forEach(renderIndiaIndex);
+
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5ENSEI,%5EBSESN,%5ENSEBANK,%5ENIFTYMIDCAP150&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+    const quotes = await yfFetch(url);
+    if (quotes.length > 0) {
+      quotes.forEach(renderIndiaIndex);
+      setCache('india_idx_v2', quotes);
+    }
   }
 
   // ── Hero visual mini ticker ───────────────────────────────────
