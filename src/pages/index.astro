@@ -409,7 +409,7 @@ const sorted = posts.sort((a: any, b: any) =>
     } catch {}
   }
 
-  // ── Sector Bar Chart (Yahoo Finance) ─────────────────────────
+  // ── Sector Bar Chart (Yahoo Finance direct) ──────────────────
   const SECTORS = [
     {sym:'XLK', name:'Technology'},
     {sym:'XLF', name:'Financials'},
@@ -424,7 +424,10 @@ const sorted = posts.sort((a: any, b: any) =>
   ];
   async function loadHeatmap() {
     try {
-      const quotes = await yf(SECTORS.map(s=>s.sym).join(','), 'symbol,regularMarketChangePercent');
+      const syms = SECTORS.map(s => s.sym).join(',');
+      const url  = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=symbol,regularMarketChangePercent`;
+      const res  = await fetch(PROXY + encodeURIComponent(url));
+      const quotes = (await res.json())?.quoteResponse?.result || [];
       const data = SECTORS.map(s => {
         const q = quotes.find((q:any) => q.symbol === s.sym);
         return { name: s.name, pct: q?.regularMarketChangePercent ?? 0 };
