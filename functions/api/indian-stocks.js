@@ -28,7 +28,7 @@ export async function onRequest() {
     debug.push('crumb:' + crumb.slice(0, 20));
 
     if (crumb && !crumb.includes('{') && !crumb.includes('<') && crumb.length < 50) {
-      const symbols = 'RELIANCE.NS,TCS.NS,HDFCBANK.NS,INFY.NS,WIPRO.NS,ICICIBANK.NS,%5ENSEI,%5EBSESN,%5ENSEBANK';
+      const symbols = 'RELIANCE.NS,TCS.NS,HDFCBANK.NS,INFY.NS,WIPRO.NS,ICICIBANK.NS,%5ENSEI,%5EBSESN,%5ENSEBANK,%5EINDIAVIX';
       const qResp = await fetch(
         `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&crumb=${encodeURIComponent(crumb)}`,
         { headers: { 'User-Agent': ua, 'Cookie': cookies, 'Accept': 'application/json' } }
