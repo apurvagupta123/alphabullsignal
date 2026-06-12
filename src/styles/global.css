@@ -127,13 +127,9 @@ input  { outline: none; font-family: inherit; border: none; }
 }
 
 .nav-logo-box {
-  width: 36px;
-  height: 36px;
-  background: var(--gold);
-  color: var(--navy);
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.5px;
+  width: 42px;
+  height: 42px;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
