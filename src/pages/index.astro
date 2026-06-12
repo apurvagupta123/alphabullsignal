@@ -525,12 +525,36 @@ const SECTOR_TAGS: Record<string, string> = {
     const cached = getCache('india_idx_v2');
     if (cached) cached.forEach(renderIndiaIndex);
 
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5ENSEI,%5EBSESN,%5ENSEBANK,%5ENIFTYMIDCAP150&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-    const quotes = await yfFetch(url);
-    if (quotes.length > 0) {
-      quotes.forEach(renderIndiaIndex);
-      setCache('india_idx_v2', quotes);
-    }
+    // Use chart API meta (v8) — works through proxies more reliably than quote API (v7)
+    const IDX = [
+      { enc: '%5ENSEI',           sym: '^NSEI',            key: 'NSEI' },
+      { enc: '%5EBSESN',          sym: '^BSESN',           key: 'BSESN' },
+      { enc: '%5ENSEBANK',        sym: '^NSEBANK',         key: 'NSEBANK' },
+      { enc: '%5ENIFTYMIDCAP150', sym: '^NIFTYMIDCAP150',  key: 'MID' },
+    ];
+
+    const results: any[] = [];
+    await Promise.all(IDX.map(async ({ enc, sym: idxSym, key }) => {
+      const url = `https://query2.finance.yahoo.com/v8/finance/chart/${enc}?range=1d&interval=5m`;
+      for (const px of PROXIES) {
+        try {
+          const r = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
+          if (!r.ok) continue;
+          const d = await r.json();
+          const meta = d?.chart?.result?.[0]?.meta;
+          if (!meta?.regularMarketPrice) continue;
+          const price = meta.regularMarketPrice;
+          const prev  = meta.previousClose || meta.chartPreviousClose || price;
+          const chg   = price - prev;
+          const pct   = prev ? (chg / prev) * 100 : 0;
+          const q = { symbol: idxSym, regularMarketPrice: price, regularMarketChange: chg, regularMarketChangePercent: pct };
+          renderIndiaIndex(q);
+          results.push(q);
+          break;
+        } catch {}
+      }
+    }));
+    if (results.length > 0) setCache('india_idx_v2', results);
   }
 
   // ── Hero visual mini ticker ───────────────────────────────────
