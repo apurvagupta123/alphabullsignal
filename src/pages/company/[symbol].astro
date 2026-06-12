@@ -125,23 +125,58 @@ export async function getStaticPaths() {
 </BaseLayout>
 
 <script define:vars={{ sym, curr, isIndian }}>
-  const P = 'https://corsproxy.io/?';
+  const PROXIES = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?url=',
+  ];
   let chartInstance = null;
 
   const rangeMap = { 30: ['1mo','1d'], 90: ['3mo','1d'], 180: ['6mo','1wk'], 365: ['1y','1wk'], 1825: ['5y','1mo'] };
 
+  // Try all proxies; for Indian stocks also try query2 endpoint
+  async function yfFetch(url) {
+    const urls = isIndian
+      ? [url, url.replace('query1.finance.yahoo.com', 'query2.finance.yahoo.com')]
+      : [url];
+    for (const u of urls) {
+      for (const px of PROXIES) {
+        try {
+          const r = await fetch(px + encodeURIComponent(u), { signal: AbortSignal.timeout(7000) });
+          if (!r.ok) continue;
+          const d = await r.json();
+          const result = d?.quoteResponse?.result;
+          if (result && result.length > 0) return result[0];
+        } catch {}
+      }
+    }
+    return null;
+  }
+
+  async function yfChartFetch(url) {
+    const urls = isIndian
+      ? [url, url.replace('query1.finance.yahoo.com', 'query2.finance.yahoo.com')]
+      : [url];
+    for (const u of urls) {
+      for (const px of PROXIES) {
+        try {
+          const r = await fetch(px + encodeURIComponent(u), { signal: AbortSignal.timeout(7000) });
+          if (!r.ok) continue;
+          const d = await r.json();
+          const result = d?.chart?.result;
+          if (result && result.length > 0) return result[0];
+        } catch {}
+      }
+    }
+    return null;
+  }
+
   async function yf(fields) {
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=${fields}`;
-    const r = await fetch(P + encodeURIComponent(url));
-    const w = await r.json();
-    return w?.quoteResponse?.result?.[0] || null;
+    return yfFetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=${fields}`);
   }
 
   async function yfChart(range, interval) {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=${range}&interval=${interval}`;
-    const r = await fetch(P + encodeURIComponent(url));
-    const w = await r.json();
-    return w?.chart?.result?.[0] || null;
+    return yfChartFetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=${range}&interval=${interval}`);
   }
 
   async function loadQuote() {
@@ -261,10 +296,7 @@ export async function getStaticPaths() {
     const related = ['AAPL','MSFT','GOOGL','AMZN','TSLA'].filter(s => s !== sym).slice(0,4);
     for (const s of related) {
       try {
-        const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${s}&fields=regularMarketPrice,regularMarketChangePercent`;
-        const r = await fetch(P + encodeURIComponent(url));
-        const w = await r.json();
-        const q = w?.quoteResponse?.result?.[0];
+        const q = await yfFetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${s}&fields=regularMarketPrice,regularMarketChangePercent`);
         if (q) {
           const pct = q.regularMarketChangePercent ?? 0;
           const up  = pct >= 0;
