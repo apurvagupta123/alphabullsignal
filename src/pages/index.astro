@@ -82,6 +82,16 @@ const sorted = posts.sort((a: any, b: any) =>
 <span class="idx-price">—</span>
 <span class="idx-chg">—</span>
 </div>
+      <div class="idx-card skeleton" id="idx-BANKNIFTY">
+        <span class="idx-name">BANK NIFTY</span>
+        <span class="idx-price">—</span>
+        <span class="idx-chg">—</span>
+      </div>
+      <div class="idx-card skeleton" id="idx-INDIAVIX">
+        <span class="idx-name">INDIA VIX</span>
+        <span class="idx-price">—</span>
+        <span class="idx-chg">—</span>
+      </div>
     </div>
   </section>
 
@@ -340,9 +350,15 @@ async function loadIndianMarkets() {
       if (!price) continue;
       const up = pct >= 0;
       const color = up ? '#22c55e' : '#ef4444';
-      if (sym === '^NSEI' || sym === '^BSESN') {
-        const idxId = sym === '^NSEI' ? 'idx-NIFTY50' : 'idx-SENSEX';
-        const el = document.getElementById(idxId);
+      // Handle indices
+      const idxMap: Record<string,string> = {
+        '^NSEI': 'idx-NIFTY50',
+        '^BSESN': 'idx-SENSEX',
+        '^NSEBANK': 'idx-BANKNIFTY',
+        '^INDIAVIX': 'idx-INDIAVIX'
+      };
+      if (idxMap[sym]) {
+        const el = document.getElementById(idxMap[sym]);
         if (!el) continue;
         el.classList.remove('skeleton');
         el.classList.add(up ? 'up' : 'dn');
@@ -350,6 +366,7 @@ async function loadIndianMarkets() {
         el.querySelector('.idx-chg')!.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
         continue;
       }
+      // Handle stocks
       const baseSym = sym.replace('.NS', '');
       const priceEl = document.getElementById(`mp-IN-${baseSym}`);
       const chgEl = document.getElementById(`mch-IN-${baseSym}`);
