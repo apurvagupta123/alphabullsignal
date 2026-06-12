@@ -240,7 +240,7 @@ async function fhCandles(sym: string) {
   return { closes: d.c, timestamps: d.t };
 }
 
-// ── Indices (Twelve Data) ─────────────────────────────────────────────
+// ── Indices (Twelve Data) ─────────────────────────────────────────────────────
 async function loadIndices() {
   try {
     const data: any = await tdQuote(['SPY', 'QQQ', 'DIA', 'IWM']);
@@ -256,11 +256,14 @@ async function loadIndices() {
       el.querySelector('.idx-price')!.textContent = fmtPrice(parseFloat(q.close));
       el.querySelector('.idx-chg')!.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
     });
+  } catch {}
+
+  // Indian indices via Twelve Data
   setTimeout(async () => {
     try {
       const ir = await fetch(TD_BASE + '/quote?symbol=NIFTY%2050,SENSEX&apikey=' + TD_KEY);
-      const id2 = await ir.json();
-      const imap = { 'NIFTY 50': 'NIFTY50', 'SENSEX': 'SENSEX' };
+      const id2: any = await ir.json();
+      const imap: Record<string,string> = { 'NIFTY 50': 'NIFTY50', 'SENSEX': 'SENSEX' };
       for (const [key, elId] of Object.entries(imap)) {
         const q = id2[key];
         if (!q || q.status === 'error' || !q.close) continue;
@@ -270,10 +273,10 @@ async function loadIndices() {
         const up = pct >= 0;
         el.classList.remove('skeleton');
         el.classList.add(up ? 'up' : 'dn');
-        el.querySelector('.idx-price').textContent = '₹' + fmtPrice(parseFloat(q.close));
-        el.querySelector('.idx-chg').textContent = (up ? '▲' : '▼') + ' ' + Math.abs(pct).toFixed(2) + '%';
+        el.querySelector('.idx-price')!.textContent = '₹' + fmtPrice(parseFloat(q.close));
+        el.querySelector('.idx-chg')!.textContent = (up ? '▲' : '▼') + ' ' + Math.abs(pct).toFixed(2) + '%';
       }
-    } catch(e) {}
+    } catch(e2) {}
   }, 600);
 }
 
