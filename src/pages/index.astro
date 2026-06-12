@@ -116,7 +116,7 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
     <div class="markets-grid" id="marketsGrid">
       {['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'].map((sym) => (
-        <div class="mkt-card" id={`mc-${sym}`}>
+        <a class="mkt-card" id={`mc-${sym}`} href={`/company/${sym.toLowerCase().replace(/\./g,'-')}`}>
           {SECTOR_TAGS[sym] && <span class="mkt-sector-tag">{SECTOR_TAGS[sym]}</span>}
           <div class="mkt-top">
             <div>
@@ -128,7 +128,7 @@ const SECTOR_TAGS: Record<string, string> = {
           <div class="mkt-price" id={`mp-${sym}`}>—</div>
           <div class="mkt-chg" id={`mch-${sym}`}>—</div>
           <canvas class="mkt-chart" id={`chart-${sym}`} height="60"></canvas>
-        </div>
+        </a>
       ))}
     </div>
   </section>
