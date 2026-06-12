@@ -451,7 +451,6 @@ const sorted = posts.sort((a: any, b: any) =>
           }]
         },
         options: {
-          indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
@@ -464,17 +463,22 @@ const sorted = posts.sort((a: any, b: any) =>
           },
           scales: {
             x: {
+              grid: { display: false },
+              border: { color: 'rgba(255,255,255,0.1)' },
+              ticks: {
+                color: '#e2e8f0',
+                font: { size: 11, weight: '600' as const },
+                maxRotation: 0,
+                minRotation: 0,
+              }
+            },
+            y: {
               grid: { color: 'rgba(255,255,255,0.06)' },
               border: { color: 'rgba(255,255,255,0.1)' },
               ticks: {
                 color: '#94a3b8',
                 callback: (v:any) => `${Number(v) >= 0 ? '+' : ''}${Number(v).toFixed(1)}%`
               }
-            },
-            y: {
-              grid: { display: false },
-              border: { color: 'rgba(255,255,255,0.1)' },
-              ticks: { color: '#e2e8f0', font: { size: 11, weight: '600' as const } }
             }
           }
         }
