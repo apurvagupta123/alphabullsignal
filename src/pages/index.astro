@@ -5,6 +5,21 @@ const posts = await Astro.glob('./blog/*.md').catch(() => []);
 const sorted = posts.sort((a: any, b: any) =>
   new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
 );
+
+const SECTOR_TAGS: Record<string, string> = {
+  'AAPL':         '💻 Tech',
+  'MSFT':         '💻 Tech',
+  'GOOGL':        '💻 Tech',
+  'AMZN':         '🛍️ Consumer',
+  'TSLA':         '🚗 Auto/EV',
+  'META':         '📱 Social',
+  'NVDA':         '🤖 Semicon.',
+  'JPM':          '💰 Finance',
+  'RELIANCE.NS':  '⚡ Energy',
+  'TCS.NS':       '💻 Tech',
+  'HDFCBANK.NS':  '💰 Finance',
+  'INFY.NS':      '💻 Tech',
+};
 ---
 <BaseLayout title="Where Smart Money Reads">
 
@@ -104,6 +119,7 @@ const sorted = posts.sort((a: any, b: any) =>
     <div class="markets-grid" id="marketsGrid">
       {['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'].map((sym) => (
         <div class="mkt-card" id={`mc-${sym}`}>
+          {SECTOR_TAGS[sym] && <span class="mkt-sector-tag">{SECTOR_TAGS[sym]}</span>}
           <div class="mkt-top">
             <div>
               <div class="mkt-sym">{sym.replace('.NS','')}</div>
