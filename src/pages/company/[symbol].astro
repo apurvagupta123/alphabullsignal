@@ -125,58 +125,83 @@ export async function getStaticPaths() {
 </BaseLayout>
 
 <script define:vars={{ sym, curr, isIndian }}>
-  const PROXIES = [
-    'https://corsproxy.io/?',
-    'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?url=',
-  ];
+  const PROXY   = 'https://corsproxy.io/?';
+  const PROXIES = ['https://corsproxy.io/?','https://api.allorigins.win/raw?url=','https://corsproxy.io/?url='];
+  const FH_KEY  = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
   let chartInstance = null;
 
   const rangeMap = { 30: ['1mo','1d'], 90: ['3mo','1d'], 180: ['6mo','1wk'], 365: ['1y','1wk'], 1825: ['5y','1mo'] };
+  const fhRes    = { '1d':'D', '1wk':'W', '1mo':'M' };
 
-  // Try all proxies; for Indian stocks also try query2 endpoint
-  async function yfFetch(url) {
-    const urls = isIndian
-      ? [url, url.replace('query1.finance.yahoo.com', 'query2.finance.yahoo.com')]
-      : [url];
-    for (const u of urls) {
-      for (const px of PROXIES) {
-        try {
-          const r = await fetch(px + encodeURIComponent(u), { signal: AbortSignal.timeout(7000) });
-          if (!r.ok) continue;
-          const d = await r.json();
-          const result = d?.quoteResponse?.result;
-          if (result && result.length > 0) return result[0];
-        } catch {}
-      }
+  // ── US stocks: Yahoo Finance via proxy fallbacks ──────────────
+  async function yfFetchUS(url) {
+    for (const px of PROXIES) {
+      try {
+        const r = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(7000) });
+        if (!r.ok) continue;
+        const d = await r.json();
+        const result = d?.quoteResponse?.result;
+        if (result?.length) return result[0];
+      } catch {}
     }
     return null;
   }
 
-  async function yfChartFetch(url) {
-    const urls = isIndian
-      ? [url, url.replace('query1.finance.yahoo.com', 'query2.finance.yahoo.com')]
-      : [url];
-    for (const u of urls) {
-      for (const px of PROXIES) {
-        try {
-          const r = await fetch(px + encodeURIComponent(u), { signal: AbortSignal.timeout(7000) });
-          if (!r.ok) continue;
-          const d = await r.json();
-          const result = d?.chart?.result;
-          if (result && result.length > 0) return result[0];
-        } catch {}
-      }
-    }
-    return null;
+  // ── Indian stocks: Finnhub directly (no proxy, CORS-open) ────
+  async function fhQuote() {
+    const fhSym = 'NSE:' + sym.replace(/\.(NS|BO)$/, '');
+    const [qRes, pRes] = await Promise.allSettled([
+      fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`,          { signal: AbortSignal.timeout(7000) }).then(r=>r.json()),
+      fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${fhSym}&token=${FH_KEY}`, { signal: AbortSignal.timeout(7000) }).then(r=>r.json()),
+    ]);
+    const q = qRes.status === 'fulfilled' ? qRes.value : {};
+    const p = pRes.status === 'fulfilled' ? pRes.value : {};
+    if (!q.c) return null;
+    return {
+      symbol: sym, shortName: p.name||sym.replace('.NS',''), longName: p.name||sym.replace('.NS',''),
+      regularMarketPrice: q.c, regularMarketChange: q.d||0, regularMarketChangePercent: q.dp||0,
+      marketCap: p.marketCapitalization ? p.marketCapitalization*1e6 : null,
+      trailingPE: null, fiftyTwoWeekHigh: null, fiftyTwoWeekLow: null,
+      averageVolume: null, dividendYield: null, longBusinessSummary: null,
+      sector: p.finnhubIndustry||null, industry: p.finnhubIndustry||null,
+      website: p.weburl||null, country: p.country||'India', fullTimeEmployees: null,
+    };
+  }
+
+  async function fhCandle(days, interval) {
+    const fhSym = 'NSE:' + sym.replace(/\.(NS|BO)$/, '');
+    const to   = Math.floor(Date.now()/1000);
+    const from = to - days*86400;
+    const res  = fhRes[interval] || 'D';
+    try {
+      const r = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${fhSym}&resolution=${res}&from=${from}&to=${to}&token=${FH_KEY}`, { signal: AbortSignal.timeout(8000) });
+      const d = await r.json();
+      if (d.s !== 'ok' || !d.c?.length) return null;
+      return { indicators: { quote: [{ close: d.c }] }, timestamp: d.t };
+    } catch { return null; }
   }
 
   async function yf(fields) {
-    return yfFetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=${fields}`);
+    if (isIndian) return fhQuote();
+    return yfFetchUS(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=${fields}`);
   }
 
   async function yfChart(range, interval) {
-    return yfChartFetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=${range}&interval=${interval}`);
+    if (isIndian) {
+      const days = { '1mo':30,'3mo':90,'6mo':180,'1y':365,'5y':1825 }[range]||30;
+      return fhCandle(days, interval);
+    }
+    for (const px of PROXIES) {
+      try {
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=${range}&interval=${interval}`;
+        const r = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(7000) });
+        if (!r.ok) continue;
+        const d = await r.json();
+        const result = d?.chart?.result;
+        if (result?.length) return result[0];
+      } catch {}
+    }
+    return null;
   }
 
   async function loadQuote() {
@@ -296,7 +321,7 @@ export async function getStaticPaths() {
     const related = ['AAPL','MSFT','GOOGL','AMZN','TSLA'].filter(s => s !== sym).slice(0,4);
     for (const s of related) {
       try {
-        const q = await yfFetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${s}&fields=regularMarketPrice,regularMarketChangePercent`);
+        const q = await yfFetchUS(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${s}&fields=regularMarketPrice,regularMarketChangePercent`);
         if (q) {
           const pct = q.regularMarketChangePercent ?? 0;
           const up  = pct >= 0;
