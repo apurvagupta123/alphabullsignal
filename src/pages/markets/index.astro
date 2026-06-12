@@ -1,0 +1,305 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const SECTORS: Record<string, { label: string; icon: string; desc: string; stocks: { sym: string; name: string }[] }> = {
+  tech: {
+    label: 'Technology', icon: '💻', desc: 'Software, semiconductors, internet & hardware',
+    stocks: [
+      { sym: 'AAPL',  name: 'Apple' },
+      { sym: 'MSFT',  name: 'Microsoft' },
+      { sym: 'GOOGL', name: 'Alphabet' },
+      { sym: 'NVDA',  name: 'NVIDIA' },
+      { sym: 'META',  name: 'Meta Platforms' },
+      { sym: 'AMZN',  name: 'Amazon' },
+      { sym: 'TSLA',  name: 'Tesla' },
+      { sym: 'AMD',   name: 'AMD' },
+      { sym: 'INTC',  name: 'Intel' },
+      { sym: 'CRM',   name: 'Salesforce' },
+      { sym: 'ORCL',  name: 'Oracle' },
+      { sym: 'ADBE',  name: 'Adobe' },
+      { sym: 'NFLX',  name: 'Netflix' },
+      { sym: 'QCOM',  name: 'Qualcomm' },
+      { sym: 'AVGO',  name: 'Broadcom' },
+    ],
+  },
+  finance: {
+    label: 'Finance', icon: '💰', desc: 'Banks, asset managers & payment networks',
+    stocks: [
+      { sym: 'JPM',    name: 'JPMorgan Chase' },
+      { sym: 'BAC',    name: 'Bank of America' },
+      { sym: 'WFC',    name: 'Wells Fargo' },
+      { sym: 'GS',     name: 'Goldman Sachs' },
+      { sym: 'MS',     name: 'Morgan Stanley' },
+      { sym: 'C',      name: 'Citigroup' },
+      { sym: 'BLK',    name: 'BlackRock' },
+      { sym: 'V',      name: 'Visa' },
+      { sym: 'MA',     name: 'Mastercard' },
+      { sym: 'AXP',    name: 'American Express' },
+      { sym: 'BRK-B',  name: 'Berkshire Hathaway' },
+      { sym: 'SCHW',   name: 'Charles Schwab' },
+    ],
+  },
+  energy: {
+    label: 'Energy', icon: '⚡', desc: 'Oil, gas, renewables & utilities',
+    stocks: [
+      { sym: 'XOM',  name: 'ExxonMobil' },
+      { sym: 'CVX',  name: 'Chevron' },
+      { sym: 'COP',  name: 'ConocoPhillips' },
+      { sym: 'SLB',  name: 'SLB (Schlumberger)' },
+      { sym: 'EOG',  name: 'EOG Resources' },
+      { sym: 'MPC',  name: 'Marathon Petroleum' },
+      { sym: 'VLO',  name: 'Valero Energy' },
+      { sym: 'OXY',  name: 'Occidental Petroleum' },
+      { sym: 'HAL',  name: 'Halliburton' },
+      { sym: 'PSX',  name: 'Phillips 66' },
+    ],
+  },
+  healthcare: {
+    label: 'Healthcare', icon: '🏥', desc: 'Pharma, biotech, devices & insurance',
+    stocks: [
+      { sym: 'JNJ',  name: 'Johnson & Johnson' },
+      { sym: 'UNH',  name: 'UnitedHealth Group' },
+      { sym: 'PFE',  name: 'Pfizer' },
+      { sym: 'MRK',  name: 'Merck' },
+      { sym: 'ABBV', name: 'AbbVie' },
+      { sym: 'TMO',  name: 'Thermo Fisher' },
+      { sym: 'ABT',  name: 'Abbott Laboratories' },
+      { sym: 'LLY',  name: 'Eli Lilly' },
+      { sym: 'BMY',  name: 'Bristol-Myers Squibb' },
+      { sym: 'AMGN', name: 'Amgen' },
+    ],
+  },
+  consumer: {
+    label: 'Consumer', icon: '🛍️', desc: 'Retail, food, auto & discretionary',
+    stocks: [
+      { sym: 'HD',   name: 'Home Depot' },
+      { sym: 'MCD',  name: "McDonald's" },
+      { sym: 'NKE',  name: 'Nike' },
+      { sym: 'SBUX', name: 'Starbucks' },
+      { sym: 'TGT',  name: 'Target' },
+      { sym: 'LOW',  name: "Lowe's" },
+      { sym: 'TJX',  name: 'TJX Companies' },
+      { sym: 'BKNG', name: 'Booking Holdings' },
+      { sym: 'CMG',  name: 'Chipotle' },
+      { sym: 'F',    name: 'Ford' },
+    ],
+  },
+  industrials: {
+    label: 'Industrials', icon: '🏭', desc: 'Aerospace, defense, machinery & logistics',
+    stocks: [
+      { sym: 'BA',   name: 'Boeing' },
+      { sym: 'CAT',  name: 'Caterpillar' },
+      { sym: 'GE',   name: 'GE Aerospace' },
+      { sym: 'UPS',  name: 'UPS' },
+      { sym: 'HON',  name: 'Honeywell' },
+      { sym: 'LMT',  name: 'Lockheed Martin' },
+      { sym: 'RTX',  name: 'RTX Corp' },
+      { sym: 'DE',   name: 'John Deere' },
+      { sym: 'NOC',  name: 'Northrop Grumman' },
+      { sym: 'FDX',  name: 'FedEx' },
+    ],
+  },
+  india: {
+    label: 'India 🇮🇳', icon: '🇮🇳', desc: 'NSE & BSE — top Indian listed companies',
+    stocks: [
+      { sym: 'RELIANCE.NS',   name: 'Reliance Industries' },
+      { sym: 'TCS.NS',        name: 'Tata Consultancy Services' },
+      { sym: 'HDFCBANK.NS',   name: 'HDFC Bank' },
+      { sym: 'INFY.NS',       name: 'Infosys' },
+      { sym: 'ICICIBANK.NS',  name: 'ICICI Bank' },
+      { sym: 'WIPRO.NS',      name: 'Wipro' },
+      { sym: 'BAJFINANCE.NS', name: 'Bajaj Finance' },
+      { sym: 'TATAMOTORS.NS', name: 'Tata Motors' },
+      { sym: 'BHARTIARTL.NS', name: 'Bharti Airtel' },
+      { sym: 'MARUTI.NS',     name: 'Maruti Suzuki' },
+      { sym: 'SBIN.NS',       name: 'State Bank of India' },
+      { sym: 'LT.NS',         name: 'Larsen & Toubro' },
+    ],
+  },
+};
+
+const defaultSector = 'tech';
+---
+<BaseLayout title="Markets — The Business Ledger">
+
+  <section class="content-section" style="margin-top:48px">
+
+    <!-- Page header -->
+    <div class="mkts-header">
+      <div>
+        <h1 class="mkts-title">Markets</h1>
+        <p class="mkts-sub">Live prices across every major sector</p>
+      </div>
+      <span class="section-live">LIVE</span>
+    </div>
+
+    <!-- Sector selector pills -->
+    <div class="sector-selector" id="sectorSelector">
+      {Object.entries(SECTORS).map(([key, s]) => (
+        <button class={`ss-pill ${key === defaultSector ? 'active' : ''}`} data-sector={key}>
+          {s.icon} {s.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- Sector description -->
+    <div class="sector-desc-bar" id="sectorDesc">
+      <span id="sectorDescText">{SECTORS[defaultSector].desc}</span>
+      <span class="section-live" style="margin-left:10px">LIVE</span>
+    </div>
+
+    <!-- Company grid (rendered client-side) -->
+    <div class="sector-grid" id="companyGrid">
+      {SECTORS[defaultSector].stocks.map(s => (
+        <a href={`/company/${s.sym.toLowerCase().replace('.','-')}`} class="mkt-card sector-card" id={`sc-${s.sym}`} data-sector="tech">
+          <div class="mkt-top">
+            <div>
+              <div class="mkt-sym">{s.sym.replace(/\.(NS|BO)$/,'')}</div>
+              <div class="mkt-name">{s.name}</div>
+            </div>
+            <div class="mkt-badge" id={`scb-${s.sym}`}>—</div>
+          </div>
+          <div class="mkt-price" id={`scp-${s.sym}`}>—</div>
+          <div class="mkt-chg"   id={`scc-${s.sym}`}>—</div>
+        </a>
+      ))}
+    </div>
+
+  </section>
+
+</BaseLayout>
+
+<script define:vars={{ SECTORS }}>
+  const PROXY = 'https://corsproxy.io/?';
+  let currentSector = 'tech';
+  let _prices = {};
+
+  // ── fetch quotes via Yahoo Finance ─────────────────────
+  async function fetchYF(syms) {
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+    const r = await fetch(PROXY + encodeURIComponent(url));
+    return (await r.json())?.quoteResponse?.result || [];
+  }
+
+  // ── render one card ────────────────────────────────────
+  function renderCard(q) {
+    const chg  = q.regularMarketChange ?? 0;
+    const pct  = q.regularMarketChangePercent ?? 0;
+    const up   = chg >= 0;
+    const color = up ? '#22c55e' : '#ef4444';
+    const isIN = q.symbol.endsWith('.NS') || q.symbol.endsWith('.BO');
+    const curr = isIN ? '₹' : '$';
+
+    const card = document.getElementById(`sc-${q.symbol}`);
+    if (card) card.classList.add(up ? 'up' : 'dn');
+    const bEl = document.getElementById(`scb-${q.symbol}`);
+    if (bEl) { bEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; bEl.classList.remove('badge-up','badge-dn'); bEl.classList.add(up?'badge-up':'badge-dn'); }
+    const pEl = document.getElementById(`scp-${q.symbol}`);
+    if (pEl) pEl.textContent = `${curr}${q.regularMarketPrice?.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    const cEl = document.getElementById(`scc-${q.symbol}`);
+    if (cEl) { cEl.textContent = `${up?'▲':'▼'} ${curr}${Math.abs(chg).toFixed(2)}`; cEl.style.color = color; }
+
+    _prices[q.symbol] = q;
+  }
+
+  // ── build & render the grid for a sector ──────────────
+  function buildGrid(sectorKey) {
+    const sector = SECTORS[sectorKey];
+    const grid   = document.getElementById('companyGrid');
+    grid.innerHTML = sector.stocks.map(s => `
+      <a href="/company/${s.sym.toLowerCase().replace(/\./g,'-')}" class="mkt-card sector-card" id="sc-${s.sym}">
+        <div class="mkt-top">
+          <div>
+            <div class="mkt-sym">${s.sym.replace(/\.(NS|BO)$/,'')}</div>
+            <div class="mkt-name">${s.name}</div>
+          </div>
+          <div class="mkt-badge" id="scb-${s.sym}">—</div>
+        </div>
+        <div class="mkt-price" id="scp-${s.sym}">—</div>
+        <div class="mkt-chg"   id="scc-${s.sym}">—</div>
+      </a>
+    `).join('');
+
+    // restore cached prices immediately if available
+    sector.stocks.forEach(s => { if (_prices[s.sym]) renderCard(_prices[s.sym]); });
+  }
+
+  async function loadSector(sectorKey) {
+    const sector = SECTORS[sectorKey];
+    buildGrid(sectorKey);
+    document.getElementById('sectorDescText').textContent = sector.desc;
+
+    const syms = sector.stocks.map(s => s.sym);
+    // fetch in batches of 10 to avoid URL length limits
+    for (let i = 0; i < syms.length; i += 10) {
+      const batch = syms.slice(i, i + 10);
+      try {
+        const quotes = await fetchYF(batch);
+        quotes.forEach(renderCard);
+      } catch {}
+    }
+  }
+
+  // ── pill click handlers ────────────────────────────────
+  document.querySelectorAll('.ss-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ss-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSector = btn.dataset.sector;
+      loadSector(currentSector);
+    });
+  });
+
+  // initial load
+  loadSector(currentSector);
+  setInterval(() => loadSector(currentSector), 60000);
+</script>
+
+<style>
+  .mkts-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .mkts-title { font-size: 2rem; font-weight: 900; color: #fff; margin: 0; }
+  .mkts-sub   { font-size: 13px; color: var(--text-muted); margin: 4px 0 0; }
+
+  .sector-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .ss-pill {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--navy-2);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .ss-pill:hover  { border-color: rgba(201,168,76,0.4); color: var(--gold); }
+  .ss-pill.active { background: var(--gold); color: #0b0f1a; border-color: var(--gold); }
+
+  .sector-desc-bar {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    padding: 10px 14px;
+    background: var(--navy-2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  @media (max-width: 600px) {
+    .sector-selector { gap: 6px; }
+    .ss-pill { font-size: 11px; padding: 6px 12px; }
+  }
+</style>
