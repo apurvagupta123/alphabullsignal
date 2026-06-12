@@ -1175,3 +1175,64 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
   transition: all 0.15s;
 }
 .wl-remove:hover { color: var(--red); border-color: rgba(239,68,68,0.3); }
+
+/* ── Hero split layout ───────────────────────────────── */
+.hero-split {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 48px;
+  align-items: center;
+}
+.hero-right { display: flex; justify-content: flex-end; }
+
+/* Hero visual card */
+.hero-visual {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 16px;
+  padding: 20px 22px;
+  width: 340px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.hv-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.hv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.hv-row:last-child { border-bottom: none; }
+.hv-sym   { font-size: 13px; font-weight: 700; color: #fff; width: 56px; }
+.hv-price { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; text-align: right; }
+.hv-chg   { font-size: 12px; font-weight: 700; width: 72px; text-align: right; }
+.hv-chart-wrap { margin-top: 14px; height: 70px; }
+.hv-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.hv-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .hero-split { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+}
