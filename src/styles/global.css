@@ -1249,60 +1249,6 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
 }
 @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
 
-/* ── MCX Commodities ────────────────────────────────── */
-.comm-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 14px;
-  margin-bottom: 10px;
-}
-.comm-card {
-  background: var(--navy-2);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px 18px;
-  transition: border-color 0.15s, transform 0.15s;
-  cursor: default;
-}
-.comm-card:hover { border-color: rgba(201,168,76,0.3); transform: translateY(-2px); }
-.comm-card.up { border-left: 3px solid var(--green); }
-.comm-card.dn { border-left: 3px solid var(--red); }
-.comm-top {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.comm-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
-.comm-name { font-size: 13px; font-weight: 700; color: #fff; }
-.comm-unit { font-size: 10px; color: var(--text-muted); margin-top: 2px; letter-spacing: 0.3px; }
-.comm-badge {
-  margin-left: auto;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  white-space: nowrap;
-}
-.comm-price {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--gold);
-  letter-spacing: -0.5px;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.comm-chg { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
-.comm-chart { width: 100%; display: block; }
-.comm-note {
-  font-size: 10px;
-  color: var(--text-muted);
-  margin: 0;
-  opacity: 0.7;
-}
-@media (max-width: 600px) {
-  .comm-grid { grid-template-columns: repeat(2, 1fr); }
-}
 
 /* ── Hero background image ───────────────────────────── */
 .hero-bg {
