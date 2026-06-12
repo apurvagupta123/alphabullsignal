@@ -24,52 +24,41 @@ const SECTOR_TAGS: Record<string, string> = {
 <BaseLayout title="Where Smart Money Reads">
 
   <!-- ── Hero ────────────────────────────────────────── -->
-  <section class="hero">
-    <div class="hero-inner hero-split">
-
-      <!-- Left: copy -->
-      <div class="hero-left">
-        <div class="hero-badge">
-          <span class="hero-badge-dot"></span>
-          LIVE MARKET DATA
+  <section class="hero hero-bg">
+    <div class="hero-overlay"></div>
+    <div class="hero-inner">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        LIVE MARKET DATA
+      </div>
+      <h1 class="hero-title">
+        Bull Signal.<br />
+        <span class="hero-accent">Sharper Moves.</span>
+      </h1>
+      <p class="hero-desc">
+        Live market moves, trending stocks, and investor-focused<br />
+        news delivered in one clean, fast dashboard.
+      </p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hs-num">500+</span>
+          <span class="hs-label">STOCKS TRACKED</span>
         </div>
-        <h1 class="hero-title">
-          Bull Signal.<br />
-          <span class="hero-accent">Sharper Moves.</span>
-        </h1>
-        <p class="hero-desc">
-          Live market moves, trending stocks, and investor-focused<br />
-          news delivered in one clean, fast dashboard.
-        </p>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <span class="hs-num">500+</span>
-            <span class="hs-label">STOCKS TRACKED</span>
-          </div>
-          <div class="hs-divider"></div>
-          <div class="hero-stat">
-            <span class="hs-num">Daily</span>
-            <span class="hs-label">NEWS UPDATES</span>
-          </div>
-          <div class="hs-divider"></div>
-          <div class="hero-stat">
-            <span class="hs-num">Real-Time</span>
-            <span class="hs-label">MARKET DATA</span>
-          </div>
+        <div class="hs-divider"></div>
+        <div class="hero-stat">
+          <span class="hs-num">Daily</span>
+          <span class="hs-label">NEWS UPDATES</span>
         </div>
-        <div class="hero-actions">
-          <button class="btn-primary" onclick="document.getElementById('markets').scrollIntoView({behavior:'smooth'})">Explore Markets →</button>
-          <button class="btn-outline" onclick="document.getElementById('from-ledger').scrollIntoView({behavior:'smooth'})">Daily News</button>
+        <div class="hs-divider"></div>
+        <div class="hero-stat">
+          <span class="hs-num">Real-Time</span>
+          <span class="hs-label">MARKET DATA</span>
         </div>
       </div>
-
-      <!-- Right: bull hero image -->
-      <div class="hero-right" aria-hidden="true">
-        <div class="hero-bull-wrap">
-          <img src="/images/bull-hero.jpg" alt="" class="hero-bull-img" />
-        </div>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="document.getElementById('markets').scrollIntoView({behavior:'smooth'})">Explore Markets →</button>
+        <button class="btn-outline" onclick="document.getElementById('from-ledger').scrollIntoView({behavior:'smooth'})">Daily News</button>
       </div>
-
     </div>
   </section>
 
