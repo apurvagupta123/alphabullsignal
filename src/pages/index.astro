@@ -72,6 +72,16 @@ const sorted = posts.sort((a: any, b: any) =>
         <span class="idx-price">—</span>
         <span class="idx-chg">—</span>
       </div>
+<div class="idx-card skeleton" id="idx-NIFTY50">
+<span class="idx-name">NIFTY 50</span>
+<span class="idx-price">—</span>
+<span class="idx-chg">—</span>
+</div>
+<div class="idx-card skeleton" id="idx-SENSEX">
+<span class="idx-name">SENSEX</span>
+<span class="idx-price">—</span>
+<span class="idx-chg">—</span>
+</div>
     </div>
   </section>
 
@@ -127,7 +137,38 @@ const sorted = posts.sort((a: any, b: any) =>
   </section>
 
 
-  <!-- ── Company Spotlight ─────────────────────────────── -->
+  <!-- ── Indian Markets ───────────────────────────────── -->
+<section class="content-section">
+<div class="section-head">
+<h2 class="section-title">Indian Markets</h2>
+<span class="section-live">NSE</span>
+</div>
+<div class="markets-grid" id="indianMarketsGrid">
+{[
+{api:'NSE:RELIANCE', sym:'RELIANCE', name:'Reliance Ind.'},
+{api:'NSE:TCS', sym:'TCS', name:'Tata Consultancy'},
+{api:'NSE:HDFCBANK', sym:'HDFCBANK', name:'HDFC Bank'},
+{api:'NSE:INFY', sym:'INFY', name:'Infosys'},
+{api:'NSE:WIPRO', sym:'WIPRO', name:'Wipro'},
+{api:'NSE:ICICIBANK', sym:'ICICIBANK', name:'ICICI Bank'},
+].map((s) => (
+<div class="mkt-card" id={`mc-IN-${s.sym}`}>
+<div class="mkt-top">
+<div>
+<div class="mkt-sym">{s.sym}</div>
+<div class="mkt-name" id={`mn-IN-${s.sym}`}>{s.name}</div>
+</div>
+<div class="mkt-badge" id={`mb-IN-${s.sym}`}>—</div>
+</div>
+<div class="mkt-price" id={`mp-IN-${s.sym}`}>—</div>
+<div class="mkt-chg" id={`mch-IN-${s.sym}`}>—</div>
+<canvas class="mkt-chart" id={`chart-IN-${s.sym}`} height="60"></canvas>
+</div>
+))}
+</div>
+</section>
+
+<!-- ── Company Spotlight ─────────────────────────────── -->
   <section class="content-section">
     <div class="section-head">
       <h2 class="section-title">Company Spotlight</h2>
@@ -215,7 +256,25 @@ async function loadIndices() {
       el.querySelector('.idx-price')!.textContent = fmtPrice(parseFloat(q.close));
       el.querySelector('.idx-chg')!.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
     });
-  } catch {}
+  setTimeout(async () => {
+    try {
+      const ir = await fetch(TD_BASE + '/quote?symbol=NIFTY%2050,SENSEX&apikey=' + TD_KEY);
+      const id2 = await ir.json();
+      const imap = { 'NIFTY 50': 'NIFTY50', 'SENSEX': 'SENSEX' };
+      for (const [key, elId] of Object.entries(imap)) {
+        const q = id2[key];
+        if (!q || q.status === 'error' || !q.close) continue;
+        const el = document.getElementById('idx-' + elId);
+        if (!el) continue;
+        const pct = parseFloat(q.percent_change);
+        const up = pct >= 0;
+        el.classList.remove('skeleton');
+        el.classList.add(up ? 'up' : 'dn');
+        el.querySelector('.idx-price').textContent = '₹' + fmtPrice(parseFloat(q.close));
+        el.querySelector('.idx-chg').textContent = (up ? '▲' : '▼') + ' ' + Math.abs(pct).toFixed(2) + '%';
+      }
+    } catch(e) {}
+  }, 600);
 }
 
 // ── Markets Grid (Finnhub) ────────────────────────────────────────────
@@ -281,6 +340,51 @@ async function loadHeatmap() {
       (pEl as HTMLElement).style.color = color;
     });
   } catch {}
+}
+
+// ── Indian Markets (Finnhub NSE) ────────────────────────────────
+async function loadIndianMarkets() {
+  const stocks = [
+    { api: 'NSE:RELIANCE', sym: 'RELIANCE' },
+    { api: 'NSE:TCS', sym: 'TCS' },
+    { api: 'NSE:HDFCBANK', sym: 'HDFCBANK' },
+    { api: 'NSE:INFY', sym: 'INFY' },
+    { api: 'NSE:WIPRO', sym: 'WIPRO' },
+    { api: 'NSE:ICICIBANK', sym: 'ICICIBANK' },
+  ];
+  try {
+    const quotes = await Promise.all(stocks.map((s, i) =>
+      new Promise(r => setTimeout(r, i * 120 + 1800)).then(() =>
+        fhQuote(s.api).then(q => ({ ...s, q })).catch(() => ({ ...s, q: null }))
+      )
+    ));
+    for (const { sym, api, q } of quotes) {
+      if (!q || !q.c) continue;
+      const up = q.dp >= 0;
+      const color = up ? '#22c55e' : '#ef4444';
+      const id = 'IN-' + sym;
+      const priceEl = document.getElementById('mp-' + id);
+      const chgEl = document.getElementById('mch-' + id);
+      const badgeEl = document.getElementById('mb-' + id);
+      const card = document.getElementById('mc-' + id);
+      if (priceEl) priceEl.textContent = '₹' + fmtPrice(q.c);
+      if (chgEl) { chgEl.textContent = (up ? '▲' : '▼') + ' ₹' + Math.abs(q.d).toFixed(2) + ' (' + (up?'+':'') + q.dp.toFixed(2) + '%)'; chgEl.style.color = color; }
+      if (badgeEl) { badgeEl.textContent = (up ? '▲' : '▼') + ' ' + Math.abs(q.dp).toFixed(2) + '%'; badgeEl.classList.add(up ? 'badge-up' : 'badge-dn'); }
+      if (card) card.classList.add(up ? 'up' : 'dn');
+      const capApi = api; const capId = id; const capColor = color; const capUp = up;
+      fhCandles(capApi).then(cd => {
+        if (!cd) return;
+        const canvas = document.getElementById('chart-' + capId);
+        if (!canvas) return;
+        const ex = window.Chart?.getChart?.(canvas); if (ex) ex.destroy();
+        new window.Chart(canvas, {
+          type: 'line',
+          data: { labels: cd.closes.map((_,i) => i), datasets: [{ data: cd.closes, borderColor: capColor, borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: capUp ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }] },
+          options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
+        });
+      }).catch(()=>{});
+    }
+  } catch(e) {}
 }
 
 // ── Fear & Greed ──────────────────────────────────────────────────────
@@ -373,8 +477,9 @@ document.getElementById('slInput')?.addEventListener('keydown', (e: KeyboardEven
 
 loadIndices();
 loadMarkets();
+loadIndianMarkets();
 loadNews();
 loadFearGreed();
 loadHeatmap();
-setInterval(() => { loadIndices(); loadMarkets(); loadHeatmap(); }, 300000);
+setInterval(() => { loadIndices(); loadMarkets(); loadIndianMarkets(); loadHeatmap(); }, 300000);
 </script>
