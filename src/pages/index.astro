@@ -292,8 +292,7 @@ const SECTOR_TAGS: Record<string, string> = {
     if (badgeEl) { badgeEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; badgeEl.classList.add(up?'badge-up':'badge-dn'); }
     if (card)    card.classList.add(up ? 'up' : 'dn');
 
-    yfChart(q.symbol).then(cd => {
-      const closes = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
+    const drawSparkline = (closes: number[]) => {
       if (closes.length < 2) return;
       const canvas = document.getElementById(`chart-${q.symbol}`) as HTMLCanvasElement;
       if (!canvas) return;
@@ -306,7 +305,22 @@ const SECTOR_TAGS: Record<string, string> = {
           plugins: { legend: { display: false }, tooltip: { enabled: false } },
           scales: { x: { display: false }, y: { display: false } } }
       });
-    }).catch(() => {});
+    };
+
+    if (q.symbol.endsWith('.NS') || q.symbol.endsWith('.BO')) {
+      // Finnhub candle for Indian sparklines — no proxy needed
+      const fhSym = 'NSE:' + q.symbol.replace(/\.(NS|BO)$/, '');
+      const to = Math.floor(Date.now() / 1000);
+      const from = to - 30 * 86400;
+      fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${fhSym}&resolution=D&from=${from}&to=${to}&token=${FH_KEY}`)
+        .then(r => r.json())
+        .then(d => { if (d.s === 'ok' && d.c?.length) drawSparkline(d.c); })
+        .catch(() => {});
+    } else {
+      yfChart(q.symbol).then(cd => {
+        drawSparkline(cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || []);
+      }).catch(() => {});
+    }
   }
 
   async function loadMarkets() {
@@ -317,29 +331,27 @@ const SECTOR_TAGS: Record<string, string> = {
     const cached = getCache('markets_v2');
     if (cached) cached.forEach(renderMarketCard);
 
-    // Always fetch US and India independently — one failing can't block the other
-    const fields = 'symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent';
-    const [usResult, inResult] = await Promise.allSettled([
-      yfFetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${usSyms.join(',')}&fields=${fields}`),
-      yfFetch(`https://query2.finance.yahoo.com/v7/finance/quote?symbols=${inSyms.join(',')}&fields=${fields}`),
-    ]);
-
     const allQuotes: any[] = [];
-    if (usResult.status === 'fulfilled' && usResult.value.length > 0) {
-      usResult.value.forEach(renderMarketCard);
-      allQuotes.push(...usResult.value);
-    }
-    if (inResult.status === 'fulfilled' && inResult.value.length > 0) {
-      inResult.value.forEach(renderMarketCard);
-      allQuotes.push(...inResult.value);
-    } else {
-      // Retry India with query1 as fallback
+
+    // US stocks via FMP → Finnhub → NASDAQ → Yahoo chain
+    try {
+      const usQuotes = await fetchQuotes(usSyms);
+      if (usQuotes.length) { usQuotes.forEach(renderMarketCard); allQuotes.push(...usQuotes); }
+    } catch {}
+
+    // Indian stocks via Finnhub directly — proper CORS API, no proxy needed
+    const inResults = await Promise.all(inSyms.map(async (nsSym: string) => {
+      const fhSym = 'NSE:' + nsSym.replace('.NS','');
       try {
-        const inRetry = await yfFetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${inSyms.join(',')}&fields=${fields}`);
-        inRetry.forEach(renderMarketCard);
-        allQuotes.push(...inRetry);
-      } catch {}
-    }
+        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`, { signal: AbortSignal.timeout(7000) });
+        const d = await r.json();
+        if (!d.c) return null;
+        return { symbol: nsSym, shortName: nsSym.replace('.NS',''), regularMarketPrice: d.c, regularMarketChange: d.d||0, regularMarketChangePercent: d.dp||0 };
+      } catch { return null; }
+    }));
+    const validIn = inResults.filter(Boolean) as any[];
+    if (validIn.length) { validIn.forEach(renderMarketCard); allQuotes.push(...validIn); }
+
     if (allQuotes.length > 0) setCache('markets_v2', allQuotes);
   }
 
