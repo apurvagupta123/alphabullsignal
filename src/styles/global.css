@@ -1178,7 +1178,7 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
 
 /* ── Hero background image ───────────────────────────── */
 .hero-bg {
-  background: url('/images/bull-hero.jpg') center/cover no-repeat;
+  background: url('/images/bull-hero.jpg') center/cover no-repeat !important;
   position: relative;
 }
 .hero-overlay {
@@ -1186,8 +1186,8 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
   inset: 0;
   background: linear-gradient(
     135deg,
-    rgba(10,14,26,0.88) 0%,
-    rgba(10,14,26,0.72) 50%,
+    rgba(10,14,26,0.90) 0%,
+    rgba(10,14,26,0.75) 55%,
     rgba(10,14,26,0.55) 100%
   );
   z-index: 0;
