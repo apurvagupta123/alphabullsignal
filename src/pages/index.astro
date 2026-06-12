@@ -63,24 +63,12 @@ const SECTOR_TAGS: Record<string, string> = {
         </div>
       </div>
 
-      <!-- Right: live mini dashboard visual -->
+      <!-- Right: bull hero image -->
       <div class="hero-right" aria-hidden="true">
-        <div class="hero-visual">
-          <div class="hv-label">LIVE PRICES</div>
-          <div class="hv-ticker" id="hvTicker">
-            {['AAPL','NVDA','TSLA','MSFT','GOOGL'].map(s => (
-              <div class="hv-row" id={`hv-${s}`}>
-                <span class="hv-sym">{s}</span>
-                <span class="hv-price" id={`hvp-${s}`}>—</span>
-                <span class="hv-chg"  id={`hvc-${s}`}>—</span>
-              </div>
-            ))}
-          </div>
-          <div class="hv-chart-wrap">
-            <canvas id="hvChart" height="80"></canvas>
-          </div>
-          <div class="hv-footer">
-            <span class="hv-dot"></span> Markets open · updating live
+        <div class="hero-bull-wrap">
+          <img src="/images/bull-hero.jpg" alt="BullSignal — Charge the Markets" class="hero-bull-img" />
+          <div class="hero-bull-badge">
+            <span class="hero-bull-dot"></span> Markets Live
           </div>
         </div>
       </div>
@@ -138,7 +126,7 @@ const SECTOR_TAGS: Record<string, string> = {
   <section class="content-section" id="markets">
     <div class="section-head">
       <h2 class="section-title">Today's Markets</h2>
-      <a href="/markets/tech" class="section-more">View all markets →</a>
+      <a href="/markets" class="section-more">View all markets →</a>
     </div>
     <div class="markets-grid" id="marketsGrid">
       {['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'].map((sym) => (
@@ -525,6 +513,5 @@ const SECTOR_TAGS: Record<string, string> = {
   loadNews();
   loadFearGreed();
   loadIndiaIndices();
-  loadHeroVisual();
-  setInterval(() => { loadIndices(); loadMarkets(); loadIndiaIndices(); loadHeroVisual(); }, 60000);
+  setInterval(() => { loadIndices(); loadMarkets(); loadIndiaIndices(); }, 60000);
 </script>
