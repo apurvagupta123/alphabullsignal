@@ -49,7 +49,7 @@ const sorted = posts.sort((a: any, b: any) =>
     </div>
   </section>
 
-  <!-- ── Indices Bar ──────────────────────────────────── -->
+  <!-- ── Indices Bar (US + India) ────────────────────── -->
   <section class="indices-section">
     <div class="indices-grid" id="indicesBar">
       <div class="idx-card skeleton" id="idx-SPY">
@@ -72,34 +72,23 @@ const sorted = posts.sort((a: any, b: any) =>
         <span class="idx-price">—</span>
         <span class="idx-chg">—</span>
       </div>
-    </div>
-  </section>
-
-  <!-- ── India Markets ──────────────────────────────── -->
-  <section class="content-section" style="margin-top:32px">
-    <div class="section-head">
-      <h2 class="section-title">🇮🇳 India Markets</h2>
-      <a href="/markets/india" class="section-more">View all →</a>
-      <span class="section-live">LIVE</span>
-    </div>
-    <div class="indices-grid" id="indiaBar">
       <div class="idx-card skeleton" id="hidx-NSEI">
-        <span class="idx-name">NIFTY 50</span>
+        <span class="idx-name">🇮🇳 NIFTY 50</span>
         <span class="idx-price" id="hidx-NSEI-price">—</span>
         <span class="idx-chg"   id="hidx-NSEI-chg">—</span>
       </div>
       <div class="idx-card skeleton" id="hidx-BSESN">
-        <span class="idx-name">SENSEX</span>
+        <span class="idx-name">🇮🇳 SENSEX</span>
         <span class="idx-price" id="hidx-BSESN-price">—</span>
         <span class="idx-chg"   id="hidx-BSESN-chg">—</span>
       </div>
       <div class="idx-card skeleton" id="hidx-NSEBANK">
-        <span class="idx-name">NIFTY BANK</span>
+        <span class="idx-name">🇮🇳 NIFTY BANK</span>
         <span class="idx-price" id="hidx-NSEBANK-price">—</span>
         <span class="idx-chg"   id="hidx-NSEBANK-chg">—</span>
       </div>
       <div class="idx-card skeleton" id="hidx-MID">
-        <span class="idx-name">NIFTY MIDCAP</span>
+        <span class="idx-name">🇮🇳 NIFTY MIDCAP</span>
         <span class="idx-price" id="hidx-MID-price">—</span>
         <span class="idx-chg"   id="hidx-MID-chg">—</span>
       </div>
@@ -110,14 +99,14 @@ const sorted = posts.sort((a: any, b: any) =>
   <section class="content-section" id="markets">
     <div class="section-head">
       <h2 class="section-title">Today's Markets</h2>
-      <a href="/" class="section-more">View all markets →</a>
+      <a href="/markets/tech" class="section-more">View all markets →</a>
     </div>
     <div class="markets-grid" id="marketsGrid">
-      {['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','GS','NFLX'].map((sym) => (
+      {['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'].map((sym) => (
         <div class="mkt-card" id={`mc-${sym}`}>
           <div class="mkt-top">
             <div>
-              <div class="mkt-sym">{sym}</div>
+              <div class="mkt-sym">{sym.replace('.NS','')}</div>
               <div class="mkt-name" id={`mn-${sym}`}>—</div>
             </div>
             <div class="mkt-badge" id={`mb-${sym}`}>—</div>
@@ -233,45 +222,55 @@ const sorted = posts.sort((a: any, b: any) =>
   }
 
   // ── Markets Grid ──────────────────────────────────────────────────────
+  function renderMarketCard(q: any) {
+    const chg   = q.regularMarketChange ?? 0;
+    const pct   = q.regularMarketChangePercent ?? 0;
+    const up    = chg >= 0;
+    const color = up ? '#22c55e' : '#ef4444';
+    const isIN  = q.symbol.endsWith('.NS') || q.symbol.endsWith('.BO');
+    const curr  = isIN ? '₹' : '$';
+
+    const nameEl  = document.getElementById(`mn-${q.symbol}`);
+    const badgeEl = document.getElementById(`mb-${q.symbol}`);
+    const priceEl = document.getElementById(`mp-${q.symbol}`);
+    const chgEl   = document.getElementById(`mch-${q.symbol}`);
+    const card    = document.getElementById(`mc-${q.symbol}`);
+
+    if (nameEl)  nameEl.textContent  = q.shortName || q.longName || '';
+    if (priceEl) priceEl.textContent = `${curr}${q.regularMarketPrice?.toFixed(2)}`;
+    if (chgEl)   { chgEl.textContent = `${up?'▲':'▼'} ${curr}${Math.abs(chg).toFixed(2)} ${up?'+':''}${pct.toFixed(2)}%`; (chgEl as HTMLElement).style.color = color; }
+    if (badgeEl) { badgeEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; badgeEl.classList.add(up?'badge-up':'badge-dn'); }
+    if (card)    card.classList.add(up ? 'up' : 'dn');
+
+    yfChart(q.symbol).then(cd => {
+      const closes = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
+      if (closes.length < 2) return;
+      const canvas = document.getElementById(`chart-${q.symbol}`) as HTMLCanvasElement;
+      if (!canvas) return;
+      new (window as any).Chart(canvas, {
+        type: 'line',
+        data: { labels: closes.map((_: any, i: number) => i),
+          datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0,
+            fill: true, backgroundColor: up ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }] },
+        options: { animation: false, responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          scales: { x: { display: false }, y: { display: false } } }
+      });
+    }).catch(() => {});
+  }
+
   async function loadMarkets() {
-    const syms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','GS','NFLX'];
+    const usSyms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM'];
+    const inSyms = ['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'];
     try {
-      const quotes = await yf(syms.join(','), 'symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
-      for (const q of quotes) {
-        const chg = q.regularMarketChange ?? 0;
-        const pct = q.regularMarketChangePercent ?? 0;
-        const up  = chg >= 0;
-        const color = up ? '#22c55e' : '#ef4444';
-
-        const nameEl  = document.getElementById(`mn-${q.symbol}`);
-        const badgeEl = document.getElementById(`mb-${q.symbol}`);
-        const priceEl = document.getElementById(`mp-${q.symbol}`);
-        const chgEl   = document.getElementById(`mch-${q.symbol}`);
-        const card    = document.getElementById(`mc-${q.symbol}`);
-
-        if (nameEl)  nameEl.textContent  = q.shortName || '';
-        if (priceEl) priceEl.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
-        if (chgEl) { chgEl.textContent = `${up?'▲':'▼'} $${Math.abs(chg).toFixed(2)} ${up?'+':''}${pct.toFixed(2)}%`; (chgEl as HTMLElement).style.color = color; }
-        if (badgeEl) { badgeEl.textContent = `${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`; badgeEl.classList.add(up?'badge-up':'badge-dn'); }
-        if (card) card.classList.add(up ? 'up' : 'dn');
-
-        // Sparkline (non-blocking)
-        yfChart(q.symbol).then(cd => {
-          const closes = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
-          if (closes.length < 2) return;
-          const canvas = document.getElementById(`chart-${q.symbol}`) as HTMLCanvasElement;
-          if (!canvas) return;
-          new (window as any).Chart(canvas, {
-            type: 'line',
-            data: { labels: closes.map((_: any, i: number) => i),
-              datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0,
-                fill: true, backgroundColor: up ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }] },
-            options: { animation: false, responsive: true, maintainAspectRatio: false,
-              plugins: { legend: { display: false }, tooltip: { enabled: false } },
-              scales: { x: { display: false }, y: { display: false } } }
-          });
-        }).catch(() => {});
-      }
+      const usQuotes = await yf(usSyms.join(','), 'symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent');
+      usQuotes.forEach(renderMarketCard);
+    } catch {}
+    try {
+      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${inSyms.join(',')}&fields=symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+      const res = await fetch(PROXY + encodeURIComponent(url));
+      const inQuotes = (await res.json())?.quoteResponse?.result || [];
+      inQuotes.forEach(renderMarketCard);
     } catch {}
   }
 
