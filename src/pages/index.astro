@@ -25,19 +25,21 @@ const SECTOR_TAGS: Record<string, string> = {
 
   <!-- ── Hero ────────────────────────────────────────── -->
   <section class="hero">
-    <div class="hero-inner">
+    <div class="hero-inner hero-split">
+
+      <!-- Left: copy -->
       <div class="hero-left">
         <div class="hero-badge">
           <span class="hero-badge-dot"></span>
           LIVE MARKET DATA
         </div>
         <h1 class="hero-title">
-          Smart Money.<br />
+          Bull Signal.<br />
           <span class="hero-accent">Sharper Moves.</span>
         </h1>
         <p class="hero-desc">
-          Professional-grade market intelligence for people<br />
-          who'd rather invest than guess.
+          Live market moves, trending stocks, and investor-focused<br />
+          news delivered in one clean, fast dashboard.
         </p>
         <div class="hero-stats">
           <div class="hero-stat">
@@ -57,7 +59,29 @@ const SECTOR_TAGS: Record<string, string> = {
         </div>
         <div class="hero-actions">
           <button class="btn-primary" onclick="document.getElementById('markets').scrollIntoView({behavior:'smooth'})">Explore Markets →</button>
-          <button class="btn-outline" onclick="document.getElementById('news').scrollIntoView({behavior:'smooth'})">Latest News</button>
+          <button class="btn-outline" onclick="document.getElementById('from-ledger').scrollIntoView({behavior:'smooth'})">Daily News</button>
+        </div>
+      </div>
+
+      <!-- Right: live mini dashboard visual -->
+      <div class="hero-right" aria-hidden="true">
+        <div class="hero-visual">
+          <div class="hv-label">LIVE PRICES</div>
+          <div class="hv-ticker" id="hvTicker">
+            {['AAPL','NVDA','TSLA','MSFT','GOOGL'].map(s => (
+              <div class="hv-row" id={`hv-${s}`}>
+                <span class="hv-sym">{s}</span>
+                <span class="hv-price" id={`hvp-${s}`}>—</span>
+                <span class="hv-chg"  id={`hvc-${s}`}>—</span>
+              </div>
+            ))}
+          </div>
+          <div class="hv-chart-wrap">
+            <canvas id="hvChart" height="80"></canvas>
+          </div>
+          <div class="hv-footer">
+            <span class="hv-dot"></span> Markets open · updating live
+          </div>
         </div>
       </div>
 
@@ -154,7 +178,7 @@ const SECTOR_TAGS: Record<string, string> = {
 
   <!-- ── Blog Posts ───────────────────────────────────── -->
   {sorted.length > 0 && (
-    <section class="content-section">
+    <section class="content-section" id="from-ledger">
       <div class="section-head">
         <h2 class="section-title">From the Ledger</h2>
       </div>
@@ -462,10 +486,45 @@ const SECTOR_TAGS: Record<string, string> = {
     } catch {}
   }
 
+  // ── Hero visual mini ticker ───────────────────────────────────
+  async function loadHeroVisual() {
+    const syms = ['AAPL','NVDA','TSLA','MSFT','GOOGL'];
+    try {
+      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms.join(',')}&fields=symbol,regularMarketPrice,regularMarketChangePercent`;
+      const res = await fetch(PROXY + encodeURIComponent(url));
+      const quotes = (await res.json())?.quoteResponse?.result || [];
+      quotes.forEach((q: any) => {
+        const pct = q.regularMarketChangePercent ?? 0;
+        const up  = pct >= 0;
+        const pEl = document.getElementById(`hvp-${q.symbol}`);
+        const cEl = document.getElementById(`hvc-${q.symbol}`);
+        if (pEl) pEl.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
+        if (cEl) { cEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; (cEl as HTMLElement).style.color = up ? '#22c55e' : '#ef4444'; }
+      });
+    } catch {}
+    // mini NVDA chart
+    try {
+      const url2 = `https://query1.finance.yahoo.com/v8/finance/chart/NVDA?range=5d&interval=30m`;
+      const res2 = await fetch(PROXY + encodeURIComponent(url2));
+      const cd   = (await res2.json())?.chart?.result?.[0];
+      const closes = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
+      if (closes.length > 2) {
+        const up = closes[closes.length-1] >= closes[0];
+        const canvas = document.getElementById('hvChart') as HTMLCanvasElement;
+        if (canvas) new (window as any).Chart(canvas, {
+          type: 'line',
+          data: { labels: closes.map((_:any,i:number)=>i), datasets: [{ data: closes, borderColor: up?'#22c55e':'#ef4444', borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: up?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)' }] },
+          options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend:{display:false}, tooltip:{enabled:false} }, scales: { x:{display:false}, y:{display:false} } }
+        });
+      }
+    } catch {}
+  }
+
   loadIndices();
   loadMarkets();
   loadNews();
   loadFearGreed();
   loadIndiaIndices();
-  setInterval(() => { loadIndices(); loadMarkets(); loadIndiaIndices(); }, 60000);
+  loadHeroVisual();
+  setInterval(() => { loadIndices(); loadMarkets(); loadIndiaIndices(); loadHeroVisual(); }, 60000);
 </script>
