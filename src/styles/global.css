@@ -900,17 +900,17 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
 /* Sector Bar Chart */
 .sector-chart-wrap {
   position: relative;
-  height: 300px;
+  height: 260px;
   flex: 1;
 }
 
 @media (max-width: 900px) {
   .fg-heatmap-row { grid-template-columns: 1fr; }
-  .sector-chart-wrap { height: 260px; }
+  .sector-chart-wrap { height: 240px; }
 }
 @media (max-width: 600px) {
   .fg-heatmap-row { padding: 0 16px; }
-  .sector-chart-wrap { height: 240px; }
+  .sector-chart-wrap { height: 220px; }
 }
 
 /* ── Sector Pill Bar (homepage compact row) ─────────────── */
