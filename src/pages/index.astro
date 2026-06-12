@@ -248,7 +248,13 @@ async function fhCandles(sym: string) {
   const d: any = await fetch(`${FH_BASE}/stock/candle?symbol=${sym}&resolution=D&from=${from}&to=${to}&token=${FH_KEY}`).then((r: any) => r.json());
   if (d.s !== 'ok' || !d.c) return null;
   return { closes: d.c, timestamps: d.t };
-}
+    // Clear any remaining skeleton index cards (data unavailable)
+    document.querySelectorAll('.idx-card.skeleton').forEach(el => {
+      el.classList.remove('skeleton');
+      el.querySelector('.idx-price')!.textContent = 'N/A';
+      el.querySelector('.idx-chg')!.textContent = '—';
+    });
+  }
 
 // ── Indices (Twelve Data) ─────────────────────────────────────────────────────
 async function loadIndices() {
