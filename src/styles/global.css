@@ -897,33 +897,20 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
 }
 .fg-prev { font-size: 11px; color: var(--text-muted); text-align: center; }
 
-/* Sector Heatmap */
-.heatmap-grid {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 6px;
+/* Sector Bar Chart */
+.sector-chart-wrap {
+  position: relative;
+  height: 300px;
   flex: 1;
 }
-.hm-cell {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px 10px;
-  text-align: center;
-  cursor: default;
-  transition: transform 0.15s;
-}
-.hm-cell:hover { transform: scale(1.03); }
-.hm-cell.skeleton { background: var(--navy-2) !important; animation: shimmer 1.5s infinite; }
-.hm-name { display: block; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
-.hm-pct  { display: block; font-size: 1rem; font-weight: 800; }
 
 @media (max-width: 900px) {
   .fg-heatmap-row { grid-template-columns: 1fr; }
-  .heatmap-grid   { grid-template-columns: repeat(5, 1fr); }
+  .sector-chart-wrap { height: 260px; }
 }
 @media (max-width: 600px) {
   .fg-heatmap-row { padding: 0 16px; }
-  .heatmap-grid   { grid-template-columns: repeat(2, 1fr); }
+  .sector-chart-wrap { height: 240px; }
 }
 
 /* ── Sector Pill Bar (homepage compact row) ─────────────── */
