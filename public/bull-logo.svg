@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 100">
+
+  <!-- Ground shadow curve -->
+  <path d="M10 95 Q55 88 100 95" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Tail -->
+  <path d="M30 58 Q20 46 16 32 Q13 20 17 10" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Red flame — tail -->
+  <path d="M17 32 Q9 22 11 10 Q16 3 20 11 Q13 20 17 30 Z" fill="#cc2020"/>
+  <path d="M15 20 Q7 13 10 3 Q16 0 18 9 Z" fill="#e03535"/>
+  <path d="M18 11 Q13 5 15 0 Q21 2 19 10 Z" fill="#ff4444" opacity="0.85"/>
+
+  <!-- Body -->
+  <path d="M27 68
+           Q20 57 22 44
+           Q26 31 38 28
+           Q47 22 58 26
+           Q66 23 73 28
+           L78 24
+           Q85 19 83 28
+           L79 31
+           Q86 33 84 42
+           Q90 44 86 51
+           L79 59
+           Q77 68 67 71
+           L60 78
+           Q52 85 44 80
+           L39 83
+           Q30 87 28 78 Z"
+        fill="#111" stroke="#0a0a0a" stroke-width="1.2" stroke-linejoin="round"/>
+
+  <!-- Head -->
+  <path d="M73 29
+           Q77 18 83 16
+           Q91 13 91 23
+           Q95 25 93 34
+           Q90 40 84 39
+           L79 36"
+        fill="#111" stroke="#0a0a0a" stroke-width="1.2" stroke-linejoin="round"/>
+
+  <!-- Snout -->
+  <path d="M91 25 Q98 23 99 29 Q99 35 92 36" fill="#1e1e1e" stroke="#0a0a0a" stroke-width="0.8"/>
+  <!-- Nostril -->
+  <ellipse cx="96" cy="30" rx="1.5" ry="1.2" fill="#3a3a3a"/>
+
+  <!-- Eye -->
+  <circle cx="87" cy="22" r="2.5" fill="white"/>
+  <circle cx="87.5" cy="22" r="1.2" fill="#0a0a0a"/>
+
+  <!-- Horn left -->
+  <path d="M81 22 Q76 11 68 7 Q63 5 64 10 Q69 12 73 19" fill="#1a1a1a" stroke="#0a0a0a" stroke-width="1.3" stroke-linejoin="round"/>
+  <!-- Horn right -->
+  <path d="M87 19 Q90 9 95 7 Q99 5 99 10 Q96 12 93 18" fill="#1a1a1a" stroke="#0a0a0a" stroke-width="1.3" stroke-linejoin="round"/>
+
+  <!-- Front right leg (raised) -->
+  <path d="M71 67 Q73 76 70 85 Q67 92 62 93 Q58 93 58 89 Q62 87 64 81 Q66 73 64 67"
+        fill="#111" stroke="#0a0a0a" stroke-width="1"/>
+
+  <!-- Front left leg -->
+  <path d="M60 69 Q55 77 50 77 Q44 76 44 69 L47 62"
+        fill="#111" stroke="#0a0a0a" stroke-width="1"/>
+
+  <!-- Back right leg -->
+  <path d="M42 76 Q38 85 36 93 Q33 98 30 98 Q27 96 28 92 Q32 90 34 84 Q36 76 38 70"
+        fill="#111" stroke="#0a0a0a" stroke-width="1"/>
+
+  <!-- Back left leg -->
+  <path d="M38 78 Q36 87 39 93 Q43 98 47 96 Q47 92 43 88 Q41 82 41 76"
+        fill="#111" stroke="#0a0a0a" stroke-width="1"/>
+
+  <!-- Red accent slashes on body -->
+  <path d="M46 49 Q42 56 40 63" stroke="#cc1515" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M51 51 Q48 58 47 65" stroke="#cc1515" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.75"/>
+
+</svg>
