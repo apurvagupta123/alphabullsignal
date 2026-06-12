@@ -108,50 +108,6 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </section>
 
-  <!-- ── NSE Market Movers ────────────────────────────── -->
-  <section class="content-section" id="movers">
-    <div class="section-head">
-      <div>
-        <h2 class="section-title">NSE Market Movers</h2>
-        <p class="movers-date" id="moversDate" style="font-size:11px;color:var(--text-muted);margin:2px 0 0"></p>
-      </div>
-      <span class="section-live">LIVE</span>
-    </div>
-    <!-- Tabs -->
-    <div class="movers-tabs">
-      <button class="mv-tab active" data-tab="gainers">▲ Top Gainers</button>
-      <button class="mv-tab"        data-tab="losers">▼ Top Losers</button>
-      <button class="mv-tab"        data-tab="active">🔥 Most Active</button>
-    </div>
-    <!-- Table -->
-    <div class="movers-table-wrap">
-      <table class="movers-table">
-        <thead>
-          <tr>
-            <th>Symbol</th>
-            <th class="ta-r">Close (₹)</th>
-            <th class="ta-r">Prev (₹)</th>
-            <th class="ta-r">Change %</th>
-            <th class="ta-r">Turnover</th>
-            <th class="ta-r">Trades</th>
-          </tr>
-        </thead>
-        <tbody id="moversBody">
-          {[1,2,3,4,5,6,7,8,9,10].map(() => (
-            <tr class="mv-shimmer-row">
-              <td><div class="mv-shimmer"></div></td>
-              <td><div class="mv-shimmer" style="float:right;width:60px"></div></td>
-              <td><div class="mv-shimmer" style="float:right;width:60px"></div></td>
-              <td><div class="mv-shimmer" style="float:right;width:50px"></div></td>
-              <td><div class="mv-shimmer" style="float:right;width:70px"></div></td>
-              <td><div class="mv-shimmer" style="float:right;width:50px"></div></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </section>
-
   <!-- ── Today's Markets ─────────────────────────────── -->
   <section class="content-section" id="markets">
     <div class="section-head">
@@ -354,35 +310,37 @@ const SECTOR_TAGS: Record<string, string> = {
   }
 
   async function loadMarkets() {
-    const allSyms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'];
+    const usSyms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM'];
+    const inSyms = ['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'];
 
     // Show cached data instantly
     const cached = getCache('markets_v2');
     if (cached) cached.forEach(renderMarketCard);
 
-    // Fetch all in one Yahoo Finance call (supports both US + IN)
-    try {
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${allSyms.join(',')}&fields=symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-      const quotes = await yfFetch(url);
-      if (quotes.length > 0) {
-        quotes.forEach(renderMarketCard);
-        setCache('markets_v2', quotes);
-        return;
-      }
-    } catch {}
+    // Always fetch US and India independently — one failing can't block the other
+    const fields = 'symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent';
+    const [usResult, inResult] = await Promise.allSettled([
+      yfFetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${usSyms.join(',')}&fields=${fields}`),
+      yfFetch(`https://query2.finance.yahoo.com/v7/finance/quote?symbols=${inSyms.join(',')}&fields=${fields}`),
+    ]);
 
-    // Fallback: US via fetchQuotes, India via separate yfFetch
-    const usSyms = allSyms.filter(s => !s.includes('.'));
-    const inSyms = allSyms.filter(s => s.includes('.'));
-    try {
-      const usQuotes = await yf(usSyms.join(','), '');
-      usQuotes.forEach(renderMarketCard);
-    } catch {}
-    try {
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${inSyms.join(',')}&fields=symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-      const inQuotes = await yfFetch(url);
-      inQuotes.forEach(renderMarketCard);
-    } catch {}
+    const allQuotes: any[] = [];
+    if (usResult.status === 'fulfilled' && usResult.value.length > 0) {
+      usResult.value.forEach(renderMarketCard);
+      allQuotes.push(...usResult.value);
+    }
+    if (inResult.status === 'fulfilled' && inResult.value.length > 0) {
+      inResult.value.forEach(renderMarketCard);
+      allQuotes.push(...inResult.value);
+    } else {
+      // Retry India with query1 as fallback
+      try {
+        const inRetry = await yfFetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${inSyms.join(',')}&fields=${fields}`);
+        inRetry.forEach(renderMarketCard);
+        allQuotes.push(...inRetry);
+      } catch {}
+    }
+    if (allQuotes.length > 0) setCache('markets_v2', allQuotes);
   }
 
   // ── News (Reuters RSS) ────────────────────────────────────────────────
@@ -597,122 +555,8 @@ const SECTOR_TAGS: Record<string, string> = {
     } catch {}
   }
 
-  // ── NSE Market Movers from Bhavcopy CSV ──────────────────────
-  let _moversData: any = null;
-  let _activeTab = 'gainers';
-
-  function fmtCr(lakhs: number) {
-    if (lakhs >= 10000) return `₹${(lakhs/100).toFixed(0)}Cr`;
-    if (lakhs >= 100)   return `₹${(lakhs/100).toFixed(1)}Cr`;
-    return `₹${lakhs.toFixed(0)}L`;
-  }
-
-  function renderMovers(tab: string) {
-    _activeTab = tab;
-    if (!_moversData) return;
-    const data = _moversData[tab];
-    const tbody = document.getElementById('moversBody');
-    if (!tbody) return;
-    tbody.innerHTML = data.map((r: any) => {
-      const up    = r.pct >= 0;
-      const color = up ? '#22c55e' : '#ef4444';
-      const sym   = r.symbol.toLowerCase();
-      return `<tr class="mv-row" onclick="location.href='/company/${sym}-ns'" style="cursor:pointer">
-        <td class="mv-sym-cell">
-          <span class="mv-sym">${r.symbol}</span>
-          <span class="mv-series">${r.series}</span>
-        </td>
-        <td class="ta-r mv-close">₹${Number(r.close).toLocaleString('en-IN',{maximumFractionDigits:2})}</td>
-        <td class="ta-r mv-prev">₹${Number(r.prev).toLocaleString('en-IN',{maximumFractionDigits:2})}</td>
-        <td class="ta-r" style="color:${color};font-weight:700">${up?'+':''}${r.pct.toFixed(2)}%</td>
-        <td class="ta-r mv-turn">${fmtCr(r.turnover)}</td>
-        <td class="ta-r mv-trades">${Number(r.trades).toLocaleString('en-IN')}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  function parseNSECsv(text: string) {
-    const lines  = text.trim().split('\n');
-    const header = lines[0].split(',').map((h: string) => h.trim());
-    const idx    = (name: string) => header.indexOf(name);
-
-    const rows = lines.slice(1).map((line: string) => {
-      const cols = line.split(',');
-      return {
-        symbol:   (cols[idx('SYMBOL')]||'').trim(),
-        series:   (cols[idx('SERIES')]||'').trim(),
-        prev:     parseFloat(cols[idx('PREV_CLOSE')]||'0'),
-        open:     parseFloat(cols[idx('OPEN_PRICE')]||'0'),
-        high:     parseFloat(cols[idx('HIGH_PRICE')]||'0'),
-        low:      parseFloat(cols[idx('LOW_PRICE')]||'0'),
-        close:    parseFloat(cols[idx('CLOSE_PRICE')]||'0'),
-        turnover: parseFloat(cols[idx('TURNOVER_LACS')]||'0'),
-        trades:   parseInt(cols[idx('NO_OF_TRADES')]||'0'),
-        volume:   parseInt(cols[idx('TTL_TRD_QNTY')]||'0'),
-        date:     (cols[idx('DATE1')]||'').trim(),
-      };
-    }).filter((r: any) =>
-      r.series === 'EQ' && r.prev > 0 && r.close > 0 && r.turnover >= 50 // min ₹50L turnover
-    ).map((r: any) => ({ ...r, pct: (r.close - r.prev) / r.prev * 100 }));
-
-    return {
-      gainers: [...rows].sort((a: any, b: any) => b.pct - a.pct).slice(0,10),
-      losers:  [...rows].sort((a: any, b: any) => a.pct - b.pct).slice(0,10),
-      active:  [...rows].sort((a: any, b: any) => b.turnover - a.turnover).slice(0,10),
-    };
-  }
-
-  async function loadNSEMovers() {
-    // Build date string list to try (today + last 4 trading days)
-    const dates: string[] = [];
-    const d = new Date();
-    for (let i = 0; i < 7; i++) {
-      const dd   = String(d.getDate()).padStart(2,'0');
-      const mm   = String(d.getMonth()+1).padStart(2,'0');
-      const yyyy = d.getFullYear();
-      dates.push(`${dd}${mm}${yyyy}`);
-      d.setDate(d.getDate()-1);
-    }
-
-    // Try cached first
-    const cachedMovers = getCache('nse_movers_v1');
-    if (cachedMovers) {
-      _moversData = cachedMovers;
-      renderMovers(_activeTab);
-      document.getElementById('moversDate')!.textContent = `As of ${cachedMovers._date || ''}`;
-    }
-
-    for (const dateStr of dates) {
-      try {
-        const url  = `https://archives.nseindia.com/products/content/sec_bhavdata_full_${dateStr}.csv`;
-        const res  = await fetch(PROXIES[0] + encodeURIComponent(url), { signal: AbortSignal.timeout(12000) });
-        if (!res.ok) continue;
-        const text = await res.text();
-        if (!text.startsWith('SYMBOL')) continue;  // sanity check
-
-        const parsed = parseNSECsv(text);
-        const dateDisp = parsed.gainers[0]?.date || dateStr;
-        _moversData = { ...parsed, _date: dateDisp };
-        setCache('nse_movers_v1', _moversData);
-        renderMovers(_activeTab);
-        document.getElementById('moversDate')!.textContent = `BSE/NSE data as of ${dateDisp}`;
-        return;
-      } catch { continue; }
-    }
-  }
-
-  // Tab click handlers (set up after DOM ready)
-  document.querySelectorAll('.mv-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.mv-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderMovers((btn as HTMLElement).dataset.tab || 'gainers');
-    });
-  });
-
   loadIndices();
   loadMarkets();
-  loadNSEMovers();
   loadNews();
   loadFearGreed();
   loadIndiaIndices();
