@@ -108,39 +108,6 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </section>
 
-  <!-- ── MCX Commodities ──────────────────────────────── -->
-  <section class="content-section" id="commodities">
-    <div class="section-head">
-      <h2 class="section-title">MCX Commodities</h2>
-      <span class="section-live">LIVE</span>
-    </div>
-    <div class="comm-grid" id="commGrid">
-      {[
-        { id:'GOLD',  icon:'🥇', name:'Gold',        unit:'per 10g',  sym:'GC=F'  },
-        { id:'SILVER',icon:'🥈', name:'Silver',      unit:'per kg',   sym:'SI=F'  },
-        { id:'CRUDE', icon:'🛢️', name:'Crude Oil',   unit:'per bbl',  sym:'CL=F'  },
-        { id:'NATGAS',icon:'⚡', name:'Natural Gas',  unit:'per MMBtu',sym:'NG=F'  },
-        { id:'COPPER',icon:'🔶', name:'Copper',       unit:'per kg',   sym:'HG=F'  },
-        { id:'ALUMINIUM',icon:'🔷',name:'Aluminium', unit:'per kg',   sym:'ALI=F' },
-      ].map(c => (
-        <div class="comm-card" id={`comm-${c.id}`}>
-          <div class="comm-top">
-            <span class="comm-icon">{c.icon}</span>
-            <div>
-              <div class="comm-name">{c.name}</div>
-              <div class="comm-unit">MCX · {c.unit}</div>
-            </div>
-            <div class="comm-badge" id={`cb-${c.id}`}>—</div>
-          </div>
-          <div class="comm-price" id={`cp-${c.id}`}>—</div>
-          <div class="comm-chg"   id={`cc-${c.id}`}>—</div>
-          <canvas class="comm-chart" id={`cch-${c.id}`} height="50"></canvas>
-        </div>
-      ))}
-    </div>
-    <p class="comm-note">Prices in ₹ · derived from international futures (GC, SI, CL, NG, HG) × live USD/INR — tracks MCX closely</p>
-  </section>
-
   <!-- ── NSE Market Movers ────────────────────────────── -->
   <section class="content-section" id="movers">
     <div class="section-head">
@@ -630,74 +597,6 @@ const SECTOR_TAGS: Record<string, string> = {
     } catch {}
   }
 
-  // ── MCX Commodities ───────────────────────────────────────────
-  const COMM_MAP = [
-    { id:'GOLD',      sym:'GC=F',   factor: (p:number, fx:number) => (p * fx) / 3.11035,   // per 10g
-      chartSym:'GC=F' },
-    { id:'SILVER',    sym:'SI=F',   factor: (p:number, fx:number) => (p * fx) / 0.0311035, // per kg
-      chartSym:'SI=F' },
-    { id:'CRUDE',     sym:'CL=F',   factor: (p:number, fx:number) => p * fx,                // per barrel
-      chartSym:'CL=F' },
-    { id:'NATGAS',    sym:'NG=F',   factor: (p:number, fx:number) => p * fx,                // per MMBtu
-      chartSym:'NG=F' },
-    { id:'COPPER',    sym:'HG=F',   factor: (p:number, fx:number) => p * fx * 2.20462,     // per kg
-      chartSym:'HG=F' },
-    { id:'ALUMINIUM', sym:'ALI=F',  factor: (p:number, fx:number) => (p * fx) / 1000,      // per kg (futures in USD/ton)
-      chartSym:'ALI=F' },
-  ];
-
-  function renderCommCard(id:string, inrPrice:number, pct:number, chgInr:number) {
-    const up    = pct >= 0;
-    const color = up ? '#22c55e' : '#ef4444';
-    const priceStr = inrPrice >= 100000
-      ? `₹${(inrPrice/1000).toFixed(0)}K`
-      : `₹${inrPrice.toLocaleString('en-IN',{maximumFractionDigits:0})}`;
-    const el = document.getElementById(`comm-${id}`);
-    if (el) el.classList.add(up ? 'up' : 'dn');
-    const pEl = document.getElementById(`cp-${id}`);
-    if (pEl) pEl.textContent = priceStr;
-    const bEl = document.getElementById(`cb-${id}`);
-    if (bEl) { bEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; bEl.classList.add(up?'badge-up':'badge-dn'); }
-    const cEl = document.getElementById(`cc-${id}`);
-    if (cEl) { cEl.textContent = `${up?'▲':'▼'} ₹${Math.abs(chgInr).toLocaleString('en-IN',{maximumFractionDigits:0})}`; (cEl as HTMLElement).style.color = color; }
-  }
-
-  async function loadCommodities() {
-    // Show cached instantly
-    const cached = getCache('commodities_v2');
-    if (cached) cached.forEach((c:any) => renderCommCard(c.id, c.inrPrice, c.pct, c.chgInr));
-
-    const syms = [...COMM_MAP.map(c=>c.sym), 'USDINR=X'].join(',');
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-
-    try {
-      const quotes = await yfFetch(url);
-      const fx = quotes.find((q:any) => q.symbol === 'USDINR=X')?.regularMarketPrice || 84;
-      const results: any[] = [];
-
-      COMM_MAP.forEach(c => {
-        const q = quotes.find((x:any) => x.symbol === c.sym);
-        if (!q || !q.regularMarketPrice) return;
-        const inrPrice = c.factor(q.regularMarketPrice, fx);
-        const pct      = q.regularMarketChangePercent ?? 0;
-        const chgInr   = c.factor(q.regularMarketPrice - (q.regularMarketChange ?? 0), fx);
-        const chgDiff  = inrPrice - chgInr;
-        renderCommCard(c.id, inrPrice, pct, chgDiff);
-        results.push({ id: c.id, inrPrice, pct, chgInr: chgDiff });
-
-        // Sparkline chart
-        (async () => {
-          try {
-            const chartUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${c.chartSym}?range=5d&interval=1h`;
-            const cd = await yfFetch(chartUrl.replace('/v7/finance/quote?symbols=', ''));
-            // use yfChart-style fetch instead
-          } catch {}
-        })();
-      });
-      if (results.length) setCache('commodities_v2', results);
-    } catch {}
-  }
-
   // ── NSE Market Movers from Bhavcopy CSV ──────────────────────
   let _moversData: any = null;
   let _activeTab = 'gainers';
@@ -813,10 +712,9 @@ const SECTOR_TAGS: Record<string, string> = {
 
   loadIndices();
   loadMarkets();
-  loadCommodities();
   loadNSEMovers();
   loadNews();
   loadFearGreed();
   loadIndiaIndices();
-  setInterval(() => { loadIndices(); loadMarkets(); loadIndiaIndices(); loadCommodities(); }, 60000);
+  setInterval(() => { loadIndices(); loadMarkets(); loadIndiaIndices(); }, 60000);
 </script>
