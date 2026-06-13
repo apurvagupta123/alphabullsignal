@@ -660,6 +660,52 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
   margin: 1.5rem 0;
 }
 
+/* ── Blog Post Tables — Excel-style ──────────────────────── */
+.post-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.8rem 0;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #2a7a8a;
+}
+.post-content table thead tr {
+  background: #1a6070;
+}
+.post-content table thead th {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 11px 14px;
+  text-align: left;
+  border-right: 1px solid rgba(255,255,255,0.12);
+  white-space: nowrap;
+}
+.post-content table thead th::after {
+  content: " ▼";
+  font-size: 0.65em;
+  opacity: 0.55;
+  vertical-align: middle;
+}
+.post-content table thead th:last-child { border-right: none; }
+.post-content table tbody tr:nth-child(odd)  { background: #d6eaf2; }
+.post-content table tbody tr:nth-child(even) { background: #eaf5f9; }
+.post-content table tbody td {
+  color: #0d1f2d;
+  padding: 10px 14px;
+  border-right: 1px solid #b0cfd8;
+  border-bottom: 1px solid #b0cfd8;
+  vertical-align: middle;
+  line-height: 1.45;
+}
+.post-content table tbody td:last-child  { border-right: none; }
+.post-content table tbody tr:last-child td { border-bottom: none; }
+.post-content table tbody tr:hover { background: #bee8f1 !important; }
+.post-content .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 900px) {
   .indices-grid { grid-template-columns: repeat(2, 1fr); }
