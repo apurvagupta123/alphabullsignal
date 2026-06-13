@@ -18,3 +18,13 @@ import BaseLayout from './BaseLayout.astro';
     </article>
   </div>
 </BaseLayout>
+
+<script>
+  // Wrap every table in post-content with a scroll container for mobile
+  document.querySelectorAll('.post-content table').forEach(table => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'table-wrap';
+    table.parentNode.insertBefore(wrapper, table);
+    wrapper.appendChild(table);
+  });
+</script>
