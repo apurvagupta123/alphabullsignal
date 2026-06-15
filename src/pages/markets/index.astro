@@ -368,18 +368,27 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
     if (ts) ts.textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
   }
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const initSector = urlParams.get('sector') || 'banking';
-  const validSector = SECTORS[initSector] ? initSector : 'banking';
+  // Wait for DOM to be ready (define:vars makes script inline, not deferred)
+  function init() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initSector = urlParams.get('sector') || 'banking';
+    const validSector = SECTORS[initSector] ? initSector : 'banking';
 
-  document.getElementById('sectorDropdown')?.addEventListener('change', (e) => loadSector(e.target.value));
-  document.querySelectorAll('.mkts-pill').forEach(btn => {
-    btn.addEventListener('click', () => loadSector(btn.dataset.sector || 'banking'));
-  });
-  document.getElementById('refreshBtn')?.addEventListener('click', () => loadSector(currentSector, true));
+    document.getElementById('sectorDropdown')?.addEventListener('change', (e) => loadSector(e.target.value));
+    document.querySelectorAll('.mkts-pill').forEach(btn => {
+      btn.addEventListener('click', () => loadSector(btn.dataset.sector || 'banking'));
+    });
+    document.getElementById('refreshBtn')?.addEventListener('click', () => loadSector(currentSector, true));
 
-  loadSector(validSector);
-  setInterval(() => loadSector(currentSector), 90000); // auto-refresh every 90s
+    loadSector(validSector);
+    setInterval(() => loadSector(currentSector), 90000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 </script>
 
 <style>
