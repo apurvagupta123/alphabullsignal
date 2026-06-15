@@ -1,0 +1,560 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Market News">
+
+<div class="news-page">
+
+  <!-- ── Top bar: tabs + view toggle ─────────────────────────── -->
+  <div class="news-topbar">
+    <div class="news-tabs">
+      <button class="ntab active" data-tab="market">📰 Market News</button>
+      <button class="ntab" data-tab="pulse">📊 Market Pulse</button>
+      <button class="ntab" data-tab="stocks">📈 Stocks</button>
+      <button class="ntab" data-tab="etf">🏦 ETFs</button>
+      <button class="ntab" data-tab="crypto">₿ Crypto</button>
+    </div>
+    <div class="news-view-toggle">
+      <span class="nvt-label">View by</span>
+      <button class="nvt-btn active" id="vtTime">Time</button>
+      <button class="nvt-btn" id="vtSource">Source</button>
+    </div>
+  </div>
+
+  <!-- ── Loading bar ───────────────────────────────────────────── -->
+  <div id="newsLoading" class="news-loading-bar">
+    <div class="news-loading-inner"></div>
+  </div>
+
+  <!-- ── Two-column layout ─────────────────────────────────────── -->
+  <div class="news-body">
+
+    <!-- Left: main news -->
+    <div class="news-main-col">
+      <div class="news-col-header">
+        <span class="ncol-title" id="mainColTitle">News</span>
+        <span class="ncol-count" id="mainCount"></span>
+      </div>
+      <div id="newsMainFeed" class="news-feed"></div>
+      <button class="news-load-more" id="loadMoreMain" style="display:none">Load more →</button>
+    </div>
+
+    <!-- Right: blogs -->
+    <div class="news-blog-col">
+      <div class="news-col-header">
+        <span class="ncol-title">Blogs</span>
+        <span class="ncol-count" id="blogCount"></span>
+      </div>
+      <div id="newsBlogFeed" class="news-feed"></div>
+      <button class="news-load-more" id="loadMoreBlog" style="display:none">Load more →</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  // ─── Feed Definitions ────────────────────────────────────────────────────
+  // Only feeds confirmed working with rss2json free tier
+  const TABS = {
+    market: {
+      label: 'Market News',
+      news: [
+        { url: 'https://feeds.bbci.co.uk/news/business/rss.xml',       source: 'BBC Business',   color: '#bb1919' },
+        { url: 'https://www.cnbc.com/id/10001147/device/rss/rss.html', source: 'CNBC',           color: '#00a3e0' },
+        { url: 'https://feeds.foxbusiness.com/foxbusiness/latest',      source: 'Fox Business',   color: '#003366' },
+      ],
+      blogs: [
+        { url: 'https://abnormalreturns.com/feed/',          source: 'Abnormal Returns',    color: '#22c55e' },
+        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#a78bfa' },
+        { url: 'https://mishtalk.com/feed/',                 source: 'Mish Talk',           color: '#ef4444' },
+        { url: 'https://ritholtz.com/feed/',                 source: 'Ritholtz',            color: '#c9a84c' },
+      ],
+    },
+    pulse: {
+      label: 'Market Pulse',
+      news: [
+        { url: 'https://realinvestmentadvice.com/feed/',     source: 'Real Inv. Advice',    color: '#22c55e' },
+        { url: 'https://mishtalk.com/feed/',                 source: 'Mish Talk',           color: '#ef4444' },
+        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#a78bfa' },
+      ],
+      blogs: [
+        { url: 'https://ritholtz.com/feed/',                 source: 'Ritholtz',            color: '#c9a84c' },
+        { url: 'https://abnormalreturns.com/feed/',          source: 'Abnormal Returns',    color: '#22c55e' },
+      ],
+    },
+    stocks: {
+      label: 'Stocks News',
+      news: [
+        { url: 'https://www.cnbc.com/id/10001147/device/rss/rss.html', source: 'CNBC',           color: '#00a3e0' },
+        { url: 'https://feeds.bbci.co.uk/news/business/rss.xml',       source: 'BBC Business',   color: '#bb1919' },
+        { url: 'https://feeds.foxbusiness.com/foxbusiness/latest',      source: 'Fox Business',   color: '#003366' },
+      ],
+      blogs: [
+        { url: 'https://realinvestmentadvice.com/feed/',     source: 'Real Inv. Advice',    color: '#22c55e' },
+        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#a78bfa' },
+      ],
+    },
+    etf: {
+      label: 'ETF News',
+      news: [
+        { url: 'https://www.cnbc.com/id/10001147/device/rss/rss.html', source: 'CNBC',           color: '#00a3e0' },
+        { url: 'https://feeds.bbci.co.uk/news/business/rss.xml',       source: 'BBC Business',   color: '#bb1919' },
+      ],
+      blogs: [
+        { url: 'https://abnormalreturns.com/feed/',          source: 'Abnormal Returns',    color: '#22c55e' },
+        { url: 'https://ritholtz.com/feed/',                 source: 'Ritholtz',            color: '#c9a84c' },
+      ],
+    },
+    crypto: {
+      label: 'Crypto News',
+      news: [
+        { url: 'https://www.coindesk.com/arc/outboundfeeds/rss/', source: 'CoinDesk', color: '#f7941d' },
+        { url: 'https://decrypt.co/feed',                         source: 'Decrypt',  color: '#4f46e5' },
+      ],
+      blogs: [
+        { url: 'https://mishtalk.com/feed/',                 source: 'Mish Talk',           color: '#ef4444' },
+        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#a78bfa' },
+      ],
+    },
+  };
+
+  // ─── State ───────────────────────────────────────────────────────────────
+  let currentTab  = 'market';
+  let viewMode    = 'time';   // 'time' | 'source'
+  let mainItems   = [];
+  let blogItems   = [];
+  let mainShown   = 20;
+  let blogShown   = 15;
+
+  // ─── Cache ───────────────────────────────────────────────────────────────
+  const CACHE_TTL = 15 * 60 * 1000; // 15 min
+  function getCache(key) {
+    try {
+      const c = JSON.parse(localStorage.getItem('nws_' + key) || 'null');
+      if (c && Date.now() - c.ts < CACHE_TTL) return c.data;
+    } catch {}
+    return null;
+  }
+  function setCache(key, data) {
+    try { localStorage.setItem('nws_' + key, JSON.stringify({ ts: Date.now(), data })); } catch {}
+  }
+
+  // ─── Relative time ───────────────────────────────────────────────────────
+  function relTime(dateStr) {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '';
+    const diff = Date.now() - d.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1)  return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24)  return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days === 1) return 'Yesterday';
+    if (days < 7)  return `${days}d ago`;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  // ─── Fetch a single RSS feed ──────────────────────────────────────────────
+  async function fetchFeed(feedDef) {
+    const cacheKey = btoa(feedDef.url).slice(0, 32);
+    const cached = getCache(cacheKey);
+    if (cached) return cached.map(item => ({ ...item, _source: feedDef.source, _color: feedDef.color }));
+
+    try {
+      const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedDef.url)}`;
+      const r   = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const d   = await r.json();
+      if (d.status !== 'ok' || !d.items?.length) return [];
+      const items = d.items.map(item => ({
+        title:   item.title || '',
+        link:    item.link  || item.guid || '#',
+        pubDate: item.pubDate || '',
+        _source: feedDef.source,
+        _color:  feedDef.color,
+      }));
+      setCache(cacheKey, items.map(({ _source, _color, ...rest }) => rest));
+      return items;
+    } catch {
+      return [];
+    }
+  }
+
+  // ─── Fetch all feeds for a column ────────────────────────────────────────
+  async function fetchColumn(feeds) {
+    const results = await Promise.all(feeds.map(fetchFeed));
+    const all = results.flat();
+    // Sort by date descending
+    return all.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+  }
+
+  // ─── Render: By Time (flat sorted list) ──────────────────────────────────
+  function renderByTime(items, limit) {
+    if (!items.length) return '<div class="news-empty">No articles found.</div>';
+    return items.slice(0, limit).map(item => `
+      <a class="ni" href="${escHtml(item.link)}" target="_blank" rel="noopener noreferrer">
+        <span class="ni-src" style="background:${item._color}20;color:${item._color};border-color:${item._color}40">${escHtml(item._source)}</span>
+        <span class="ni-time">${relTime(item.pubDate)}</span>
+        <div class="ni-title">${escHtml(item.title)}</div>
+      </a>
+    `).join('');
+  }
+
+  // ─── Render: By Source (grouped) ─────────────────────────────────────────
+  function renderBySource(items) {
+    if (!items.length) return '<div class="news-empty">No articles found.</div>';
+    // Group by source
+    const groups = {};
+    items.forEach(item => {
+      if (!groups[item._source]) groups[item._source] = { color: item._color, items: [] };
+      groups[item._source].items.push(item);
+    });
+    return Object.entries(groups).map(([src, { color, items: sitems }]) => `
+      <div class="ns-group">
+        <div class="ns-group-header" style="border-left-color:${color}">
+          <span class="ns-group-name" style="color:${color}">${escHtml(src)}</span>
+          <span class="ns-group-count">${sitems.length} articles</span>
+        </div>
+        ${sitems.slice(0, 10).map(item => `
+          <a class="ni" href="${escHtml(item.link)}" target="_blank" rel="noopener noreferrer">
+            <span class="ni-time">${relTime(item.pubDate)}</span>
+            <div class="ni-title">${escHtml(item.title)}</div>
+          </a>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+
+  function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ─── Render feeds into columns ────────────────────────────────────────────
+  function renderColumns() {
+    const mainFeed = document.getElementById('newsMainFeed');
+    const blogFeed = document.getElementById('newsBlogFeed');
+    const mainMore = document.getElementById('loadMoreMain');
+    const blogMore = document.getElementById('loadMoreBlog');
+    document.getElementById('mainCount').textContent = mainItems.length ? `${mainItems.length} articles` : '';
+    document.getElementById('blogCount').textContent = blogItems.length ? `${blogItems.length} articles` : '';
+
+    if (viewMode === 'time') {
+      mainFeed.innerHTML = renderByTime(mainItems, mainShown);
+      blogFeed.innerHTML = renderByTime(blogItems, blogShown);
+      mainMore.style.display = mainItems.length > mainShown ? 'block' : 'none';
+      blogMore.style.display = blogItems.length > blogShown ? 'block' : 'none';
+    } else {
+      mainFeed.innerHTML = renderBySource(mainItems);
+      blogFeed.innerHTML = renderBySource(blogItems);
+      mainMore.style.display = 'none';
+      blogMore.style.display = 'none';
+    }
+  }
+
+  // ─── Load tab ─────────────────────────────────────────────────────────────
+  async function loadTab(tabKey) {
+    currentTab = tabKey;
+    mainShown  = 20;
+    blogShown  = 15;
+    mainItems  = [];
+    blogItems  = [];
+
+    const tab = TABS[tabKey];
+    document.getElementById('mainColTitle').textContent = 'News';
+    document.getElementById('newsMainFeed').innerHTML   = '<div class="news-skeleton-list">' + Array(6).fill('<div class="news-skeleton"></div>').join('') + '</div>';
+    document.getElementById('newsBlogFeed').innerHTML   = '<div class="news-skeleton-list">' + Array(5).fill('<div class="news-skeleton"></div>').join('') + '</div>';
+    document.getElementById('newsLoading').style.display = 'block';
+    document.getElementById('loadMoreMain').style.display = 'none';
+    document.getElementById('loadMoreBlog').style.display = 'none';
+
+    // Fetch both columns in parallel
+    const [newsItems, blogsData] = await Promise.all([
+      fetchColumn(tab.news),
+      fetchColumn(tab.blogs),
+    ]);
+
+    mainItems = newsItems;
+    blogItems = blogsData;
+
+    renderColumns();
+    document.getElementById('newsLoading').style.display = 'none';
+  }
+
+  // ─── Tab switching ────────────────────────────────────────────────────────
+  document.querySelectorAll('.ntab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ntab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadTab(btn.dataset.tab);
+    });
+  });
+
+  // ─── View toggle ──────────────────────────────────────────────────────────
+  document.getElementById('vtTime').addEventListener('click', () => {
+    viewMode = 'time';
+    document.getElementById('vtTime').classList.add('active');
+    document.getElementById('vtSource').classList.remove('active');
+    renderColumns();
+  });
+  document.getElementById('vtSource').addEventListener('click', () => {
+    viewMode = 'source';
+    document.getElementById('vtSource').classList.add('active');
+    document.getElementById('vtTime').classList.remove('active');
+    renderColumns();
+  });
+
+  // ─── Load More ────────────────────────────────────────────────────────────
+  document.getElementById('loadMoreMain').addEventListener('click', () => {
+    mainShown += 20;
+    renderColumns();
+    document.getElementById('loadMoreMain').style.display =
+      mainItems.length > mainShown ? 'block' : 'none';
+  });
+  document.getElementById('loadMoreBlog').addEventListener('click', () => {
+    blogShown += 15;
+    renderColumns();
+    document.getElementById('loadMoreBlog').style.display =
+      blogItems.length > blogShown ? 'block' : 'none';
+  });
+
+  // ─── Init ─────────────────────────────────────────────────────────────────
+  loadTab('market');
+  // Auto-refresh every 10 minutes
+  setInterval(() => {
+    // Clear caches for current tab then reload
+    const tab = TABS[currentTab];
+    [...tab.news, ...tab.blogs].forEach(f => {
+      try { localStorage.removeItem('nws_' + btoa(f.url).slice(0,32)); } catch {}
+    });
+    loadTab(currentTab);
+  }, 10 * 60 * 1000);
+</script>
+
+<style>
+  /* ── Page wrapper ── */
+  .news-page {
+    max-width: 1240px;
+    margin: 48px auto 0;
+    padding: 0;
+  }
+
+  /* ── Top bar ── */
+  .news-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 28px 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--navy-2);
+  }
+
+  .news-tabs {
+    display: flex;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+  .ntab {
+    padding: 11px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+    letter-spacing: .2px;
+  }
+  .ntab:hover  { color: var(--text); }
+  .ntab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* View toggle */
+  .news-view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 10px;
+  }
+  .nvt-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .7px; }
+  .nvt-btn {
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .nvt-btn:hover  { border-color: rgba(201,168,76,.4); color: var(--gold); }
+  .nvt-btn.active { background: var(--gold); color: #0b0f1a; border-color: var(--gold); }
+
+  /* ── Loading bar ── */
+  .news-loading-bar {
+    display: none;
+    height: 2px;
+    background: rgba(201,168,76,.1);
+    overflow: hidden;
+  }
+  .news-loading-inner {
+    height: 100%;
+    background: var(--gold);
+    width: 40%;
+    animation: loadSlide 1.4s ease-in-out infinite;
+  }
+  @keyframes loadSlide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  /* ── Body: two columns ── */
+  .news-body {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 0;
+    min-height: 600px;
+  }
+
+  .news-main-col,
+  .news-blog-col {
+    padding: 0;
+    border-right: 1px solid var(--border);
+  }
+  .news-blog-col { border-right: none; }
+
+  /* Column header */
+  .news-col-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--navy-2);
+    position: sticky;
+    top: 128px;
+    z-index: 10;
+  }
+  .ncol-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+  .ncol-count {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* ── News Feed ── */
+  .news-feed { padding: 0; }
+
+  /* Single news item */
+  .ni {
+    display: block;
+    padding: 11px 20px;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    text-decoration: none;
+    transition: background .1s;
+    cursor: pointer;
+  }
+  .ni:hover { background: var(--navy-2); }
+  .ni:last-child { border-bottom: none; }
+
+  .ni-src {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .ni-time {
+    font-size: 11px;
+    color: var(--text-dim);
+    vertical-align: middle;
+  }
+  .ni-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    margin-top: 5px;
+    line-height: 1.45;
+    transition: color .1s;
+  }
+  .ni:hover .ni-title { color: #fff; }
+
+  /* By Source grouping */
+  .ns-group { margin-bottom: 0; border-bottom: 1px solid var(--border); }
+  .ns-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: rgba(255,255,255,.02);
+    border-left: 3px solid;
+  }
+  .ns-group-name  { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; }
+  .ns-group-count { font-size: 11px; color: var(--text-muted); }
+
+  /* Skeleton loaders */
+  .news-skeleton-list { padding: 8px 20px; }
+  .news-skeleton {
+    height: 54px;
+    background: linear-gradient(90deg, var(--navy-2) 25%, var(--navy-3) 50%, var(--navy-2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+    margin-bottom: 8px;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .news-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  /* Load More */
+  .news-load-more {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: none;
+    border-top: 1px solid var(--border);
+    color: var(--gold);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .1s;
+    text-align: center;
+  }
+  .news-load-more:hover { background: var(--navy-2); }
+
+  /* ── Responsive ── */
+  @media (max-width: 860px) {
+    .news-body {
+      grid-template-columns: 1fr;
+    }
+    .news-main-col { border-right: none; border-bottom: 1px solid var(--border); }
+    .news-topbar { padding: 10px 16px 0; }
+    .ntab { padding: 10px 14px; font-size: 12px; }
+    .ni { padding: 10px 16px; }
+  }
+</style>
+
+</BaseLayout>

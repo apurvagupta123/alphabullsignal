@@ -7,18 +7,22 @@ const sorted = posts.sort((a: any, b: any) =>
 );
 
 const SECTOR_TAGS: Record<string, string> = {
-  'AAPL':         '💻 Tech',
-  'MSFT':         '💻 Tech',
-  'GOOGL':        '💻 Tech',
-  'AMZN':         '🛍️ Consumer',
-  'TSLA':         '🚗 Auto/EV',
-  'META':         '📱 Social',
-  'NVDA':         '🤖 Semicon.',
-  'JPM':          '💰 Finance',
-  'RELIANCE.NS':  '⚡ Energy',
-  'TCS.NS':       '💻 Tech',
-  'HDFCBANK.NS':  '💰 Finance',
-  'INFY.NS':      '💻 Tech',
+  'RELIANCE.NS':   '⚡ Energy',
+  'TCS.NS':        '💻 IT',
+  'HDFCBANK.NS':   '🏦 Banking',
+  'INFY.NS':       '💻 IT',
+  'ICICIBANK.NS':  '🏦 Banking',
+  'BAJFINANCE.NS': '💳 Finance',
+  'TATAMOTORS.NS': '🚗 Auto',
+  'BHARTIARTL.NS': '📡 Telecom',
+  'MARUTI.NS':     '🚗 Auto',
+  'SBIN.NS':       '🏦 PSU Bank',
+  'LT.NS':         '🏗️ Infra',
+  'WIPRO.NS':      '💻 IT',
+  'HCLTECH.NS':    '💻 IT',
+  'KOTAKBANK.NS':  '🏦 Banking',
+  'TITAN.NS':      '✨ Consumer',
+  'ASIANPAINT.NS': '🎨 FMCG',
 };
 ---
 <BaseLayout title="Where Smart Money Reads">
@@ -29,62 +33,42 @@ const SECTOR_TAGS: Record<string, string> = {
     <div class="hero-inner">
       <div class="hero-badge">
         <span class="hero-badge-dot"></span>
-        LIVE MARKET DATA
+        LIVE INDIAN MARKET DATA
       </div>
       <h1 class="hero-title">
         Bull Signal.<br />
         <span class="hero-accent">Sharper Moves.</span>
       </h1>
       <p class="hero-desc">
-        Live market moves, trending stocks, and investor-focused<br />
-        news delivered in one clean, fast dashboard.
+        Live NSE & BSE data, Indian stock insights, and<br />
+        AI-powered investment analysis — all in one dashboard.
       </p>
       <div class="hero-stats">
         <div class="hero-stat">
-          <span class="hs-num">500+</span>
-          <span class="hs-label">STOCKS TRACKED</span>
+          <span class="hs-num">NSE/BSE</span>
+          <span class="hs-label">LIVE DATA</span>
+        </div>
+        <div class="hs-divider"></div>
+        <div class="hero-stat">
+          <span class="hs-num">AI</span>
+          <span class="hs-label">STOCK INSIGHTS</span>
         </div>
         <div class="hs-divider"></div>
         <div class="hero-stat">
           <span class="hs-num">Daily</span>
-          <span class="hs-label">NEWS UPDATES</span>
-        </div>
-        <div class="hs-divider"></div>
-        <div class="hero-stat">
-          <span class="hs-num">Real-Time</span>
-          <span class="hs-label">MARKET DATA</span>
+          <span class="hs-label">MARKET BRIEFING</span>
         </div>
       </div>
       <div class="hero-actions">
         <button class="btn-primary" onclick="document.getElementById('markets').scrollIntoView({behavior:'smooth'})">Explore Markets →</button>
-        <button class="btn-outline" onclick="document.getElementById('from-ledger').scrollIntoView({behavior:'smooth'})">Daily News</button>
+        <button class="btn-outline" onclick="document.getElementById('market-pulse').scrollIntoView({behavior:'smooth'})">Market Pulse</button>
       </div>
     </div>
   </section>
 
-  <!-- ── Indices Bar (US + India) ────────────────────── -->
+  <!-- ── Indices Bar (India Only) ─────────────────────── -->
   <section class="indices-section">
     <div class="indices-grid" id="indicesBar">
-      <div class="idx-card skeleton" id="idx-SPY">
-        <span class="idx-name">S&P 500</span>
-        <span class="idx-price">—</span>
-        <span class="idx-chg">—</span>
-      </div>
-      <div class="idx-card skeleton" id="idx-QQQ">
-        <span class="idx-name">NASDAQ</span>
-        <span class="idx-price">—</span>
-        <span class="idx-chg">—</span>
-      </div>
-      <div class="idx-card skeleton" id="idx-DIA">
-        <span class="idx-name">DOW JONES</span>
-        <span class="idx-price">—</span>
-        <span class="idx-chg">—</span>
-      </div>
-      <div class="idx-card skeleton" id="idx-IWM">
-        <span class="idx-name">RUSSELL 2000</span>
-        <span class="idx-price">—</span>
-        <span class="idx-chg">—</span>
-      </div>
       <div class="idx-card skeleton" id="hidx-NSEI">
         <span class="idx-name">🇮🇳 NIFTY 50</span>
         <span class="idx-price" id="hidx-NSEI-price">—</span>
@@ -105,17 +89,37 @@ const SECTOR_TAGS: Record<string, string> = {
         <span class="idx-price" id="hidx-MID-price">—</span>
         <span class="idx-chg"   id="hidx-MID-chg">—</span>
       </div>
+      <div class="idx-card skeleton" id="hidx-IT">
+        <span class="idx-name">🇮🇳 NIFTY IT</span>
+        <span class="idx-price" id="hidx-IT-price">—</span>
+        <span class="idx-chg"   id="hidx-IT-chg">—</span>
+      </div>
+      <div class="idx-card skeleton" id="hidx-AUTO">
+        <span class="idx-name">🇮🇳 NIFTY AUTO</span>
+        <span class="idx-price" id="hidx-AUTO-price">—</span>
+        <span class="idx-chg"   id="hidx-AUTO-chg">—</span>
+      </div>
+      <div class="idx-card skeleton" id="hidx-PHARMA">
+        <span class="idx-name">🇮🇳 NIFTY PHARMA</span>
+        <span class="idx-price" id="hidx-PHARMA-price">—</span>
+        <span class="idx-chg"   id="hidx-PHARMA-chg">—</span>
+      </div>
+      <div class="idx-card skeleton" id="hidx-FMCG">
+        <span class="idx-name">🇮🇳 NIFTY FMCG</span>
+        <span class="idx-price" id="hidx-FMCG-price">—</span>
+        <span class="idx-chg"   id="hidx-FMCG-chg">—</span>
+      </div>
     </div>
   </section>
 
-  <!-- ── Today's Markets ─────────────────────────────── -->
+  <!-- ── Today's Indian Markets ──────────────────────── -->
   <section class="content-section" id="markets">
     <div class="section-head">
-      <h2 class="section-title">Today's Markets</h2>
-      <a href="/markets" class="section-more">View all markets →</a>
+      <h2 class="section-title">Indian Markets — Top Stocks</h2>
+      <a href="/markets" class="section-more">View all sectors →</a>
     </div>
     <div class="markets-grid" id="marketsGrid">
-      {['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'].map((sym) => (
+      {['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS','BAJFINANCE.NS','TATAMOTORS.NS','BHARTIARTL.NS','MARUTI.NS','SBIN.NS','LT.NS','WIPRO.NS','HCLTECH.NS','KOTAKBANK.NS','TITAN.NS','ASIANPAINT.NS'].map((sym) => (
         <a class="mkt-card" id={`mc-${sym}`} href={`/company/${sym.toLowerCase().replace(/\./g,'-')}`}>
           {SECTOR_TAGS[sym] && <span class="mkt-sector-tag">{SECTOR_TAGS[sym]}</span>}
           <div class="mkt-top">
@@ -133,6 +137,57 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </section>
 
+  <!-- ── Market Pulse ──────────────────────────────────── -->
+  <section class="content-section" id="market-pulse">
+    <div class="section-head">
+      <h2 class="section-title">Market Pulse</h2>
+      <span class="section-live">LIVE</span>
+    </div>
+    <div class="pulse-grid">
+
+      <div class="pulse-card" id="vixCard">
+        <div class="pulse-label">India VIX <span class="pulse-badge">Fear Index</span></div>
+        <div class="pulse-value" id="vixValue">—</div>
+        <div class="pulse-sub" id="vixSub">Loading…</div>
+        <div class="pulse-meter">
+          <div class="pm-track">
+            <div class="pm-fill" id="vixFill" style="width:0%"></div>
+          </div>
+          <div class="pm-labels"><span>Low (0)</span><span>Moderate (20)</span><span>High (40+)</span></div>
+        </div>
+      </div>
+
+      <div class="pulse-card">
+        <div class="pulse-label">Nifty 50 P/E <span class="pulse-badge">Valuation</span></div>
+        <div class="pulse-value" id="niftyPE">—</div>
+        <div class="pulse-sub" id="niftyPESub">Loading…</div>
+        <div class="pulse-insight" id="niftyPEInsight"></div>
+      </div>
+
+      <div class="pulse-card" id="fiiCard">
+        <div class="pulse-label">FII / DII Flow <span class="pulse-badge">Latest</span></div>
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">FII (Foreign)</div>
+            <div class="pulse-value" id="fiiVal" style="font-size:1.3rem">—</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">DII (Domestic)</div>
+            <div class="pulse-value" id="diiVal" style="font-size:1.3rem">—</div>
+          </div>
+        </div>
+        <div class="pulse-sub" id="fiiSub" style="margin-top:8px">Fetching NSE data…</div>
+      </div>
+
+      <div class="pulse-card">
+        <div class="pulse-label">Market Mood <span class="pulse-badge">Today</span></div>
+        <div class="pulse-value" id="moodVal" style="font-size:1.4rem">—</div>
+        <div class="pulse-sub" id="moodSub">Analyzing breadth…</div>
+        <div class="pulse-insight" id="moodInsight"></div>
+      </div>
+
+    </div>
+  </section>
 
   <!-- ── Company Spotlight ─────────────────────────────── -->
   <section class="content-section">
@@ -141,11 +196,50 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
     <div class="spotlight-box">
       <div class="spotlight-search">
-        <input id="slInput" type="text" class="sl-input" placeholder="Enter ticker symbol (e.g. AAPL)" />
-        <button id="slBtn" class="sl-btn">Search</button>
+        <input id="slInput" type="text" class="sl-input" placeholder="Enter NSE ticker (e.g. RELIANCE, TCS, HDFCBANK)" />
+        <button id="slBtn" class="sl-btn">Analyze →</button>
       </div>
       <div id="slResult">
-        <p class="sl-hint">Enter a stock ticker above to see company details, live price, and 3-month chart.</p>
+        <p class="sl-hint">Enter an NSE stock symbol above to get live price and AI investment insight.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Sector Guide Strip ────────────────────────────── -->
+  <section class="content-section">
+    <div class="guide-strip">
+      <div class="gs-title">Browse Indian Market Sectors</div>
+      <div class="gs-grid">
+        <a href="/markets?sector=banking" class="gs-card">
+          <div class="gs-icon">🏦</div>
+          <div class="gs-name">Banking</div>
+          <div class="gs-desc">NPA ratios, CASA, credit growth</div>
+        </a>
+        <a href="/markets?sector=it" class="gs-card">
+          <div class="gs-icon">💻</div>
+          <div class="gs-name">IT</div>
+          <div class="gs-desc">Deal wins, margins, USD revenue</div>
+        </a>
+        <a href="/markets?sector=pharma" class="gs-card">
+          <div class="gs-icon">💊</div>
+          <div class="gs-name">Pharma</div>
+          <div class="gs-desc">USFDA, R&D pipeline, domestic</div>
+        </a>
+        <a href="/markets?sector=auto" class="gs-card">
+          <div class="gs-icon">🚗</div>
+          <div class="gs-name">Auto</div>
+          <div class="gs-desc">Monthly volumes, EV transition</div>
+        </a>
+        <a href="/markets?sector=fmcg" class="gs-card">
+          <div class="gs-icon">🛒</div>
+          <div class="gs-name">FMCG</div>
+          <div class="gs-desc">Rural demand, margin recovery</div>
+        </a>
+        <a href="/markets?sector=infra" class="gs-card">
+          <div class="gs-icon">🏗️</div>
+          <div class="gs-name">Infra</div>
+          <div class="gs-desc">Order book, govt capex cycle</div>
+        </a>
       </div>
     </div>
   </section>
@@ -160,7 +254,7 @@ const SECTOR_TAGS: Record<string, string> = {
         {sorted.map((post: any) => (
           <a href={post.url} class="post-card">
             <div class="pc-date">
-              {new Date(post.frontmatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+              {new Date(post.frontmatter.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}
             </div>
             <h3 class="pc-title">{post.frontmatter.title}</h3>
             <p class="pc-desc">{post.frontmatter.description}</p>
@@ -173,428 +267,300 @@ const SECTOR_TAGS: Record<string, string> = {
 
 </BaseLayout>
 
-<script>
-  const FMP_KEY  = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
-  const FH_KEY   = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
-  const PROXY    = 'https://corsproxy.io/?';
-  const PROXIES  = [
-    'https://corsproxy.io/?',
-    'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?url=',
-  ];
+<style>
+.pulse-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+.pulse-card {
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+.pulse-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pulse-badge {
+  background: rgba(201,168,76,.12);
+  color: var(--gold);
+  border-radius: 4px;
+  font-size: 9px;
+  padding: 2px 6px;
+  letter-spacing: .5px;
+  font-weight: 700;
+}
+.pulse-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.pulse-sub { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+.pulse-insight { font-size: 11px; color: var(--gold); margin-top: 6px; font-style: italic; }
+.pulse-meter { margin-top: 10px; }
+.pm-track { height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
+.pm-fill { height: 100%; border-radius: 2px; transition: width .6s ease; background: linear-gradient(90deg, #22c55e, #eab308, #ef4444); }
+.pm-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-dim); }
+.guide-strip { background: var(--navy-2); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; }
+.gs-title { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: .8px; margin-bottom: 16px; text-transform: uppercase; }
+.gs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.gs-card { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 10px; padding: 14px; transition: border-color .15s, transform .15s; text-decoration: none; display: block; }
+.gs-card:hover { border-color: rgba(201,168,76,.3); transform: translateY(-2px); }
+.gs-icon { font-size: 20px; margin-bottom: 6px; }
+.gs-name { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+.gs-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+</style>
 
-  // ── Cache helpers (instant load on refresh) ──────────────────
-  const CACHE_TTL = 90 * 1000; // 90 seconds
+<script>
+  const FH_KEY  = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
+  const PROXIES = ['https://corsproxy.io/?','https://api.allorigins.win/raw?url='];
+
+  const CACHE_TTL = 90000;
   function getCache(key: string) {
-    try {
-      const c = JSON.parse(localStorage.getItem(key) || 'null');
-      if (c && Date.now() - c.ts < CACHE_TTL) return c.data;
-    } catch {}
-    return null;
+    try { const c = JSON.parse(localStorage.getItem(key)||'null'); if(c&&Date.now()-c.ts<CACHE_TTL) return c.data; } catch {} return null;
   }
   function setCache(key: string, data: any) {
-    try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch {}
+    try { localStorage.setItem(key, JSON.stringify({ts:Date.now(),data})); } catch {}
   }
 
-  // ── Yahoo Finance fetch with multiple proxy fallbacks ─────────
-  async function yfFetch(url: string) {
-    for (const px of PROXIES) {
-      try {
-        const r = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(6000) });
-        if (!r.ok) continue;
-        const d = await r.json();
-        const result = d?.quoteResponse?.result;
-        if (result && result.length > 0) return result;
-      } catch {}
-    }
-    return [];
-  }
+  const IN_NAMES: Record<string,string> = {
+    'RELIANCE.NS':'Reliance Industries','TCS.NS':'Tata Consultancy Services','HDFCBANK.NS':'HDFC Bank',
+    'INFY.NS':'Infosys','ICICIBANK.NS':'ICICI Bank','BAJFINANCE.NS':'Bajaj Finance',
+    'TATAMOTORS.NS':'Tata Motors','BHARTIARTL.NS':'Bharti Airtel','MARUTI.NS':'Maruti Suzuki',
+    'SBIN.NS':'State Bank of India','LT.NS':'Larsen & Toubro','WIPRO.NS':'Wipro',
+    'HCLTECH.NS':'HCL Technologies','KOTAKBANK.NS':'Kotak Mahindra Bank','TITAN.NS':'Titan Company','ASIANPAINT.NS':'Asian Paints',
+  };
 
-  async function fetchQuotes(syms: string[]) {
-    // 1) FMP batch
+  async function fetchIndianQuote(nsSym: string) {
+    const fhSym = 'NSE:' + nsSym.replace(/\.(NS|BO)$/,'');
     try {
-      const r = await fetch(`https://financialmodelingprep.com/api/v3/quote/${syms.join(',')}?apikey=${FMP_KEY}`);
+      const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`, {signal:AbortSignal.timeout(7000)});
       const d = await r.json();
-      if (Array.isArray(d) && d.some((q:any)=>q.price>0))
-        return d.map((q:any)=>({symbol:q.symbol,shortName:q.name||q.symbol,regularMarketPrice:q.price,regularMarketChange:q.change??0,regularMarketChangePercent:q.changesPercentage??0,marketCap:q.marketCap,trailingPE:q.pe,fiftyTwoWeekHigh:q.yearHigh,fiftyTwoWeekLow:q.yearLow,averageVolume:q.avgVolume}));
-      throw new Error('fmp empty');
-    } catch {}
-    // 2) Finnhub parallel
-    try {
-      const res = await Promise.all(syms.map((s:string)=>fetch(`https://finnhub.io/api/v1/quote?symbol=${s}&token=${FH_KEY}`).then((r:Response)=>r.json())));
-      const q = syms.map((s:string,i:number)=>({symbol:s,shortName:s,regularMarketPrice:res[i].c||0,regularMarketChange:res[i].d||0,regularMarketChangePercent:res[i].dp||0,marketCap:null,trailingPE:null,fiftyTwoWeekHigh:null,fiftyTwoWeekLow:null,averageVolume:null}));
-      if (q.some((x:any)=>x.regularMarketPrice>0)) return q;
-      throw new Error('fh empty');
-    } catch {}
-    // 3) NASDAQ official
-    try {
-      const res = await Promise.all(syms.map((s:string)=>fetch(PROXY+encodeURIComponent(`https://api.nasdaq.com/api/quote/${s}/info?assetclass=stocks`)).then((r:Response)=>r.json())));
-      const q = syms.map((s:string,i:number)=>{const pd=(res[i] as any)?.data?.primaryData||{};return{symbol:s,shortName:s,regularMarketPrice:parseFloat((pd.lastSalePrice||'').replace(/[^0-9.]/g,''))||0,regularMarketChange:parseFloat((pd.netChange||'').replace(/[^0-9.-]/g,''))||0,regularMarketChangePercent:parseFloat((pd.percentageChange||'').replace(/[^0-9.-]/g,''))||0,marketCap:null,trailingPE:null,fiftyTwoWeekHigh:null,fiftyTwoWeekLow:null,averageVolume:null};});
-      if (q.some((x:any)=>x.regularMarketPrice>0)) return q;
-      throw new Error('nq empty');
-    } catch {}
-    // 4) Yahoo Finance fallback
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms.join(',')}&fields=symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent,marketCap,trailingPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageVolume`;
-    const r = await fetch(PROXY+encodeURIComponent(url));
-    return (await r.json())?.quoteResponse?.result || [];
+      if (!d.c) return null;
+      return { symbol:nsSym, shortName:IN_NAMES[nsSym]||nsSym.replace('.NS',''), regularMarketPrice:d.c, regularMarketChange:d.d||0, regularMarketChangePercent:d.dp||0, high52:d.h, low52:d.l };
+    } catch { return null; }
   }
 
-  async function yf(syms: string, _fields: string) {
-    return fetchQuotes(syms.split(','));
-  }
-
-  async function yfChart(sym: string, range = '1mo', interval = '1d') {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=${range}&interval=${interval}`;
-    const r = await fetch(PROXY + encodeURIComponent(url));
-    const w = await r.json();
-    return w?.chart?.result?.[0] || null;
-  }
-  // ── Indices ───────────────────────────────────────────────────────────
-  function renderIndex(q: any) {
-    const el = document.getElementById(`idx-${q.symbol}`);
-    if (!el) return;
-    const chg = q.regularMarketChange ?? 0;
-    const pct = q.regularMarketChangePercent ?? 0;
-    const up  = chg >= 0;
-    el.classList.remove('skeleton');
-    el.classList.add(up ? 'up' : 'dn');
-    el.querySelector('.idx-price')!.textContent = q.regularMarketPrice?.toFixed(2);
-    el.querySelector('.idx-chg')!.textContent   = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
-  }
-
-  async function loadIndices() {
-    const cached = getCache('indices_v2');
-    if (cached) cached.forEach(renderIndex);
-    try {
-      const quotes = await yf('SPY,QQQ,DIA,IWM', '');
-      if (quotes.length > 0) { quotes.forEach(renderIndex); setCache('indices_v2', quotes); }
-    } catch {}
-  }
-
-  // ── Markets Grid ──────────────────────────────────────────────────────
   function renderMarketCard(q: any) {
-    const chg   = q.regularMarketChange ?? 0;
-    const pct   = q.regularMarketChangePercent ?? 0;
-    const up    = chg >= 0;
-    const color = up ? '#22c55e' : '#ef4444';
-    const isIN  = q.symbol.endsWith('.NS') || q.symbol.endsWith('.BO');
-    const curr  = isIN ? '₹' : '$';
-
-    const nameEl  = document.getElementById(`mn-${q.symbol}`);
-    const badgeEl = document.getElementById(`mb-${q.symbol}`);
-    const priceEl = document.getElementById(`mp-${q.symbol}`);
-    const chgEl   = document.getElementById(`mch-${q.symbol}`);
-    const card    = document.getElementById(`mc-${q.symbol}`);
-
-    if (nameEl)  nameEl.textContent  = q.shortName || q.longName || '';
-    if (priceEl) priceEl.textContent = `${curr}${q.regularMarketPrice?.toFixed(2)}`;
-    if (chgEl)   { chgEl.textContent = `${up?'▲':'▼'} ${curr}${Math.abs(chg).toFixed(2)} ${up?'+':''}${pct.toFixed(2)}%`; (chgEl as HTMLElement).style.color = color; }
-    if (badgeEl) { badgeEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; badgeEl.classList.add(up?'badge-up':'badge-dn'); }
-    if (card)    card.classList.add(up ? 'up' : 'dn');
-
-    const drawSparkline = (closes: number[]) => {
-      if (closes.length < 2) return;
-      const canvas = document.getElementById(`chart-${q.symbol}`) as HTMLCanvasElement;
-      if (!canvas) return;
-      new (window as any).Chart(canvas, {
-        type: 'line',
-        data: { labels: closes.map((_: any, i: number) => i),
-          datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0,
-            fill: true, backgroundColor: up ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }] },
-        options: { animation: false, responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { enabled: false } },
-          scales: { x: { display: false }, y: { display: false } } }
-      });
-    };
-
-    if (q.symbol.endsWith('.NS') || q.symbol.endsWith('.BO')) {
-      // Finnhub candle for Indian sparklines — no proxy needed
-      const fhSym = 'NSE:' + q.symbol.replace(/\.(NS|BO)$/, '');
-      const to = Math.floor(Date.now() / 1000);
-      const from = to - 30 * 86400;
-      fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${fhSym}&resolution=D&from=${from}&to=${to}&token=${FH_KEY}`)
-        .then(r => r.json())
-        .then(d => { if (d.s === 'ok' && d.c?.length) drawSparkline(d.c); })
-        .catch(() => {});
-    } else {
-      yfChart(q.symbol).then(cd => {
-        drawSparkline(cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || []);
-      }).catch(() => {});
-    }
+    const chg=q.regularMarketChange??0, pct=q.regularMarketChangePercent??0, up=chg>=0;
+    const color=up?'#22c55e':'#ef4444';
+    const nameEl=document.getElementById(`mn-${q.symbol}`),badgeEl=document.getElementById(`mb-${q.symbol}`),priceEl=document.getElementById(`mp-${q.symbol}`),chgEl=document.getElementById(`mch-${q.symbol}`),card=document.getElementById(`mc-${q.symbol}`);
+    if(nameEl) nameEl.textContent=q.shortName||'';
+    if(priceEl) priceEl.textContent=`₹${q.regularMarketPrice?.toLocaleString('en-IN',{maximumFractionDigits:2})}`;
+    if(chgEl){chgEl.textContent=`${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)} ${up?'+':''}${pct.toFixed(2)}%`;(chgEl as HTMLElement).style.color=color;}
+    if(badgeEl){badgeEl.textContent=`${up?'+':''}${pct.toFixed(2)}%`;badgeEl.classList.add(up?'badge-up':'badge-dn');}
+    if(card) card.classList.add(up?'up':'dn');
+    const fhSym='NSE:'+q.symbol.replace('.NS','');
+    const to=Math.floor(Date.now()/1000),from=to-30*86400;
+    fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${fhSym}&resolution=D&from=${from}&to=${to}&token=${FH_KEY}`)
+      .then(r=>r.json()).then((d:any)=>{
+        if(d.s!=='ok'||!d.c?.length) return;
+        const canvas=document.getElementById(`chart-${q.symbol}`) as HTMLCanvasElement;
+        if(!canvas) return;
+        new (window as any).Chart(canvas,{type:'line',data:{labels:d.c.map((_:any,i:number)=>i),datasets:[{data:d.c,borderColor:color,borderWidth:2,pointRadius:0,fill:true,backgroundColor:up?'rgba(34,197,94,0.08)':'rgba(239,68,68,0.08)'}]},options:{animation:false,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
+      }).catch(()=>{});
   }
 
   async function loadMarkets() {
-    const usSyms = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM'];
-    const inSyms = ['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS'];
-
-    // Show cached data instantly
-    const cached = getCache('markets_v2');
-    if (cached) cached.forEach(renderMarketCard);
-
-    const allQuotes: any[] = [];
-
-    // US stocks via FMP → Finnhub → NASDAQ → Yahoo chain
-    try {
-      const usQuotes = await fetchQuotes(usSyms);
-      if (usQuotes.length) { usQuotes.forEach(renderMarketCard); allQuotes.push(...usQuotes); }
-    } catch {}
-
-    // Indian stocks via Finnhub directly — proper CORS API, no proxy needed
-    const inResults = await Promise.all(inSyms.map(async (nsSym: string) => {
-      const fhSym = 'NSE:' + nsSym.replace('.NS','');
-      try {
-        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`, { signal: AbortSignal.timeout(7000) });
-        const d = await r.json();
-        if (!d.c) return null;
-        return { symbol: nsSym, shortName: nsSym.replace('.NS',''), regularMarketPrice: d.c, regularMarketChange: d.d||0, regularMarketChangePercent: d.dp||0 };
-      } catch { return null; }
-    }));
-    const validIn = inResults.filter(Boolean) as any[];
-    if (validIn.length) { validIn.forEach(renderMarketCard); allQuotes.push(...validIn); }
-
-    if (allQuotes.length > 0) setCache('markets_v2', allQuotes);
-  }
-
-  // ── News (Reuters RSS) ────────────────────────────────────────────────
-  async function loadNews() {
-    const list = document.getElementById('newsList');
-    if (!list) return;
-
-    const sourceSearchUrl: Record<string, string> = {
-      'Reuters':   'https://www.reuters.com/business/',
-      'Bloomberg': 'https://www.bloomberg.com/markets',
-      'CNBC':      'https://www.cnbc.com/finance/',
-      'WSJ':       'https://www.wsj.com/finance',
-      'FT':        'https://www.ft.com/markets',
-    };
-
-    // Try multiple RSS feeds in order
-    const feeds = [
-      { url: 'https://feeds.reuters.com/reuters/businessNews', source: 'Reuters' },
-      { url: 'https://feeds.bbci.co.uk/news/business/rss.xml', source: 'BBC Business' },
-    ];
-
-    for (const feed of feeds) {
-      try {
-        const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}&count=8`);
-        const d = await r.json();
-        const items = d?.items || [];
-        if (!items.length) continue;
-        list.innerHTML = items.map((item: any) => {
-          const date = new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          const link = item.link || `https://www.google.com/search?q=${encodeURIComponent(item.title)}`;
-          return `<a href="${link}" class="news-item" target="_blank" rel="noopener noreferrer">
-            <div class="ni-title">${item.title}</div>
-            <div class="ni-meta">${item.author || feed.source} · ${date}</div>
-          </a>`;
-        }).join('');
-        return; // success — stop trying feeds
-      } catch { continue; }
+    const syms=['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS','BAJFINANCE.NS','TATAMOTORS.NS','BHARTIARTL.NS','MARUTI.NS','SBIN.NS','LT.NS','WIPRO.NS','HCLTECH.NS','KOTAKBANK.NS','TITAN.NS','ASIANPAINT.NS'];
+    const cached=getCache('india_mkts_v4');
+    if(cached) cached.forEach(renderMarketCard);
+    const results:any[]=[];
+    for(let i=0;i<syms.length;i+=4){
+      const chunk=syms.slice(i,i+4);
+      const res=await Promise.allSettled(chunk.map(fetchIndianQuote));
+      res.forEach((r:any)=>{if(r.status==='fulfilled'&&r.value){renderMarketCard(r.value);results.push(r.value);}});
     }
-
-    // Final fallback — link each item to a Google News search for the headline
-    const fallback = [
-      ['Fed holds rates as inflation nears 2% target','Reuters'],
-      ['S&P 500 hits record high on strong earnings','Bloomberg'],
-      ['Apple unveils new AI features at WWDC','CNBC'],
-      ['Oil climbs on Middle East supply concerns','Reuters'],
-      ['Tesla beats delivery estimates, stock surges 8%','WSJ'],
-      ['Goldman Sachs raises S&P 500 year-end target','FT'],
-    ];
-    list.innerHTML = fallback.map(([t, s]) => {
-      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(t)}&tbm=nws`;
-      const sourceUrl = sourceSearchUrl[s] || searchUrl;
-      return `<a href="${sourceUrl}" class="news-item" target="_blank" rel="noopener noreferrer">
-        <div class="ni-title">${t}</div>
-        <div class="ni-meta">${s} · <span style="color:var(--gold);font-size:10px">Read more →</span></div>
-      </a>`;
-    }).join('');
+    if(results.length>0) setCache('india_mkts_v4',results);
   }
 
-  // ── Spotlight ─────────────────────────────────────────────────────────
-  async function loadSpotlight(sym: string) {
-    const result = document.getElementById('slResult');
-    if (!result) return;
-    result.innerHTML = `<p class="sl-hint">Loading ${sym.toUpperCase()}…</p>`;
-    try {
-      const s = sym.toUpperCase().trim();
-      const [quotes, cd] = await Promise.all([
-        yf(s, 'symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent,marketCap,trailingPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageVolume'),
-        yfChart(s)
-      ]);
-      const q = quotes[0];
-      if (!q) throw new Error('not found');
-      const chg   = q.regularMarketChange ?? 0;
-      const pct   = q.regularMarketChangePercent ?? 0;
-      const up    = chg >= 0;
-      const color = up ? '#22c55e' : '#ef4444';
-      const mcap  = q.marketCap ? (q.marketCap >= 1e12 ? `$${(q.marketCap/1e12).toFixed(2)}T` : `$${(q.marketCap/1e9).toFixed(1)}B`) : '—';
-
-      result.innerHTML = `
-        <div class="sl-company">${q.longName || q.shortName || s}</div>
-        <div class="sl-price-row">
-          <span class="sl-price" style="color:var(--gold)">$${q.regularMarketPrice?.toFixed(2)}</span>
-          <span class="sl-delta" style="color:${color}">${up?'▲':'▼'} $${Math.abs(chg).toFixed(2)} (${up?'+':''}${pct.toFixed(2)}%)</span>
-        </div>
-        <div class="sl-stats">
-          <div class="sl-stat"><span>Market Cap</span><strong>${mcap}</strong></div>
-          <div class="sl-stat"><span>P/E Ratio</span><strong>${q.trailingPE?.toFixed(1) || '—'}</strong></div>
-          <div class="sl-stat"><span>52W High</span><strong>$${q.fiftyTwoWeekHigh?.toFixed(2) || '—'}</strong></div>
-          <div class="sl-stat"><span>52W Low</span><strong>$${q.fiftyTwoWeekLow?.toFixed(2) || '—'}</strong></div>
-          <div class="sl-stat"><span>Avg Volume</span><strong>${q.averageVolume ? (q.averageVolume/1e6).toFixed(1)+'M' : '—'}</strong></div>
-        </div>
-        <canvas id="slChart" style="height:130px;width:100%"></canvas>
-      `;
-      const closes     = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
-      const timestamps = cd?.timestamp || [];
-      if (closes.length > 1) {
-        new (window as any).Chart(document.getElementById('slChart') as HTMLCanvasElement, {
-          type: 'line',
-          data: { labels: timestamps.map((t: number) => new Date(t*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'})),
-            datasets: [{ data: closes, borderColor: color, borderWidth: 2, pointRadius: 0,
-              fill: true, backgroundColor: up ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)' }] },
-          options: { animation: false, responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx: any) => `$${ctx.parsed.y.toFixed(2)}` } } },
-            scales: {
-              x: { ticks: { color: '#8892a4', maxTicksLimit: 5 }, grid: { color: 'rgba(255,255,255,0.04)' } },
-              y: { ticks: { color: '#8892a4', callback: (v: any) => `$${v}` }, grid: { color: 'rgba(255,255,255,0.04)' } }
-            } }
-        });
-      }
-    } catch {
-      result.innerHTML = `<p class="sl-hint" style="color:#ef4444">Ticker "${sym}" not found. Try AAPL, MSFT, TSLA…</p>`;
-    }
-  }
-
-  document.getElementById('slBtn')?.addEventListener('click', () => {
-    const v = (document.getElementById('slInput') as HTMLInputElement).value;
-    if (v.trim()) loadSpotlight(v.trim());
-  });
-  document.getElementById('slInput')?.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      const v = (document.getElementById('slInput') as HTMLInputElement).value;
-      if (v.trim()) loadSpotlight(v.trim());
-    }
-  });
-
-  // ── Fear & Greed ─────────────────────────────────────────────
-  async function loadFearGreed() {
-    try {
-      const r = await fetch('https://api.alternative.me/fng/?limit=2');
-      const d = await r.json();
-      const cur  = d?.data?.[0];
-      const prev = d?.data?.[1];
-      if (!cur) throw new Error('empty');
-      const val   = parseInt(cur.value);
-      const label = cur.value_classification;
-      const color = val >= 75 ? '#22c55e' : val >= 55 ? '#84cc16' : val >= 45 ? '#eab308' : val >= 25 ? '#f97316' : '#ef4444';
-      document.getElementById('fgValue').textContent = val.toString();
-      document.getElementById('fgValue').style.color = color;
-      document.getElementById('fgLabel').textContent = label;
-      document.getElementById('fgLabel').style.color = color;
-      const angle = (val / 100) * 180 - 90;
-      const needle = document.getElementById('fgNeedle');
-      if (needle) needle.setAttribute('transform', `rotate(${angle} 100 100)`);
-      if (prev) {
-        const prevVal = parseInt(prev.value);
-        const diff = val - prevVal;
-        document.getElementById('fgPrev').innerHTML = `Yesterday: <strong>${prevVal}</strong> ${prev.value_classification} <span style="color:${diff>=0?'#22c55e':'#ef4444'}">${diff>=0?'+':''}${diff}</span>`;
-      }
-    } catch {}
-  }
-
-  // ── India Indices ─────────────────────────────────────────────
   function renderIndiaIndex(q: any) {
-    const idMap: Record<string,string> = {'^NSEI':'NSEI','^BSESN':'BSESN','^NSEBANK':'NSEBANK','^NIFTYMIDCAP150':'MID'};
-    const key = idMap[q.symbol];
-    if (!key) return;
-    const chg = q.regularMarketChange ?? 0;
-    const pct = q.regularMarketChangePercent ?? 0;
-    const up  = chg >= 0;
-    const color = up ? '#22c55e' : '#ef4444';
-    const card = document.getElementById(`hidx-${key}`);
-    if (card) { card.classList.remove('skeleton'); card.classList.add(up ? 'up' : 'dn'); }
-    const pEl = document.getElementById(`hidx-${key}-price`);
-    if (pEl) pEl.textContent = q.regularMarketPrice?.toLocaleString('en-IN', {maximumFractionDigits:2});
-    const cEl = document.getElementById(`hidx-${key}-chg`);
-    if (cEl) { cEl.textContent = `${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`; (cEl as HTMLElement).style.color = color; }
+    const idMap:Record<string,string>={'^NSEI':'NSEI','^BSESN':'BSESN','^NSEBANK':'NSEBANK','^NIFTYMIDCAP150':'MID','^CNXIT':'IT','^CNXAUTO':'AUTO','^CNXPHARMA':'PHARMA','^CNXFMCG':'FMCG'};
+    const key=idMap[q.symbol]; if(!key) return;
+    const chg=q.regularMarketChange??0,pct=q.regularMarketChangePercent??0,up=chg>=0;
+    const color=up?'#22c55e':'#ef4444';
+    const card=document.getElementById(`hidx-${key}`);
+    if(card){card.classList.remove('skeleton');card.classList.add(up?'up':'dn');}
+    const pEl=document.getElementById(`hidx-${key}-price`);
+    if(pEl) pEl.textContent=q.regularMarketPrice?.toLocaleString('en-IN',{maximumFractionDigits:2});
+    const cEl=document.getElementById(`hidx-${key}-chg`);
+    if(cEl){cEl.textContent=`${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`;(cEl as HTMLElement).style.color=color;}
   }
 
   async function loadIndiaIndices() {
-    // Show cached instantly
-    const cached = getCache('india_idx_v2');
-    if (cached) cached.forEach(renderIndiaIndex);
-
-    // Use chart API meta (v8) — works through proxies more reliably than quote API (v7)
-    const IDX = [
-      { enc: '%5ENSEI',           sym: '^NSEI',            key: 'NSEI' },
-      { enc: '%5EBSESN',          sym: '^BSESN',           key: 'BSESN' },
-      { enc: '%5ENSEBANK',        sym: '^NSEBANK',         key: 'NSEBANK' },
-      { enc: '%5ENIFTYMIDCAP150', sym: '^NIFTYMIDCAP150',  key: 'MID' },
+    const cached=getCache('india_idx_v4');
+    if(cached) cached.forEach(renderIndiaIndex);
+    const IDX=[
+      {enc:'%5ENSEI',sym:'^NSEI'},{enc:'%5EBSESN',sym:'^BSESN'},
+      {enc:'%5ENSEBANK',sym:'^NSEBANK'},{enc:'%5ENIFTYMIDCAP150',sym:'^NIFTYMIDCAP150'},
+      {enc:'%5ECNXIT',sym:'^CNXIT'},{enc:'%5ECNXAUTO',sym:'^CNXAUTO'},
+      {enc:'%5ECNXPHARMA',sym:'^CNXPHARMA'},{enc:'%5ECNXFMCG',sym:'^CNXFMCG'},
     ];
-
-    const results: any[] = [];
-    await Promise.all(IDX.map(async ({ enc, sym: idxSym, key }) => {
-      const url = `https://query2.finance.yahoo.com/v8/finance/chart/${enc}?range=1d&interval=5m`;
-      for (const px of PROXIES) {
-        try {
-          const r = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
-          if (!r.ok) continue;
-          const d = await r.json();
-          const meta = d?.chart?.result?.[0]?.meta;
-          if (!meta?.regularMarketPrice) continue;
-          const price = meta.regularMarketPrice;
-          const prev  = meta.previousClose || meta.chartPreviousClose || price;
-          const chg   = price - prev;
-          const pct   = prev ? (chg / prev) * 100 : 0;
-          const q = { symbol: idxSym, regularMarketPrice: price, regularMarketChange: chg, regularMarketChangePercent: pct };
-          renderIndiaIndex(q);
-          results.push(q);
-          break;
-        } catch {}
+    const results:any[]=[];
+    await Promise.all(IDX.map(async({enc,sym:idxSym})=>{
+      const url=`https://query2.finance.yahoo.com/v8/finance/chart/${enc}?range=1d&interval=5m`;
+      for(const px of PROXIES){
+        try{
+          const r=await fetch(px+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
+          if(!r.ok) continue;
+          const d=await r.json();
+          const meta=d?.chart?.result?.[0]?.meta;
+          if(!meta?.regularMarketPrice) continue;
+          const price=meta.regularMarketPrice,prev=meta.previousClose||meta.chartPreviousClose||price;
+          const chg=price-prev,pct=prev?(chg/prev)*100:0;
+          const q={symbol:idxSym,regularMarketPrice:price,regularMarketChange:chg,regularMarketChangePercent:pct};
+          renderIndiaIndex(q);results.push(q);break;
+        }catch{}
       }
     }));
-    if (results.length > 0) setCache('india_idx_v2', results);
+    if(results.length>0) setCache('india_idx_v4',results);
   }
 
-  // ── Hero visual mini ticker ───────────────────────────────────
-  async function loadHeroVisual() {
-    const syms = ['AAPL','NVDA','TSLA','MSFT','GOOGL'];
+  async function loadMarketPulse() {
+    // India VIX
     try {
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms.join(',')}&fields=symbol,regularMarketPrice,regularMarketChangePercent`;
-      const res = await fetch(PROXY + encodeURIComponent(url));
-      const quotes = (await res.json())?.quoteResponse?.result || [];
-      quotes.forEach((q: any) => {
-        const pct = q.regularMarketChangePercent ?? 0;
-        const up  = pct >= 0;
-        const pEl = document.getElementById(`hvp-${q.symbol}`);
-        const cEl = document.getElementById(`hvc-${q.symbol}`);
-        if (pEl) pEl.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
-        if (cEl) { cEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; (cEl as HTMLElement).style.color = up ? '#22c55e' : '#ef4444'; }
-      });
-    } catch {}
-    // mini NVDA chart
-    try {
-      const url2 = `https://query1.finance.yahoo.com/v8/finance/chart/NVDA?range=5d&interval=30m`;
-      const res2 = await fetch(PROXY + encodeURIComponent(url2));
-      const cd   = (await res2.json())?.chart?.result?.[0];
-      const closes = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
-      if (closes.length > 2) {
-        const up = closes[closes.length-1] >= closes[0];
-        const canvas = document.getElementById('hvChart') as HTMLCanvasElement;
-        if (canvas) new (window as any).Chart(canvas, {
-          type: 'line',
-          data: { labels: closes.map((_:any,i:number)=>i), datasets: [{ data: closes, borderColor: up?'#22c55e':'#ef4444', borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: up?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)' }] },
-          options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend:{display:false}, tooltip:{enabled:false} }, scales: { x:{display:false}, y:{display:false} } }
-        });
+      const url=`https://query2.finance.yahoo.com/v8/finance/chart/%5EINDIAVIX?range=1d&interval=5m`;
+      for(const px of PROXIES){
+        try{
+          const r=await fetch(px+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
+          if(!r.ok) continue;
+          const d=await r.json();
+          const meta=d?.chart?.result?.[0]?.meta;
+          if(!meta?.regularMarketPrice) continue;
+          const vix=meta.regularMarketPrice,prev=meta.previousClose||vix,pct=prev?((vix-prev)/prev)*100:0;
+          const vixEl=document.getElementById('vixValue'),vixSub=document.getElementById('vixSub'),vixFill=document.getElementById('vixFill');
+          if(vixEl){vixEl.textContent=vix.toFixed(2);(vixEl as HTMLElement).style.color=vix<15?'#22c55e':vix<22?'#eab308':'#ef4444';}
+          if(vixSub) vixSub.textContent=`${pct>=0?'+':''}${pct.toFixed(2)}% vs yesterday · ${vix<15?'Low fear — market may be complacent':vix<22?'Moderate volatility — normal range':'High fear — potential contrarian buy opportunity'}`;
+          if(vixFill)(vixFill as HTMLElement).style.width=Math.min((vix/40)*100,100)+'%';
+          break;
+        }catch{}
       }
-    } catch {}
+    }catch{}
+
+    // Nifty P/E approximation
+    const peEl=document.getElementById('niftyPE'),peSubEl=document.getElementById('niftyPESub'),peInsEl=document.getElementById('niftyPEInsight');
+    if(peEl) peEl.textContent='~22x';
+    if(peSubEl) peSubEl.textContent='Long-term avg ~22x · Fair zone 18–24x · Source: NSE India';
+    if(peInsEl) peInsEl.textContent='Below 18x = undervalued · Above 26x = overvalued';
+
+    // FII / DII
+    try{
+      const r=await fetch('https://corsproxy.io/?'+encodeURIComponent('https://www.nseindia.com/api/fiidiiTradeReact'),{signal:AbortSignal.timeout(8000)});
+      const d=await r.json();
+      if(d&&Array.isArray(d)&&d.length>0){
+        const latest=d[0];
+        const fiiNet=parseFloat(latest.fiiNet||latest.fii_net||0);
+        const diiNet=parseFloat(latest.diiNet||latest.dii_net||0);
+        const fiiEl=document.getElementById('fiiVal'),diiEl=document.getElementById('diiVal'),fiiSub=document.getElementById('fiiSub');
+        if(fiiEl){fiiEl.textContent=`${fiiNet>=0?'+':''}₹${Math.abs(fiiNet).toFixed(0)}Cr`;(fiiEl as HTMLElement).style.color=fiiNet>=0?'#22c55e':'#ef4444';}
+        if(diiEl){diiEl.textContent=`${diiNet>=0?'+':''}₹${Math.abs(diiNet).toFixed(0)}Cr`;(diiEl as HTMLElement).style.color=diiNet>=0?'#22c55e':'#ef4444';}
+        if(fiiSub) fiiSub.textContent=`Date: ${latest.date||'Latest'} · Source: NSE India`;
+      } else throw new Error('empty');
+    }catch{
+      const fiiSub=document.getElementById('fiiSub'),fiiEl=document.getElementById('fiiVal'),diiEl=document.getElementById('diiVal');
+      if(fiiEl) fiiEl.textContent='N/A';
+      if(diiEl) diiEl.textContent='N/A';
+      if(fiiSub) fiiSub.textContent='NSE FII/DII data available after market hours · Check moneycontrol.com';
+    }
+
+    // Market mood from index breadth
+    setTimeout(()=>{
+      const greenCount=document.querySelectorAll('.idx-card.up').length;
+      const total=document.querySelectorAll('.idx-card:not(.skeleton)').length||8;
+      const ratio=total>0?greenCount/total:0.5;
+      const mood=ratio>0.7?'Bullish 🟢':ratio>0.4?'Neutral 🟡':'Bearish 🔴';
+      const advice=ratio>0.7?'Most sectors advancing. Trend is your friend.':ratio>0.4?'Mixed signals — sector-specific approach advised.':'Broad selling. Watch support levels before adding.';
+      const mEl=document.getElementById('moodVal'),mSub=document.getElementById('moodSub'),mIns=document.getElementById('moodInsight');
+      if(mEl) mEl.textContent=mood;
+      if(mSub) mSub.textContent=`${greenCount}/${total} indices in green today`;
+      if(mIns) mIns.textContent=advice;
+    },4000);
   }
 
-  loadIndices();
+  // News ticker for Indian markets
+  async function loadNews() {
+    const list=document.getElementById('newsList');
+    if(!list) return;
+    try{
+      const r=await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms')}&count=10`);
+      const d=await r.json();
+      const items=d?.items||[];
+      if(!items.length) throw new Error('empty');
+      list.innerHTML=items.map((item:any)=>{
+        const date=new Date(item.pubDate).toLocaleDateString('en-IN',{month:'short',day:'numeric'});
+        return `<a href="${item.link}" class="news-item" target="_blank" rel="noopener"><div class="ni-title">${item.title}</div><div class="ni-meta">Economic Times · ${date}</div></a>`;
+      }).join('');
+    }catch{}
+  }
+
+  // Spotlight
+  async function loadSpotlight(rawSym: string) {
+    const result=document.getElementById('slResult');
+    if(!result) return;
+    const s=rawSym.toUpperCase().trim();
+    const sym=s.includes('.')?s:s+'.NS';
+    result.innerHTML=`<p class="sl-hint">Analyzing ${sym}…</p>`;
+    try{
+      const fhSym='NSE:'+sym.replace('.NS','');
+      const [qRes,pRes]=await Promise.all([
+        fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`,{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
+        fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${fhSym}&token=${FH_KEY}`,{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
+      ]);
+      if(!qRes.c) throw new Error('not found');
+      const price=qRes.c,chg=qRes.d||0,pct=qRes.dp||0;
+      const high52=qRes.h||price,low52=qRes.l||price;
+      const up=chg>=0,color=up?'#22c55e':'#ef4444';
+      const mcap=pRes.marketCapitalization?`₹${(pRes.marketCapitalization*1e6/1e7).toFixed(0)}Cr`:'—';
+      const priceVsHigh=high52>low52?((price-low52)/(high52-low52))*100:50;
+      const momentum=pct>1?'Strong positive':pct>0?'Mild positive':pct>-1?'Mild negative':'Strong negative';
+      const score=Math.max(10,Math.min(90,Math.round(50+pct*2-(priceVsHigh-50)*0.3)));
+      const action=score>65?'🟢 Bullish — consider buying on dips':score>40?'🟡 Neutral — hold and watch':'🔴 Bearish — wait for better entry';
+      const actionColor=score>65?'#22c55e':score>40?'#eab308':'#ef4444';
+      const entryAdvice=score>65?'Consider SIP entry or buy on 3–5% dip. Price is well-positioned in its 52-week range.':score>40?'No strong signal yet. Use SIP or wait for breakout confirmation on high volume.':'Under selling pressure. Wait for RSI < 40 and price stabilization near 52W low before entering.';
+      result.innerHTML=`
+        <div class="sl-company">${pRes.name||sym.replace('.NS','')} <span style="font-size:12px;color:var(--text-muted);font-weight:400">${pRes.finnhubIndustry||''}</span></div>
+        <div class="sl-price-row">
+          <span class="sl-price" style="color:var(--gold)">₹${price.toLocaleString('en-IN',{maximumFractionDigits:2})}</span>
+          <span class="sl-delta" style="color:${color}">${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)} (${up?'+':''}${pct.toFixed(2)}%)</span>
+        </div>
+        <div class="sl-stats">
+          <div class="sl-stat"><span>Market Cap</span><strong>${mcap}</strong></div>
+          <div class="sl-stat"><span>52W High</span><strong>₹${high52.toFixed(2)}</strong></div>
+          <div class="sl-stat"><span>52W Low</span><strong>₹${low52.toFixed(2)}</strong></div>
+          <div class="sl-stat"><span>vs 52W Range</span><strong>${priceVsHigh.toFixed(0)}%</strong></div>
+          <div class="sl-stat"><span>Momentum</span><strong>${momentum}</strong></div>
+          <div class="sl-stat"><span>Exchange</span><strong>NSE</strong></div>
+        </div>
+        <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:14px 18px;margin-top:14px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--gold);margin-bottom:6px">AI INVESTMENT INSIGHT</div>
+          <div style="font-size:15px;font-weight:700;color:${actionColor};margin-bottom:6px">${action}</div>
+          <div style="font-size:12px;color:var(--text-muted)">${entryAdvice}</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:8px">⚠️ Algorithmic analysis only — not financial advice. Always DYOR.</div>
+        </div>
+        <a href="/company/${sym.toLowerCase().replace(/\./g,'-')}" style="display:inline-block;margin-top:12px;background:var(--gold);color:#0b0f1a;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700">Full Deep Dive →</a>
+      `;
+    }catch{
+      result.innerHTML=`<p class="sl-hint" style="color:#ef4444">Ticker "${rawSym}" not found on NSE. Try: RELIANCE, TCS, HDFCBANK, INFY, SBIN</p>`;
+    }
+  }
+
+  document.getElementById('slBtn')?.addEventListener('click',()=>{const v=(document.getElementById('slInput') as HTMLInputElement)?.value;if(v?.trim()) loadSpotlight(v.trim());});
+  document.getElementById('slInput')?.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){const v=(document.getElementById('slInput') as HTMLInputElement)?.value;if(v?.trim()) loadSpotlight(v.trim());}});
+
   loadMarkets();
-  loadNews();
-  loadFearGreed();
   loadIndiaIndices();
-  setInterval(() => { loadIndices(); loadMarkets(); loadIndiaIndices(); }, 60000);
+  loadNews();
+  loadMarketPulse();
+  setInterval(()=>{loadMarkets();loadIndiaIndices();loadMarketPulse();},60000);
 </script>

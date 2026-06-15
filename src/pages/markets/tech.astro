@@ -67,53 +67,67 @@ const STOCKS = [
       <a href="/markets/energy" class="sector-pill">⚡ Energy</a>
       <a href="/markets/healthcare" class="sector-pill">🏥 Healthcare</a>
       <a href="/markets/consumer" class="sector-pill">🛍️ Consumer</a>
+          <a href="/markets/india" class="sector-pill">🇮🇳 India</a>
     </div>
   </section>
 
 </BaseLayout>
 
 <script define:vars={{ stocks: ['AAPL','MSFT','GOOGL','AMZN','META','NVDA','TSLA','AMD','INTC','CRM','ORCL','ADBE','NFLX','PYPL','QCOM'] }}>
-  const FH_KEY = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
-  const P = 'https://corsproxy.io/?';
+  const FMP_KEY  = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
+  const FH_KEY   = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
+  const PROXY    = 'https://corsproxy.io/?';
+
+  async function fetchQuotes(syms) {
+    // 1) FMP batch
+    try {
+      const r = await fetch(`https://financialmodelingprep.com/api/v3/quote/${syms.join(',')}?apikey=${FMP_KEY}`);
+      const d = await r.json();
+      if (Array.isArray(d) && d.some(q=>q.price>0))
+        return d.map(q=>({symbol:q.symbol,shortName:q.name||q.symbol,regularMarketPrice:q.price,regularMarketChange:q.change??0,regularMarketChangePercent:q.changesPercentage??0,marketCap:q.marketCap,trailingPE:q.pe,fiftyTwoWeekHigh:q.yearHigh,fiftyTwoWeekLow:q.yearLow,averageVolume:q.avgVolume}));
+      throw new Error('fmp empty');
+    } catch {}
+    // 2) Finnhub parallel
+    try {
+      const res = await Promise.all(syms.map(s=>fetch(`https://finnhub.io/api/v1/quote?symbol=${s}&token=${FH_KEY}`).then(r=>r.json())));
+      const q = syms.map((s,i)=>({symbol:s,shortName:s,regularMarketPrice:res[i].c||0,regularMarketChange:res[i].d||0,regularMarketChangePercent:res[i].dp||0}));
+      if (q.some(x=>x.regularMarketPrice>0)) return q;
+      throw new Error('fh empty');
+    } catch {}
+    // 3) NASDAQ official
+    try {
+      const res = await Promise.all(syms.map(s=>fetch(PROXY+encodeURIComponent(`https://api.nasdaq.com/api/quote/${s}/info?assetclass=stocks`)).then(r=>r.json())));
+      const q = syms.map((s,i)=>{const pd=res[i]?.data?.primaryData||{};return{symbol:s,shortName:s,regularMarketPrice:parseFloat((pd.lastSalePrice||'').replace(/[^0-9.]/g,''))||0,regularMarketChange:parseFloat((pd.netChange||'').replace(/[^0-9.-]/g,''))||0,regularMarketChangePercent:parseFloat((pd.percentageChange||'').replace(/[^0-9.-]/g,''))||0};});
+      if (q.some(x=>x.regularMarketPrice>0)) return q;
+      throw new Error('nq empty');
+    } catch {}
+    // 4) Yahoo Finance fallback
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms.join(',')}&fields=symbol,shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent,marketCap,trailingPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageVolume`;
+    const r = await fetch(PROXY+encodeURIComponent(url));
+    return (await r.json())?.quoteResponse?.result || [];
+  }
 
   async function loadSector() {
-    let quotes = [];
-    try {
-      const fhRes = await Promise.all(stocks.map(s =>
-        fetch(`https://finnhub.io/api/v1/quote?symbol=${s}&token=${FH_KEY}`).then(r => r.json())
-      ));
-      const fhQ = stocks.map((s, i) => ({symbol: s, regularMarketPrice: fhRes[i].c, regularMarketChange: fhRes[i].d, regularMarketChangePercent: fhRes[i].dp}));
-      if (fhQ.some(q => q.regularMarketPrice > 0)) quotes = fhQ;
-      else throw new Error('empty');
-    } catch {
-      try {
-        const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${stocks.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-        const r = await fetch(P + encodeURIComponent(url));
-        const w = await r.json();
-        quotes = w?.quoteResponse?.result || [];
-      } catch {}
-    }
-    try {
-      let totalPct = 0;
-      quotes.forEach(q => {
-        const chg = q.regularMarketChange ?? 0;
-        const pct = q.regularMarketChangePercent ?? 0;
-        const up  = chg >= 0;
-        const color = up ? '#22c55e' : '#ef4444';
-        totalPct += pct;
-        const card = document.getElementById(`sc-${q.symbol}`);
-        if (card) card.classList.add(up ? 'up' : 'dn');
-        const bEl = document.getElementById(`scb-${q.symbol}`);
-        if (bEl) { bEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; bEl.classList.add(up?'badge-up':'badge-dn'); }
-        const pEl = document.getElementById(`scp-${q.symbol}`);
-        if (pEl) pEl.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
-        const cEl = document.getElementById(`scc-${q.symbol}`);
-        if (cEl) { cEl.textContent = `${up?'▲':'▼'} $${Math.abs(chg).toFixed(2)}`; cEl.style.color = color; }
-      });
-      const avg = totalPct / (quotes.length || 1);
-      const el  = document.getElementById('sectorChg');
-      if (el) { el.textContent = `${avg>=0?'+':''}${avg.toFixed(2)}%`; el.style.color = avg>=0?'#22c55e':'#ef4444'; }
-    } catch {}
+    const quotes = await fetchQuotes(stocks);
+    let totalPct = 0;
+    quotes.forEach(q => {
+      const chg = q.regularMarketChange ?? 0;
+      const pct = q.regularMarketChangePercent ?? 0;
+      const up  = chg >= 0;
+      const color = up ? '#22c55e' : '#ef4444';
+      totalPct += pct;
+      const card = document.getElementById(`sc-${q.symbol}`);
+      if (card) card.classList.add(up ? 'up' : 'dn');
+      const bEl = document.getElementById(`scb-${q.symbol}`);
+      if (bEl) { bEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; bEl.classList.add(up?'badge-up':'badge-dn'); }
+      const pEl = document.getElementById(`scp-${q.symbol}`);
+      if (pEl) pEl.textContent = `$${q.regularMarketPrice?.toFixed(2)}`;
+      const cEl = document.getElementById(`scc-${q.symbol}`);
+      if (cEl) { cEl.textContent = `${up?'▲':'▼'} $${Math.abs(chg).toFixed(2)}`; cEl.style.color = color; }
+    });
+    const avg = totalPct / (quotes.length || 1);
+    const el  = document.getElementById('sectorChg');
+    if (el) { el.textContent = `${avg>=0?'+':''}${avg.toFixed(2)}%`; el.style.color = avg>=0?'#22c55e':'#ef4444'; }
   }
 
   loadSector();

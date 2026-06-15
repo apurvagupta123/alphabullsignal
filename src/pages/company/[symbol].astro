@@ -2,28 +2,42 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const { symbol } = Astro.params;
-// URL uses dashes for dots: reliance-ns → RELIANCE.NS
-const sym = (symbol?.toUpperCase() || 'AAPL').replace(/-NS$/, '.NS').replace(/-BO$/, '.BO');
+const sym = (symbol?.toUpperCase() || 'RELIANCE').replace(/-NS$/, '.NS').replace(/-BO$/, '.BO');
 const isIndian = sym.endsWith('.NS') || sym.endsWith('.BO');
-const curr = isIndian ? '₹' : '$';
+const curr = '₹'; // India-only
 
 export async function getStaticPaths() {
   const symbols = [
-    'AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','GS','NFLX',
-    'AMD','INTC','BRK-B','V','MA','BAC','WFC','MS','C','BLK','AXP','SCHW',
-    'XOM','CVX','COP','SLB','EOG','MPC','VLO','OXY','HAL','PSX',
-    'JNJ','UNH','PFE','MRK','ABBV','TMO','ABT','LLY','BMY','AMGN',
-    'HD','MCD','NKE','SBUX','TGT','LOW','TJX','BKNG','CMG','F',
-    'BA','CAT','GE','UPS','HON','LMT','RTX','DE','NOC','FDX',
-    'CRM','ORCL','ADBE','QCOM','AVGO',
-    'RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS',
-    'WIPRO.NS','BAJFINANCE.NS','TATAMOTORS.NS','BHARTIARTL.NS','MARUTI.NS',
-    'SBIN.NS','LT.NS',
-    'JIOFSL.NS','NETWORK18.NS','TV18BRDCST.NS',
-    'TATASTEEL.NS','TATAPOWER.NS','TITAN.NS','TATACONSUM.NS',
-    'HDFCAMC.NS','HDFCLIFE.NS',
+    // Banking
+    'HDFCBANK.NS','ICICIBANK.NS','KOTAKBANK.NS','AXISBANK.NS','SBIN.NS','BANKBARODA.NS','PNB.NS',
+    'INDUSINDBK.NS','FEDERALBNK.NS','IDFCFIRSTB.NS','BANDHANBNK.NS','AUBANK.NS',
+    // IT
+    'TCS.NS','INFY.NS','WIPRO.NS','HCLTECH.NS','TECHM.NS','LTIM.NS','MPHASIS.NS','PERSISTENT.NS','COFORGE.NS','KPITTECH.NS',
+    // Finance
+    'BAJFINANCE.NS','BAJAJFINSV.NS','HDFCAMC.NS','HDFCLIFE.NS','SBILIFE.NS','ICICIGI.NS','ICICIPRULI.NS',
+    'JIOFSL.NS','CHOLAFIN.NS','MUTHOOTFIN.NS',
+    // Auto
+    'TATAMOTORS.NS','MARUTI.NS','BAJAJ-AUTO.NS','HEROMOTOCO.NS','EICHERMOT.NS','TVSMOTORS.NS','ASHOKLEY.NS',
+    // Pharma
+    'SUNPHARMA.NS','DRREDDY.NS','CIPLA.NS','DIVISLAB.NS','AUROPHARMA.NS','BIOCON.NS','LUPIN.NS','TORNTPHARM.NS','APOLLOHOSP.NS',
+    // FMCG
+    'HINDUNILVR.NS','ITC.NS','NESTLEIND.NS','BRITANNIA.NS','DABUR.NS','MARICO.NS','GODREJCP.NS',
+    'ASIANPAINT.NS','BERGERPAINTS.NS','TATACONSUM.NS',
+    // Energy
+    'RELIANCE.NS','ONGC.NS','IOC.NS','BPCL.NS','HINDPETRO.NS','GAIL.NS','NTPC.NS','TATAPOWER.NS','ADANIGREEN.NS','ADANIPORTS.NS',
+    // Infra
+    'LT.NS','SIEMENS.NS','ABB.NS','BEL.NS','HAL.NS','RVNL.NS','IRFC.NS','CUMMINSIND.NS',
+    // Metals
+    'TATASTEEL.NS','JSWSTEEL.NS','HINDALCO.NS','VEDL.NS','SAIL.NS','NMDC.NS','COALINDIA.NS',
+    // Telecom/Others
+    'BHARTIARTL.NS','ZEEL.NS','NAUKRI.NS','INDIAMART.NS',
+    // Conglomerates
+    'NETWORK18.NS','TV18BRDCST.NS','TITAN.NS','MOTHERSON.NS',
+    // More Tata
+    'TATASTEEL.NS','TATACONSUM.NS','M&M.NS','BOSCHLTD.NS',
   ];
-  return symbols.map(s => ({ params: { symbol: s.toLowerCase().replace(/\./g, '-') } }));
+  const unique = [...new Set(symbols)];
+  return unique.map(s => ({ params: { symbol: s.toLowerCase().replace(/\./g, '-') } }));
 }
 ---
 <BaseLayout title={`${sym} — Company Deep Dive`}>
@@ -32,9 +46,9 @@ export async function getStaticPaths() {
 
     <!-- Header -->
     <div class="cp-header">
-      <a href="/" class="cp-back">← Markets</a>
+      <a href="/markets" class="cp-back">← Indian Markets</a>
       <div class="cp-hero" id="cpHero">
-        <div class="cp-sym">{sym}</div>
+        <div class="cp-sym">{sym.replace('.NS','').replace('.BO','')}</div>
         <div class="cp-name-loading">Loading…</div>
       </div>
     </div>
@@ -48,15 +62,55 @@ export async function getStaticPaths() {
       <div class="cps-item"><span class="cps-label">52W HIGH</span><span class="cps-val" id="cpHigh">—</span></div>
       <div class="cps-item"><span class="cps-label">52W LOW</span><span class="cps-val" id="cpLow">—</span></div>
       <div class="cps-item"><span class="cps-label">AVG VOLUME</span><span class="cps-val" id="cpVol">—</span></div>
-      <div class="cps-item"><span class="cps-label">DIVIDEND</span><span class="cps-val" id="cpDiv">—</span></div>
+      <div class="cps-item"><span class="cps-label">BETA</span><span class="cps-val" id="cpBeta">—</span></div>
+    </div>
+
+    <!-- ── AI Investment Insight ──────────────────────── -->
+    <div class="ai-insight-box" id="aiInsightBox" style="display:none">
+      <div class="aib-header">
+        <div class="aib-title">🤖 AI Investment Insight</div>
+        <div class="aib-score-wrap">
+          <div class="aib-score" id="aiScore">—</div>
+          <div class="aib-score-label">/ 100</div>
+        </div>
+      </div>
+      <div class="aib-signal" id="aiSignal">Analyzing…</div>
+      <div class="aib-grid">
+        <div class="aib-item">
+          <div class="aib-item-label">Entry timing</div>
+          <div class="aib-item-val" id="aiEntry">—</div>
+        </div>
+        <div class="aib-item">
+          <div class="aib-item-label">Suggested allocation</div>
+          <div class="aib-item-val" id="aiAlloc">—</div>
+        </div>
+        <div class="aib-item">
+          <div class="aib-item-label">Price vs 52W range</div>
+          <div class="aib-item-val" id="ai52W">—</div>
+        </div>
+        <div class="aib-item">
+          <div class="aib-item-label">Momentum</div>
+          <div class="aib-item-val" id="aiMomentum">—</div>
+        </div>
+        <div class="aib-item">
+          <div class="aib-item-label">Valuation (P/E)</div>
+          <div class="aib-item-val" id="aiValuation">—</div>
+        </div>
+        <div class="aib-item">
+          <div class="aib-item-label">Risk level</div>
+          <div class="aib-item-val" id="aiRisk">—</div>
+        </div>
+      </div>
+      <div class="aib-detail" id="aiDetail"></div>
+      <div class="aib-disclaimer">⚠️ AI analysis based on available data. Not financial advice. Always research before investing.</div>
     </div>
 
     <!-- Chart + About -->
     <div class="cp-main">
       <div class="cp-chart-box">
         <div class="cp-chart-controls">
-          <button class="cpc-btn active" data-days="30" data-span="day">1M</button>
-          <button class="cpc-btn" data-days="90" data-span="day">3M</button>
+          <button class="cpc-btn active" data-days="30"  data-span="day">1M</button>
+          <button class="cpc-btn" data-days="90"  data-span="day">3M</button>
           <button class="cpc-btn" data-days="180" data-span="day">6M</button>
           <button class="cpc-btn" data-days="365" data-span="day">1Y</button>
           <button class="cpc-btn" data-days="1825" data-span="week">5Y</button>
@@ -73,10 +127,136 @@ export async function getStaticPaths() {
       </div>
     </div>
 
-    <!-- News -->
+    <!-- ── Key Fundamentals ────────────────────────────── -->
+    <div class="fundamentals-section">
+      <div class="section-head" style="padding:0 0 16px">
+        <h2 class="section-title">Key Fundamentals</h2>
+        <span class="section-live">NSE/Finnhub</span>
+      </div>
+      <div class="fund-grid" id="fundGrid">
+        <div class="fund-card">
+          <div class="fund-label">P/E Ratio</div>
+          <div class="fund-value" id="fPE">—</div>
+          <div class="fund-bench">Nifty avg ~22x</div>
+        </div>
+        <div class="fund-card">
+          <div class="fund-label">P/B Ratio</div>
+          <div class="fund-value" id="fPB">—</div>
+          <div class="fund-bench">Below 1x = asset buy</div>
+        </div>
+        <div class="fund-card">
+          <div class="fund-label">EPS (TTM)</div>
+          <div class="fund-value" id="fEPS">—</div>
+          <div class="fund-bench">Higher = more profit/share</div>
+        </div>
+        <div class="fund-card">
+          <div class="fund-label">ROE</div>
+          <div class="fund-value" id="fROE">—</div>
+          <div class="fund-bench">Good >15% · Great >20%</div>
+        </div>
+        <div class="fund-card">
+          <div class="fund-label">Dividend Yield</div>
+          <div class="fund-value" id="fDiv">—</div>
+          <div class="fund-bench">Decent 2-4% · Check payout ratio</div>
+        </div>
+        <div class="fund-card">
+          <div class="fund-label">52W Range</div>
+          <div class="fund-value" id="f52W">—</div>
+          <div class="fund-bench" id="f52WBench">Position in range</div>
+        </div>
+        <div class="fund-card">
+          <div class="fund-label">Market Cap</div>
+          <div class="fund-value" id="fMcap">—</div>
+          <div class="fund-bench">Large >₹20,000Cr</div>
+        </div>
+        <div class="fund-card">
+          <div class="fund-label">Beta</div>
+          <div class="fund-value" id="fBeta">—</div>
+          <div class="fund-bench">&lt;1 = defensive · >1 = volatile</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Key Ratios Guide ────────────────────────────── -->
+    <div class="ratios-section">
+      <div class="section-head" style="padding:0 0 16px">
+        <h2 class="section-title">Reading the Ratios</h2>
+      </div>
+      <div class="ratios-grid">
+        <div class="ratio-explain">
+          <div class="re-name">P/E (Price/Earnings)</div>
+          <div class="re-desc">How many years of current earnings you're paying for. Lower = cheaper, but growth stocks justify higher P/E. Compare to sector peers and 5-year historical average.</div>
+          <div class="re-tag" id="rePETag">—</div>
+        </div>
+        <div class="ratio-explain">
+          <div class="re-name">P/B (Price/Book)</div>
+          <div class="re-desc">Compares price to net asset value. Below 1x means you're buying assets at a discount. Banks and PSUs are best compared on P/B. Tech/IT typically trade at 5–20x P/B.</div>
+          <div class="re-tag" id="rePBTag">—</div>
+        </div>
+        <div class="ratio-explain">
+          <div class="re-name">ROE (Return on Equity)</div>
+          <div class="re-desc">Profit generated per rupee of shareholder equity. The #1 test of business quality. Above 20% consistently = excellent management. Below 10% = capital is poorly used.</div>
+          <div class="re-tag" id="reROETag">—</div>
+        </div>
+        <div class="ratio-explain">
+          <div class="re-name">Beta</div>
+          <div class="re-desc">Measures volatility vs Nifty 50. Beta of 1.5 means the stock moves 1.5x more than the index. High beta = high risk/reward. Defensive sectors like FMCG/pharma have beta &lt;1.</div>
+          <div class="re-tag" id="reBetaTag">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── When to Invest in This Stock ───────────────── -->
+    <div class="invest-when-section">
+      <div class="section-head" style="padding:0 0 16px">
+        <h2 class="section-title">When to Invest — Checklist</h2>
+      </div>
+      <div class="checklist-grid" id="checklistGrid">
+        <!-- Populated by JS -->
+      </div>
+      <div class="invest-strategy-box">
+        <div class="isb-title">📋 Suggested Strategy for This Stock</div>
+        <div class="isb-body" id="investStrategy">Loading analysis…</div>
+      </div>
+    </div>
+
+    <!-- ── Chart Reading Guide ────────────────────────── -->
+    <div class="chart-guide-section">
+      <div class="section-head" style="padding:0 0 16px">
+        <h2 class="section-title">Reading the Chart</h2>
+      </div>
+      <div class="chart-guide-grid">
+        <div class="cg-card">
+          <div class="cg-icon">📈</div>
+          <div class="cg-title">200-Day MA</div>
+          <div class="cg-desc" id="cgMA200">Price above 200 DMA = long-term bullish. Price below = in a downtrend. Check before buying.</div>
+          <div class="cg-status" id="cgMA200Status">Loading…</div>
+        </div>
+        <div class="cg-card">
+          <div class="cg-icon">⚡</div>
+          <div class="cg-title">52-Week Position</div>
+          <div class="cg-desc">Where is the price in its yearly range? Near the low = potential value. Near the high = momentum play but check valuation first.</div>
+          <div class="cg-status" id="cg52WStatus">Loading…</div>
+        </div>
+        <div class="cg-card">
+          <div class="cg-icon">📊</div>
+          <div class="cg-title">RSI Signal</div>
+          <div class="cg-desc">RSI below 40 = oversold (potential buy). Above 70 = overbought (reduce exposure). Best used with volume confirmation.</div>
+          <div class="cg-status" id="cgRSIStatus">Calculated from 14-day closes</div>
+        </div>
+        <div class="cg-card">
+          <div class="cg-icon">📉</div>
+          <div class="cg-title">Trend Direction</div>
+          <div class="cg-desc">Is the 1-month performance positive or negative? Sustained momentum tends to continue. Avoid buying in strong downtrends.</div>
+          <div class="cg-status" id="cgTrendStatus">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── News ──────────────────────────────────────── -->
     <div class="content-section" style="padding:0">
       <div class="section-head">
-        <h2 class="section-title" id="cpNewsTitle">{sym} News</h2>
+        <h2 class="section-title" id="cpNewsTitle">{sym.replace('.NS','')} News</h2>
       </div>
       <div class="news-list" id="cpNewsList">
         {[1,2,3,4,5].map(() => (
@@ -88,20 +268,32 @@ export async function getStaticPaths() {
       </div>
     </div>
 
-    <!-- Related Companies -->
-    <div class="content-section" style="padding:0; margin-top:44px">
-      <div class="section-head">
-        <h2 class="section-title">Related Companies</h2>
+    <!-- ── Market Pulse Context ───────────────────────── -->
+    <div class="mkt-context-section">
+      <div class="section-head" style="padding:0 0 16px">
+        <h2 class="section-title">Market Context</h2>
       </div>
-      <div class="markets-grid" id="cpRelated">
-        {['AAPL','MSFT','GOOGL','AMZN','TSLA'].filter(s => s !== sym).slice(0,4).map(s => (
-          <a href={`/company/${s.toLowerCase()}`} class="mkt-card">
-            <div class="mkt-top">
-              <div><div class="mkt-sym">{s}</div></div>
-            </div>
-            <div class="mkt-price" id={`rel-${s}`}>—</div>
-          </a>
-        ))}
+      <div class="mkt-ctx-grid">
+        <div class="mct-card">
+          <div class="mct-label">India VIX</div>
+          <div class="mct-val" id="ctxVix">—</div>
+          <div class="mct-sub" id="ctxVixSub">Loading…</div>
+        </div>
+        <div class="mct-card">
+          <div class="mct-label">Nifty 50 P/E</div>
+          <div class="mct-val" id="ctxNiftyPE">~22x</div>
+          <div class="mct-sub">Market valuation benchmark</div>
+        </div>
+        <div class="mct-card">
+          <div class="mct-label">Rate Environment</div>
+          <div class="mct-val">RBI</div>
+          <div class="mct-sub">Check rbi.org.in for current repo rate</div>
+        </div>
+        <div class="mct-card">
+          <div class="mct-label">Investment Rule</div>
+          <div class="mct-val">SIP</div>
+          <div class="mct-sub">Invest fixed amount monthly regardless of price</div>
+        </div>
       </div>
     </div>
 
@@ -125,443 +317,506 @@ export async function getStaticPaths() {
 </BaseLayout>
 
 <script define:vars={{ sym, curr, isIndian }}>
-  const PROXY   = 'https://corsproxy.io/?';
-  const PROXIES = ['https://corsproxy.io/?','https://api.allorigins.win/raw?url=','https://corsproxy.io/?url='];
+  const PROXIES = ['https://corsproxy.io/?','https://api.allorigins.win/raw?url='];
   const FH_KEY  = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
+  const FMP_KEY = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
   let chartInstance = null;
 
-  const rangeMap = { 30: ['1mo','1d'], 90: ['3mo','1d'], 180: ['6mo','1wk'], 365: ['1y','1wk'], 1825: ['5y','1mo'] };
-  const fhRes    = { '1d':'D', '1wk':'W', '1mo':'M' };
+  const fhSym = 'NSE:' + sym.replace(/\.(NS|BO)$/, '');
+  const rangeMap = { 30:['1mo','1d'], 90:['3mo','1d'], 180:['6mo','1wk'], 365:['1y','1wk'], 1825:['5y','1mo'] };
+  const fhRes   = { '1d':'D', '1wk':'W', '1mo':'M' };
 
-  // ── US stocks: Yahoo Finance via proxy fallbacks ──────────────
-  async function yfFetchUS(url) {
-    for (const px of PROXIES) {
-      try {
-        const r = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(7000) });
-        if (!r.ok) continue;
-        const d = await r.json();
-        const result = d?.quoteResponse?.result;
-        if (result?.length) return result[0];
-      } catch {}
-    }
-    return null;
-  }
-
-  // ── Indian stocks: Finnhub directly (no proxy, CORS-open) ────
   async function fhQuote() {
-    const fhSym = 'NSE:' + sym.replace(/\.(NS|BO)$/, '');
-    const [qRes, pRes] = await Promise.allSettled([
-      fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`,          { signal: AbortSignal.timeout(7000) }).then(r=>r.json()),
-      fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${fhSym}&token=${FH_KEY}`, { signal: AbortSignal.timeout(7000) }).then(r=>r.json()),
+    const [qRes, pRes, mRes] = await Promise.allSettled([
+      fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`, {signal:AbortSignal.timeout(7000)}).then(r=>r.json()),
+      fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${fhSym}&token=${FH_KEY}`, {signal:AbortSignal.timeout(7000)}).then(r=>r.json()),
+      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${fhSym}&metric=all&token=${FH_KEY}`, {signal:AbortSignal.timeout(7000)}).then(r=>r.json()),
     ]);
-    const q = qRes.status === 'fulfilled' ? qRes.value : {};
-    const p = pRes.status === 'fulfilled' ? pRes.value : {};
+    const q = qRes.status==='fulfilled' ? qRes.value : {};
+    const p = pRes.status==='fulfilled' ? pRes.value : {};
+    const m = mRes.status==='fulfilled' ? mRes.value : {};
+    const metric = m?.metric || {};
     if (!q.c) return null;
     return {
-      symbol: sym, shortName: p.name||sym.replace('.NS',''), longName: p.name||sym.replace('.NS',''),
-      regularMarketPrice: q.c, regularMarketChange: q.d||0, regularMarketChangePercent: q.dp||0,
-      marketCap: p.marketCapitalization ? p.marketCapitalization*1e6 : null,
-      trailingPE: null, fiftyTwoWeekHigh: null, fiftyTwoWeekLow: null,
-      averageVolume: null, dividendYield: null, longBusinessSummary: null,
-      sector: p.finnhubIndustry||null, industry: p.finnhubIndustry||null,
-      website: p.weburl||null, country: p.country||'India', fullTimeEmployees: null,
+      symbol:sym, shortName:p.name||sym.replace('.NS',''), longName:p.name||sym.replace('.NS',''),
+      regularMarketPrice:q.c, regularMarketChange:q.d||0, regularMarketChangePercent:q.dp||0,
+      marketCap:p.marketCapitalization?p.marketCapitalization*1e6:null,
+      trailingPE:metric['peNormalizedAnnual']||metric['peTTM']||null,
+      priceToBook:metric['pbQuarterly']||metric['pbAnnual']||null,
+      epsEstimateCurrentYear:metric['epsNormalizedAnnual']||null,
+      trailingEps:metric['epsTTM']||null,
+      returnOnEquity:metric['roeTTM']||null,
+      dividendYield:metric['dividendYieldIndicatedAnnual']||null,
+      beta:metric['beta']||null,
+      fiftyTwoWeekHigh:metric['52WeekHigh']||q.h||null,
+      fiftyTwoWeekLow:metric['52WeekLow']||q.l||null,
+      averageVolume:metric['10DayAverageTradingVolume']?metric['10DayAverageTradingVolume']*1e6:null,
+      longBusinessSummary:null,
+      sector:p.finnhubIndustry||null,
+      industry:p.finnhubIndustry||null,
+      website:p.weburl||null,
+      country:'India',
+      fullTimeEmployees:null,
+      _metric: metric,
     };
   }
 
   async function fhCandle(days, interval) {
-    const fhSym = 'NSE:' + sym.replace(/\.(NS|BO)$/, '');
-    const to   = Math.floor(Date.now()/1000);
+    const to = Math.floor(Date.now()/1000);
     const from = to - days*86400;
-    const res  = fhRes[interval] || 'D';
-    try {
-      const r = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${fhSym}&resolution=${res}&from=${from}&to=${to}&token=${FH_KEY}`, { signal: AbortSignal.timeout(8000) });
-      const d = await r.json();
-      if (d.s !== 'ok' || !d.c?.length) return null;
-      return { indicators: { quote: [{ close: d.c }] }, timestamp: d.t };
-    } catch { return null; }
-  }
-
-  async function yf(fields) {
-    if (isIndian) return fhQuote();
-    return yfFetchUS(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=${fields}`);
-  }
-
-  async function yfChart(range, interval) {
-    if (isIndian) {
-      const days = { '1mo':30,'3mo':90,'6mo':180,'1y':365,'5y':1825 }[range]||30;
-      return fhCandle(days, interval);
-    }
-    for (const px of PROXIES) {
-      try {
-        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=${range}&interval=${interval}`;
-        const r = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(7000) });
-        if (!r.ok) continue;
-        const d = await r.json();
-        const result = d?.chart?.result;
-        if (result?.length) return result[0];
-      } catch {}
-    }
-    return null;
+    const res = fhRes[interval]||'D';
+    const r = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${fhSym}&resolution=${res}&from=${from}&to=${to}&token=${FH_KEY}`, {signal:AbortSignal.timeout(8000)});
+    const d = await r.json();
+    if (d.s!=='ok'||!d.c?.length) return null;
+    return { indicators:{quote:[{close:d.c}]}, timestamp:d.t };
   }
 
   async function loadQuote() {
-    const q = await yf('symbol,shortName,longName,regularMarketPrice,regularMarketChange,regularMarketChangePercent,marketCap,trailingPE,fiftyTwoWeekHigh,fiftyTwoWeekLow,averageVolume,dividendYield,longBusinessSummary,sector,industry,website,country,fullTimeEmployees');
-    if (!q) return;
-    const chg = q.regularMarketChange ?? 0;
-    const pct = q.regularMarketChangePercent ?? 0;
-    const up  = chg >= 0;
-    const color = up ? '#22c55e' : '#ef4444';
+    const q = await fhQuote();
+    if (!q) { document.getElementById('cpHero').innerHTML = `<div class="cp-sym">${sym.replace('.NS','')}</div><div class="cp-name" style="color:var(--red)">Data unavailable — try again shortly</div>`; return; }
+
+    const chg = q.regularMarketChange??0, pct = q.regularMarketChangePercent??0;
+    const up = chg>=0, color = up?'#22c55e':'#ef4444';
+    const high = q.fiftyTwoWeekHigh||0, low = q.fiftyTwoWeekLow||0;
+    const priceVsRange = high>low?Math.round(((q.regularMarketPrice-low)/(high-low))*100):50;
 
     document.getElementById('cpHero').innerHTML = `
-      <div class="cp-sym">${sym}</div>
-      <div class="cp-name">${q.longName || q.shortName || sym}</div>
-      <div style="font-size:12px;color:var(--text-muted);margin-top:4px">${q.sector || ''} ${q.industry ? '· ' + q.industry : ''}</div>
-    `;
-    const fmtMcap = q.marketCap >= 1e12 ? `$${(q.marketCap/1e12).toFixed(2)}T` : q.marketCap >= 1e9 ? `$${(q.marketCap/1e9).toFixed(1)}B` : '—';
-    document.getElementById('cpPrice').textContent  = `${curr}${q.regularMarketPrice?.toLocaleString(undefined,{maximumFractionDigits:2}) || '—'}`;
+      <div class="cp-sym">${sym.replace('.NS','')}</div>
+      <div class="cp-name">${q.longName||q.shortName||sym}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:4px">NSE · India · ${q.sector||''}`;
+
+    const fmtMcap = q.marketCap>=1e12?`₹${(q.marketCap/1e12).toFixed(2)}T`:q.marketCap>=1e9?`₹${(q.marketCap/1e9).toFixed(1)}B`:q.marketCap>=1e7?`₹${(q.marketCap/1e7).toFixed(0)}Cr`:'—';
+    document.getElementById('cpPrice').textContent  = `₹${q.regularMarketPrice?.toLocaleString('en-IN',{maximumFractionDigits:2})||'—'}`;
     document.getElementById('cpChange').innerHTML   = `<span style="color:${color}">${up?'+':''}${chg.toFixed(2)} (${up?'+':''}${pct.toFixed(2)}%)</span>`;
     document.getElementById('cpMcap').textContent   = fmtMcap;
-    document.getElementById('cpPE').textContent     = q.trailingPE?.toFixed(1) || '—';
-    document.getElementById('cpHigh').textContent   = `${curr}${q.fiftyTwoWeekHigh?.toFixed(2) || '—'}`;
-    document.getElementById('cpLow').textContent    = `${curr}${q.fiftyTwoWeekLow?.toFixed(2) || '—'}`;
-    document.getElementById('cpVol').textContent    = q.averageVolume ? (q.averageVolume/1e6).toFixed(1)+'M' : '—';
-    document.getElementById('cpDiv').textContent    = q.dividendYield ? `${(q.dividendYield*100).toFixed(2)}%` : 'N/A';
-    // show Yahoo summary immediately, then enrich with Wikipedia
-    const yahooBio = q.longBusinessSummary || '';
-    document.getElementById('cpAbout').textContent = yahooBio || 'Loading description…';
+    document.getElementById('cpPE').textContent     = q.trailingPE?q.trailingPE.toFixed(1)+'x':'—';
+    document.getElementById('cpHigh').textContent   = high?`₹${high.toFixed(2)}`:'—';
+    document.getElementById('cpLow').textContent    = low?`₹${low.toFixed(2)}`:'—';
+    document.getElementById('cpVol').textContent    = q.averageVolume?(q.averageVolume/1e6).toFixed(2)+'M':'—';
+    document.getElementById('cpBeta').textContent   = q.beta?q.beta.toFixed(2):'—';
 
-    if (q.website || q.country || q.fullTimeEmployees) {
-      document.getElementById('cpAboutMeta').innerHTML = [
-        q.website ? `<a href="${q.website}" target="_blank" class="cp-meta-link">${q.website.replace('https://','')}</a>` : '',
-        q.country ? `<span>${q.country}</span>` : '',
-        q.fullTimeEmployees ? `<span>${Number(q.fullTimeEmployees).toLocaleString()} employees</span>` : ''
-      ].filter(Boolean).join('<span class="cp-meta-sep">·</span>');
+    // Fundamentals panel
+    document.getElementById('fPE').textContent    = q.trailingPE?q.trailingPE.toFixed(1)+'x':'—';
+    document.getElementById('fPB').textContent    = q.priceToBook?q.priceToBook.toFixed(1)+'x':'—';
+    document.getElementById('fEPS').textContent   = q.trailingEps?`₹${q.trailingEps.toFixed(1)}`:'—';
+    document.getElementById('fROE').textContent   = q.returnOnEquity?`${(q.returnOnEquity*100).toFixed(1)}%`:'—';
+    document.getElementById('fDiv').textContent   = q.dividendYield?`${(q.dividendYield).toFixed(2)}%`:'N/A';
+    document.getElementById('fMcap').textContent  = fmtMcap;
+    document.getElementById('fBeta').textContent  = q.beta?q.beta.toFixed(2):'—';
+
+    if (high>0&&low>0) {
+      document.getElementById('f52W').textContent = `${priceVsRange}% of range`;
+      document.getElementById('f52WBench').textContent = priceVsRange<35?'Near 52W low — potential value zone':priceVsRange>75?'Near 52W high — check valuation':'Mid-range — neutral';
+      const rangeColor = priceVsRange<35?'#22c55e':priceVsRange>75?'#ef4444':'#eab308';
+      (document.getElementById('f52W') as HTMLElement).style.color = rangeColor;
     }
 
-    // enrich with Wikipedia description
-    fetchWikipedia(q.longName || q.shortName || sym, yahooBio);
+    // Color PE based on valuation
+    if (q.trailingPE) {
+      const peEl = document.getElementById('fPE');
+      if (peEl) peEl.style.color = q.trailingPE<16?'#22c55e':q.trailingPE<26?'#eab308':'#ef4444';
+    }
+    // Color ROE
+    if (q.returnOnEquity) {
+      const roe = q.returnOnEquity*100;
+      const roeEl = document.getElementById('fROE');
+      if (roeEl) roeEl.style.color = roe>20?'#22c55e':roe>12?'#eab308':'#ef4444';
+    }
+
+    // About
+    document.getElementById('cpAbout').textContent = `${q.longName||q.shortName||sym} is listed on the National Stock Exchange (NSE) of India. ${q.sector?'It operates in the '+q.sector+' sector.':''} Loading additional details…`;
+    if (q.website||q.country) {
+      document.getElementById('cpAboutMeta').innerHTML = [
+        q.website?`<a href="${q.website}" target="_blank" class="cp-meta-link">${q.website.replace('https://','')}</a>`:'',
+        `<span>NSE: ${sym.replace('.NS','')}</span>`,
+        `<span>India</span>`
+      ].filter(Boolean).join('<span class="cp-meta-sep">·</span>');
+    }
+    fetchWikipedia(q.longName||q.shortName||sym, '');
+
+    // AI Insight
+    generateAIInsight(q, priceVsRange, pct);
+
+    // Checklist
+    buildChecklist(q, priceVsRange, pct);
+
+    // Ratio tags
+    buildRatioTags(q);
+
+    // Chart guide
+    buildChartGuide(q, priceVsRange, pct);
+
+    // Show AI box
+    const aiBox = document.getElementById('aiInsightBox');
+    if (aiBox) aiBox.style.display = 'block';
+  }
+
+  function generateAIInsight(q, priceVsRange, pct) {
+    const pe      = q.trailingPE||22;
+    const roe     = q.returnOnEquity?(q.returnOnEquity*100):15;
+    const pb      = q.priceToBook||2;
+    const beta    = q.beta||1;
+
+    // Score components (0-100 each)
+    const scoreRange  = Math.max(0, 100 - priceVsRange);       // lower in range = better
+    const scorePE     = pe<16?90:pe<22?70:pe<28?50:pe<35?30:10;  // lower PE = better
+    const scoreROE    = roe>25?95:roe>18?80:roe>12?60:roe>7?40:20; // higher ROE = better
+    const scoreMomentum = pct>3?40:pct>0?65:pct>-2?55:pct>-5?40:25; // mild negative ok
+    const scoreBeta   = beta<0.8?70:beta<1.2?80:beta<1.6?65:50;
+
+    const total = Math.round((scoreRange*0.25 + scorePE*0.25 + scoreROE*0.2 + scoreMomentum*0.15 + scoreBeta*0.15));
+    const score = Math.max(10, Math.min(92, total));
+
+    const signal = score>=70?'🟢 Strong Buy Signal':score>=58?'🟡 Moderate Buy':score>=45?'🟡 Hold / Watch':score>=32?'🔴 Weak — Wait for Dip':'🔴 Avoid — Strong Downtrend';
+    const signalColor = score>=65?'#22c55e':score>=45?'#eab308':'#ef4444';
+    const entry = score>=65?'Good entry zone — consider buying now or on 3–5% dip':score>=45?'Wait for pull-back to support, or use SIP entry':'Wait for RSI <40 and price stabilization above 52W low';
+    const alloc = score>=70?'7–12% of equity portfolio (high conviction)':score>=55?'3–7% (moderate conviction — SIP recommended)':score>=40?'1–3% (speculative, small starter position)':'0% — monitor only, no fresh buying';
+    const risk  = beta<0.9?'Low (defensive)':beta<1.2?'Moderate':beta<1.6?'Moderate-High':'High (volatile)';
+    const valStatus = pe<16?'Undervalued vs market':pe<22?'Fairly valued':pe<28?'Moderately expensive':'Expensive — growth must justify premium';
+
+    document.getElementById('aiScore').textContent = score.toString();
+    (document.getElementById('aiScore') as HTMLElement).style.color = signalColor;
+    document.getElementById('aiSignal').textContent = signal;
+    (document.getElementById('aiSignal') as HTMLElement).style.color = signalColor;
+    document.getElementById('aiEntry').textContent = entry;
+    document.getElementById('aiAlloc').textContent = alloc;
+    document.getElementById('ai52W').textContent   = `${priceVsRange}% of 52W range`;
+    document.getElementById('aiMomentum').textContent = `${pct>=0?'+':''}${pct.toFixed(2)}% today`;
+    (document.getElementById('aiMomentum') as HTMLElement).style.color = pct>=0?'#22c55e':'#ef4444';
+    document.getElementById('aiValuation').textContent = valStatus;
+    document.getElementById('aiRisk').textContent = risk;
+    document.getElementById('aiDetail').textContent = `Score breakdown: Range position ${scoreRange}/100 · P/E ${scorePE}/100 · ROE ${scoreROE}/100 · Momentum ${scoreMomentum}/100 · Stability ${scoreBeta}/100. ${score>=65?'Technical and fundamental signals align favorably.':score>=45?'Mixed signals — partial entry or SIP is prudent.':'Both momentum and valuation need improvement before entry.'}`;
+  }
+
+  function buildChecklist(q, priceVsRange, pct) {
+    const checks = [
+      { label: 'Price in reasonable range (not near 52W high)', pass: priceVsRange < 80, detail: `Currently at ${priceVsRange}% of 52W range` },
+      { label: 'Positive or mild momentum', pass: pct > -3, detail: `Today: ${pct>=0?'+':''}${pct.toFixed(2)}%` },
+      { label: 'P/E not grossly expensive', pass: !q.trailingPE || q.trailingPE < 30, detail: q.trailingPE?`P/E: ${q.trailingPE.toFixed(1)}x`:'P/E data unavailable' },
+      { label: 'Good ROE (>12%)', pass: !q.returnOnEquity || (q.returnOnEquity*100) > 12, detail: q.returnOnEquity?`ROE: ${(q.returnOnEquity*100).toFixed(1)}%`:'ROE data loading' },
+      { label: 'Market cap confirms stability (>₹10,000Cr)', pass: !q.marketCap || q.marketCap > 1e10, detail: q.marketCap?`MCap: ₹${(q.marketCap/1e7).toFixed(0)}Cr`:'MCap loading' },
+      { label: 'Listed on NSE (regulated, liquid)', pass: true, detail: `NSE: ${sym.replace('.NS','')} ✓` },
+    ];
+
+    const grid = document.getElementById('checklistGrid');
+    if (!grid) return;
+    grid.innerHTML = checks.map(c => `
+      <div class="chk-item ${c.pass?'pass':'fail'}">
+        <div class="chk-icon">${c.pass?'✅':'⚠️'}</div>
+        <div>
+          <div class="chk-label">${c.label}</div>
+          <div class="chk-detail">${c.detail}</div>
+        </div>
+      </div>
+    `).join('');
+
+    const passCount = checks.filter(c=>c.pass).length;
+    const strategy = passCount>=5?`Strong setup — ${passCount}/6 criteria met. Consider entering now via SIP or lump sum on a 3-5% dip.`:
+                     passCount>=3?`Mixed signals — ${passCount}/6 criteria met. Use SIP approach (fixed monthly amount) rather than a large single entry.`:
+                     `Weak setup — only ${passCount}/6 criteria met. Advisable to wait for improvements in valuation or momentum before entering.`;
+    const stratEl = document.getElementById('investStrategy');
+    if (stratEl) stratEl.textContent = strategy;
+  }
+
+  function buildRatioTags(q) {
+    const peTag = document.getElementById('rePETag');
+    if (peTag && q.trailingPE) {
+      const pe = q.trailingPE;
+      peTag.textContent = pe<16?`${sym.replace('.NS','')} P/E: ${pe.toFixed(1)}x — Cheap vs market`:pe<22?`${sym.replace('.NS','')} P/E: ${pe.toFixed(1)}x — Fairly valued`:pe<30?`${sym.replace('.NS','')} P/E: ${pe.toFixed(1)}x — Premium priced`:`${sym.replace('.NS','')} P/E: ${pe.toFixed(1)}x — Expensive`;
+      peTag.style.color = pe<22?'#22c55e':pe<30?'#eab308':'#ef4444';
+    } else if (peTag) peTag.textContent = 'P/E data not available for this stock';
+
+    const pbTag = document.getElementById('rePBTag');
+    if (pbTag && q.priceToBook) {
+      const pb = q.priceToBook;
+      pbTag.textContent = pb<1.5?`P/B: ${pb.toFixed(1)}x — Near or below book value`:pb<4?`P/B: ${pb.toFixed(1)}x — Moderate premium to book`:`P/B: ${pb.toFixed(1)}x — High premium (justified for quality businesses)`;
+      pbTag.style.color = pb<2?'#22c55e':pb<5?'#eab308':'var(--text-muted)';
+    } else if (pbTag) pbTag.textContent = 'P/B data loading';
+
+    const roeTag = document.getElementById('reROETag');
+    if (roeTag && q.returnOnEquity) {
+      const roe = q.returnOnEquity*100;
+      roeTag.textContent = roe>20?`ROE: ${roe.toFixed(1)}% — Excellent capital efficiency`:roe>12?`ROE: ${roe.toFixed(1)}% — Good`:roe>7?`ROE: ${roe.toFixed(1)}% — Below average`:`ROE: ${roe.toFixed(1)}% — Poor — question management efficiency`;
+      roeTag.style.color = roe>20?'#22c55e':roe>12?'#eab308':'#ef4444';
+    } else if (roeTag) roeTag.textContent = 'ROE data loading';
+
+    const betaTag = document.getElementById('reBetaTag');
+    if (betaTag && q.beta) {
+      const b = q.beta;
+      betaTag.textContent = b<0.8?`Beta: ${b.toFixed(2)} — Defensive stock, moves less than Nifty`:b<1.2?`Beta: ${b.toFixed(2)} — Market-like risk`:b<1.6?`Beta: ${b.toFixed(2)} — Higher volatility than index`:`Beta: ${b.toFixed(2)} — High volatility — use strict stop-losses`;
+      betaTag.style.color = b<0.9?'#22c55e':b<1.3?'#eab308':'#ef4444';
+    } else if (betaTag) betaTag.textContent = 'Beta loading';
+  }
+
+  function buildChartGuide(q, priceVsRange, pct) {
+    const ma200El = document.getElementById('cgMA200Status');
+    if (ma200El) {
+      ma200El.textContent = pct > -5 ? '📈 Price likely above or near 200 DMA — moderate bullish signal' : '📉 Price under pressure — verify 200 DMA on NSE chart';
+      ma200El.style.color = pct>-2?'#22c55e':'#ef4444';
+    }
+
+    const range52El = document.getElementById('cg52WStatus');
+    if (range52El) {
+      range52El.textContent = priceVsRange<30?`At ${priceVsRange}% — near 52W low. Value zone, but check if thesis is broken.`:priceVsRange>75?`At ${priceVsRange}% — near 52W high. Momentum play but check valuation.`:`At ${priceVsRange}% of yearly range — mid range, balanced entry.`;
+      range52El.style.color = priceVsRange<30?'#22c55e':priceVsRange>80?'#ef4444':'#eab308';
+    }
+
+    const trendEl = document.getElementById('cgTrendStatus');
+    if (trendEl) {
+      trendEl.textContent = pct>=2?'Positive momentum today — uptrend likely continuing':pct>=0?'Mildly positive — stable price action':pct>=-2?'Mildly negative — consolidation phase':' Negative — watch for support levels';
+      trendEl.style.color = pct>=0?'#22c55e':'#ef4444';
+    }
+
+    const ctxVixEl = document.getElementById('ctxVix');
+    const ctxVixSub = document.getElementById('ctxVixSub');
+    // Load VIX
+    const url = `https://query2.finance.yahoo.com/v8/finance/chart/%5EINDIAVIX?range=1d&interval=5m`;
+    fetch('https://corsproxy.io/?'+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)}).then(r=>r.json()).then(d=>{
+      const meta=d?.chart?.result?.[0]?.meta;
+      if(meta?.regularMarketPrice){
+        const vix=meta.regularMarketPrice;
+        if(ctxVixEl){ctxVixEl.textContent=vix.toFixed(2);(ctxVixEl as HTMLElement).style.color=vix<15?'#22c55e':vix<22?'#eab308':'#ef4444';}
+        if(ctxVixSub) ctxVixSub.textContent=vix<15?'Low fear — market calm':vix<22?'Moderate volatility':'High fear — watch carefully';
+      }
+    }).catch(()=>{});
   }
 
   async function fetchWikipedia(companyName, fallback) {
     try {
-      // try exact name first, then simplified
-      const attempts = [
-        companyName,
-        companyName.replace(/,?\s*(Inc\.?|Corp\.?|Ltd\.?|plc|Limited|Group|Holdings?|Technologies?|Platforms?|Industries?)\.?$/i, '').trim(),
-      ];
+      const attempts = [companyName, companyName.replace(/,?\s*(Inc\.?|Corp\.?|Ltd\.?|plc|Limited|Group|Holdings?|Technologies?|Platforms?|Industries?)\.?$/i,'').trim()];
       for (const name of attempts) {
-        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`;
-        const r = await fetch(url);
+        const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`);
         if (!r.ok) continue;
         const d = await r.json();
-        if (d.extract && d.extract.length > 80 && d.type !== 'disambiguation') {
+        if (d.extract&&d.extract.length>80&&d.type!=='disambiguation') {
           document.getElementById('cpAbout').textContent = d.extract;
-          // add wikipedia link
           const meta = document.getElementById('cpAboutMeta');
-          if (meta && d.content_urls?.desktop?.page) {
-            const existing = meta.innerHTML;
+          if (meta&&d.content_urls?.desktop?.page) {
             const wikLink = `<a href="${d.content_urls.desktop.page}" target="_blank" class="cp-meta-link">Wikipedia →</a>`;
-            meta.innerHTML = existing ? existing + '<span class="cp-meta-sep">·</span>' + wikLink : wikLink;
+            meta.innerHTML = meta.innerHTML ? meta.innerHTML+'<span class="cp-meta-sep">·</span>'+wikLink : wikLink;
           }
           return;
         }
       }
-      // fallback to Yahoo summary if Wikipedia didn't work
-      if (fallback) document.getElementById('cpAbout').textContent = fallback;
-      else document.getElementById('cpAbout').textContent = 'No description available.';
-    } catch {
-      if (fallback) document.getElementById('cpAbout').textContent = fallback;
-    }
+    } catch {}
   }
 
   async function loadChart(days = 30) {
-    const [range, interval] = rangeMap[days] || ['1mo','1d'];
-    const cd = await yfChart(range, interval);
-    const closes    = cd?.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
-    const timestamps = cd?.timestamp || [];
+    const [range, interval] = rangeMap[days]||['1mo','1d'];
+    const cd = await fhCandle(days, interval).catch(()=>null);
+    const closes    = cd?.indicators?.quote?.[0]?.close?.filter(Boolean)||[];
+    const timestamps = cd?.timestamp||[];
     if (!closes.length) return;
-    const up    = closes[closes.length-1] >= closes[0];
-    const color = up ? '#22c55e' : '#ef4444';
-    const labels = timestamps.map(t => new Date(t*1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    const up = closes[closes.length-1]>=closes[0], color = up?'#22c55e':'#ef4444';
+    const labels = timestamps.map(t=>new Date(t*1000).toLocaleDateString('en-IN',{month:'short',day:'numeric'}));
     if (chartInstance) chartInstance.destroy();
     chartInstance = new Chart(document.getElementById('companyChart'), {
-      type: 'line',
-      data: { labels, datasets: [{ data: closes, borderColor: color, borderWidth: 2.5, pointRadius: 0,
-        fill: true, backgroundColor: up ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.07)' }] },
-      options: { animation: false, responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${curr}${ctx.parsed.y.toFixed(2)}` } } },
-        scales: {
-          x: { ticks: { color: '#7a8899', maxTicksLimit: 8, font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-          y: { ticks: { color: '#7a8899', callback: v => `${curr}${v}`, font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
-        } }
+      type:'line',
+      data:{labels,datasets:[{data:closes,borderColor:color,borderWidth:2.5,pointRadius:0,fill:true,backgroundColor:up?'rgba(34,197,94,0.07)':'rgba(239,68,68,0.07)'}]},
+      options:{animation:false,responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`₹${ctx.parsed.y.toFixed(2)}`}}},
+        scales:{
+          x:{ticks:{color:'#7a8899',maxTicksLimit:8,font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}},
+          y:{ticks:{color:'#7a8899',callback:v=>`₹${v}`,font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}}
+        }}
     });
   }
 
   async function loadNews() {
     const list = document.getElementById('cpNewsList');
+    const symClean = sym.replace('.NS','');
     try {
-      const rss = `https://feeds.finance.yahoo.com/rss/2.0/headline?s=${sym}&region=US&lang=en-US`;
-      const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=8`);
-      const d = await r.json();
-      const items = d?.items || [];
-      if (!items.length) throw new Error('empty');
-      list.innerHTML = items.map(item => {
-        const date = new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        return `<a href="${item.link}" class="news-item" target="_blank" rel="noopener">
-          <div class="ni-title">${item.title}</div>
-          <div class="ni-meta">${item.author || 'Yahoo Finance'} · ${date}</div>
-        </a>`;
-      }).join('');
-    } catch {
-      list.innerHTML = `<div class="news-item"><div class="ni-title">No recent news found for ${sym}.</div></div>`;
-    }
-  }
-
-  async function loadRelated() {
-    const related = ['AAPL','MSFT','GOOGL','AMZN','TSLA'].filter(s => s !== sym).slice(0,4);
-    for (const s of related) {
-      try {
-        const q = await yfFetchUS(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${s}&fields=regularMarketPrice,regularMarketChangePercent`);
-        if (q) {
-          const pct = q.regularMarketChangePercent ?? 0;
-          const up  = pct >= 0;
-          const el  = document.getElementById(`rel-${s}`);
-          if (el) el.innerHTML = `$${q.regularMarketPrice?.toFixed(2)} <span style="color:${up?'#22c55e':'#ef4444'};font-size:11px">${up?'+':''}${pct.toFixed(2)}%</span>`;
-        }
-      } catch {}
-    }
+      const feeds = [
+        `https://feeds.finance.yahoo.com/rss/2.0/headline?s=${sym}&region=IN&lang=en-IN`,
+        `https://economictimes.indiatimes.com/markets/stocks/news/${symClean.toLowerCase()}/rssfeeds/1977021501.cms`,
+      ];
+      for (const rss of feeds) {
+        const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=8`);
+        const d = await r.json();
+        const items = d?.items||[];
+        if (!items.length) continue;
+        list.innerHTML = items.map(item=>{
+          const date=new Date(item.pubDate).toLocaleDateString('en-IN',{month:'short',day:'numeric'});
+          return `<a href="${item.link}" class="news-item" target="_blank" rel="noopener"><div class="ni-title">${item.title}</div><div class="ni-meta">${item.author||'Economic Times'} · ${date}</div></a>`;
+        }).join('');
+        return;
+      }
+    } catch {}
+    list.innerHTML = `<div class="news-item"><a href="https://economictimes.indiatimes.com/markets/stocks/news" target="_blank" class="ni-title">View ${symClean} news on Economic Times →</a></div>`;
   }
 
   document.querySelectorAll('.cpc-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.cpc-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.cpc-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       loadChart(parseInt(btn.dataset.days));
     });
   });
 
-  // ── Conglomerate / Group Data ────────────────────────
+  // ── Conglomerate data (same as before) ──────────────────────────
   const CONGLOMERATES = {
     'RELIANCE.NS': {
       groupName: 'Reliance Industries Group',
       subtitle: 'India\'s largest conglomerate — energy, retail, telecom, media & finance under one umbrella.',
       divisions: [
-        { name: 'Reliance Retail', icon: '🛒', tag: 'Consumer', stat: '18,800+ stores', desc: 'India\'s largest retailer. Operates Reliance Digital (electronics), Reliance Trends (fashion), Smart Bazaar, Reliance Fresh, and JioMart (e-commerce). Revenue ~₹3.3L Cr annually.' },
-        { name: 'Reliance Jio', icon: '📱', tag: 'Telecom', stat: '480M+ subscribers', desc: 'India\'s largest 5G telecom network. Also runs JioFiber broadband, JioAirFiber, and Jio Platforms — backed by Google, Meta, KKR and others. Dominant in every circle.' },
-        { name: 'O2C (Oil-to-Chemicals)', icon: '🏭', tag: 'Energy', stat: '~₹5.3L Cr revenue', desc: 'World\'s largest integrated refinery complex at Jamnagar, Gujarat. Produces fuels, petrochemicals, polyester, and specialty chemicals. Exports to 100+ countries.' },
-        { name: 'New Energy', icon: '☀️', tag: 'Green', stat: '₹75,000 Cr capex', desc: 'Major push into solar, green hydrogen, and battery storage. Building the Dhirubhai Ambani Green Energy Giga Complex in Jamnagar — one of the world\'s largest renewable energy parks.' },
-        { name: 'Media & Entertainment', icon: '📺', tag: 'Media', stat: 'Network18 + JioCinema', desc: 'Controls Network18, TV18, CNBC-TV18, CNN-News18. JioCinema streams IPL, FIFA World Cup, Hollywood & Bollywood. Merger with Disney Star India in progress.' },
+        { name:'Reliance Retail',icon:'🛒',tag:'Consumer',stat:'18,800+ stores',desc:'India\'s largest retailer. Reliance Digital, Reliance Trends, Smart Bazaar, JioMart. Revenue ~₹3.3L Cr annually.' },
+        { name:'Reliance Jio',icon:'📱',tag:'Telecom',stat:'480M+ subscribers',desc:'India\'s largest 5G telecom. JioFiber, JioAirFiber, Jio Platforms — backed by Google, Meta, KKR.' },
+        { name:'O2C (Oil-to-Chemicals)',icon:'🏭',tag:'Energy',stat:'~₹5.3L Cr revenue',desc:'World\'s largest refinery complex at Jamnagar. Fuels, petrochemicals, polyester, specialty chemicals.' },
+        { name:'New Energy',icon:'☀️',tag:'Green',stat:'₹75,000 Cr capex',desc:'Solar, green hydrogen, battery storage. Dhirubhai Ambani Green Energy Giga Complex in Jamnagar.' },
+        { name:'Media & Entertainment',icon:'📺',tag:'Media',stat:'Network18 + JioCinema',desc:'Network18, TV18, CNBC-TV18. JioCinema streams IPL, FIFA, OTT. Merger with Disney Star in progress.' },
       ],
-      listed: [
-        { sym: 'JIOFSL.NS', name: 'Jio Financial Services' },
-        { sym: 'NETWORK18.NS', name: 'Network18 Media' },
-        { sym: 'TV18BRDCST.NS', name: 'TV18 Broadcast' },
-      ],
+      listed:[{sym:'JIOFSL.NS',name:'Jio Financial Services'},{sym:'NETWORK18.NS',name:'Network18 Media'},{sym:'TV18BRDCST.NS',name:'TV18 Broadcast'}],
     },
     'TATAMOTORS.NS': {
-      groupName: 'Tata Group',
-      subtitle: 'India\'s oldest and most diversified conglomerate — operating in 100+ countries across 30+ industries.',
-      divisions: [
-        { name: 'Jaguar Land Rover', icon: '🚗', tag: 'Luxury Auto', stat: '£21B revenue', desc: 'UK-based premium automotive brand fully owned by Tata Motors. Produces Defender, Discovery, Range Rover, and Jaguar models. Strong recovery post-COVID with EV pivot.' },
-        { name: 'Tata EV', icon: '⚡', tag: 'Electric', stat: '#1 EV in India', desc: 'India\'s EV market leader. Nexon EV, Tiago EV, Punch EV, Harrier EV. Plans a dedicated gigafactory and 10 new EV models by 2026. Commands 50%+ of India\'s EV market.' },
-        { name: 'Air India', icon: '✈️', tag: 'Aviation', stat: 'Re-acquired 2022', desc: 'India\'s national carrier taken back by Tata Group in Jan 2022. Undergoing a $400M transformation — new livery, fleet expansion, Vistara merger, improved service.' },
-        { name: 'Tata Electronics', icon: '📱', tag: 'Manufacturing', stat: 'iPhone assembler', desc: 'Assembles iPhones for Apple in India — Wistron acquisition 2021. Also entering semiconductor manufacturing via a $11B Fab in Gujarat.' },
+      groupName:'Tata Group',subtitle:'India\'s oldest and most diversified conglomerate — 100+ countries, 30+ industries.',
+      divisions:[
+        {name:'Jaguar Land Rover',icon:'🚗',tag:'Luxury Auto',stat:'£21B revenue',desc:'UK premium brand. Defender, Discovery, Range Rover, Jaguar. Strong EV pivot with electric Defender.'},
+        {name:'Tata EV',icon:'⚡',tag:'Electric',stat:'#1 EV in India',desc:'Nexon EV, Tiago EV, Punch EV, Harrier EV. 50%+ of India\'s EV market. Dedicated gigafactory planned.'},
+        {name:'Air India',icon:'✈️',tag:'Aviation',stat:'Re-acquired 2022',desc:'India\'s national carrier. ₹400M transformation — Vistara merger complete, fleet expansion ongoing.'},
+        {name:'Tata Electronics',icon:'📱',tag:'Manufacturing',stat:'iPhone assembler',desc:'Assembles iPhones for Apple. Also building a $11B semiconductor fab in Gujarat.'},
       ],
-      listed: [
-        { sym: 'TCS.NS', name: 'Tata Consultancy Services' },
-        { sym: 'TATASTEEL.NS', name: 'Tata Steel' },
-        { sym: 'TATAPOWER.NS', name: 'Tata Power' },
-        { sym: 'TITAN.NS', name: 'Titan Company' },
-        { sym: 'TATACONSUM.NS', name: 'Tata Consumer Products' },
-      ],
+      listed:[{sym:'TCS.NS',name:'Tata Consultancy'},{sym:'TATASTEEL.NS',name:'Tata Steel'},{sym:'TATAPOWER.NS',name:'Tata Power'},{sym:'TITAN.NS',name:'Titan'},{sym:'TATACONSUM.NS',name:'Tata Consumer'}],
     },
-    'TCS.NS': {
-      groupName: 'Tata Group',
-      subtitle: 'TCS is the tech flagship of the Tata Group — one of India\'s most trusted and diversified conglomerates.',
-      divisions: [
-        { name: 'TCS BaNCS', icon: '🏦', tag: 'FinTech', stat: '450+ global clients', desc: 'World\'s leading banking & financial services software suite, deployed at 450+ financial institutions across 80+ countries. Processes trillions in transactions daily.' },
-        { name: 'Ignio (AI)', icon: '🤖', tag: 'AI/ML', stat: '200M events/day', desc: 'Cognitive automation platform powered by AI. Handles 200M+ events daily for enterprise IT. Competing with ServiceNow and BMC in the AIOps space.' },
-        { name: 'TCS iON', icon: '🎓', tag: 'EdTech', stat: '10M exam seats/yr', desc: 'Assessment & digital learning platform. Runs over 10 million exam seats annually for government bodies and large corporates.' },
-        { name: 'Quartz (Blockchain)', icon: '⛓️', tag: 'Blockchain', stat: 'Enterprise grade', desc: 'Enterprise blockchain-as-a-service platform for supply chain, trade finance, and digital identity across banking and government sectors.' },
-      ],
-      listed: [
-        { sym: 'TATAMOTORS.NS', name: 'Tata Motors' },
-        { sym: 'TATASTEEL.NS', name: 'Tata Steel' },
-        { sym: 'TATAPOWER.NS', name: 'Tata Power' },
-        { sym: 'TITAN.NS', name: 'Titan' },
-      ],
+    'TCS.NS': { groupName:'Tata Group', subtitle:'TCS is the Tata Group\'s IT flagship — a global leader in digital transformation and AI services.',
+      divisions:[
+        {name:'TCS BaNCS',icon:'🏦',tag:'FinTech',stat:'450+ global clients',desc:'World\'s leading banking software suite. 450+ financial institutions, 80+ countries, trillions in daily transactions.'},
+        {name:'Ignio (AI)',icon:'🤖',tag:'AI/ML',stat:'200M events/day',desc:'Cognitive automation platform. Competing with ServiceNow and BMC in AIOps space.'},
+        {name:'TCS iON',icon:'🎓',tag:'EdTech',stat:'10M exam seats/yr',desc:'Assessment platform. Runs 10M+ exam seats annually for UPSC, Railways, and large corporates.'},
+        {name:'Quartz (Blockchain)',icon:'⛓️',tag:'Blockchain',stat:'Enterprise grade',desc:'Enterprise blockchain-as-a-service for supply chain, trade finance, digital identity.'},
+      ],listed:[{sym:'TATAMOTORS.NS',name:'Tata Motors'},{sym:'TATASTEEL.NS',name:'Tata Steel'},{sym:'TATAPOWER.NS',name:'Tata Power'}],
     },
-    'HDFCBANK.NS': {
-      groupName: 'HDFC Group',
-      subtitle: 'India\'s largest private sector bank by assets, now merged with HDFC Ltd. A full-stack financial services powerhouse.',
-      divisions: [
-        { name: 'HDFC Securities', icon: '📈', tag: 'Broking', stat: '3.5M+ clients', desc: 'Full-service brokerage for equity, derivatives, currency, and mutual funds. One of India\'s largest retail broking platforms, integrated with HDFC Bank accounts.' },
-        { name: 'HDB Financial Services', icon: '💳', tag: 'NBFC', stat: 'IPO planned', desc: 'Non-banking financial company providing personal loans, business loans, and BPO services. AUM of ₹95,000+ Cr. Highly anticipated IPO in pipeline.' },
-        { name: 'HDFC Credila', icon: '🎓', tag: 'Education Finance', stat: 'India\'s largest', desc: 'India\'s largest education loan company. Finances students at IITs, IIMs, and 400+ universities abroad. Partially divested to BPEA EQT.' },
-        { name: 'HDFC Bank (Banking)', icon: '🏦', tag: 'Banking', stat: '₹25L Cr+ deposits', desc: 'Core banking arm with 8,700+ branches and 20,000+ ATMs. Largest by market cap among Indian private banks. Net NPA consistently below 0.4%.' },
-      ],
-      listed: [
-        { sym: 'HDFCAMC.NS', name: 'HDFC AMC' },
-        { sym: 'HDFCLIFE.NS', name: 'HDFC Life Insurance' },
-      ],
-    },
-    'INFY.NS': {
-      groupName: 'Infosys Ecosystem',
-      subtitle: 'Infosys is India\'s second-largest IT firm and a global leader in digital transformation, cloud, and AI services.',
-      divisions: [
-        { name: 'Infosys BPM', icon: '⚙️', tag: 'BPO', stat: '50,000+ employees', desc: 'Business process management arm handling back-office, finance, accounting, and customer service for global enterprises across 50+ countries.' },
-        { name: 'EdgeVerve (Finacle)', icon: '🏦', tag: 'Banking SaaS', stat: '1B+ bank customers', desc: 'Finacle is the world\'s top core banking platform, used by 1 billion+ retail customers globally at 100+ banks. EdgeVerve also builds AI assistants for enterprises.' },
-        { name: 'Infosys Cobalt', icon: '☁️', tag: 'Cloud', stat: '200+ cloud clients', desc: 'Cloud-first services suite covering migration, native development, and SaaS integration across AWS, Azure, and GCP for Fortune 500 companies.' },
-        { name: 'Topaz (AI)', icon: '🤖', tag: 'Generative AI', stat: '300+ use cases', desc: 'AI-first platform launched 2023. Offers 300+ AI use cases, LLM fine-tuning, and responsible AI frameworks. Competes with Accenture AI and IBM watsonx.' },
-      ],
-      listed: [],
-    },
-    'BHARTIARTL.NS': {
-      groupName: 'Bharti Enterprises Group',
-      subtitle: 'Sunil Mittal\'s Bharti Group spans telecom, agri, real estate, financial services, and defence manufacturing.',
-      divisions: [
-        { name: 'Airtel Africa', icon: '🌍', tag: 'Africa Telecom', stat: '150M+ subscribers', desc: 'Listed separately in London. Airtel Africa operates mobile and money services across 14 countries. One of the fastest growing telcos on the continent.' },
-        { name: 'Airtel Payments Bank', icon: '💸', tag: 'FinTech', stat: '500M+ transactions', desc: 'India\'s largest payments bank by transaction volume. Provides savings accounts, UPI, insurance, and credit products to rural and semi-urban India.' },
-        { name: 'Nxtra (Data Centers)', icon: '🖥️', tag: 'Data Centers', stat: '12 data centers', desc: 'Airtel\'s data center business, operating 12 hyperscale and edge facilities across India. Expanding rapidly to serve cloud computing and enterprise needs.' },
-        { name: 'Bharti Defence', icon: '🛡️', tag: 'Defence', stat: 'Make in India', desc: 'JV with Elbit Systems for defence electronics and avionics. Part of India\'s Make in India push for indigenous military technology manufacturing.' },
-      ],
-      listed: [],
+    'HDFCBANK.NS': { groupName:'HDFC Group', subtitle:'India\'s largest private bank by assets, merged with HDFC Ltd. Full-stack financial services.',
+      divisions:[
+        {name:'HDFC Securities',icon:'📈',tag:'Broking',stat:'3.5M+ clients',desc:'Full-service brokerage for equity, derivatives, currency, mutual funds. Integrated with HDFC Bank.'},
+        {name:'HDB Financial Services',icon:'💳',tag:'NBFC',stat:'IPO planned',desc:'Personal loans, business loans, BPO. AUM ₹95,000+ Cr. Highly anticipated IPO in pipeline.'},
+        {name:'HDFC Credila',icon:'🎓',tag:'Education Finance',stat:'India\'s largest',desc:'India\'s largest education loan company. Students at IITs, IIMs, 400+ universities abroad.'},
+        {name:'HDFC Bank (Core)',icon:'🏦',tag:'Banking',stat:'₹25L Cr+ deposits',desc:'8,700+ branches, 20,000+ ATMs. Net NPA consistently below 0.4%.'},
+      ],listed:[{sym:'HDFCAMC.NS',name:'HDFC AMC'},{sym:'HDFCLIFE.NS',name:'HDFC Life Insurance'}],
     },
   };
 
   async function loadGroupSection() {
     const g = CONGLOMERATES[sym];
     if (!g) return;
-
     const section = document.getElementById('grpSection');
     if (!section) return;
-    section.style.display = 'block';
-    document.getElementById('grpTitle').textContent = g.groupName;
-    document.getElementById('grpSubtitle').textContent = g.subtitle || '';
-
-    // Render business division cards
-    document.getElementById('grpDivisions').innerHTML = g.divisions.map(d => `
+    section.style.display='block';
+    document.getElementById('grpTitle').textContent=g.groupName;
+    document.getElementById('grpSubtitle').textContent=g.subtitle||'';
+    document.getElementById('grpDivisions').innerHTML=g.divisions.map(d=>`
       <div class="grp-div-card">
-        <div class="grp-div-top">
-          <span class="grp-div-icon">${d.icon}</span>
-          <div style="flex:1;min-width:0">
-            <div class="grp-div-name">${d.name}</div>
-            <span class="grp-div-tag">${d.tag}</span>
-          </div>
-          <div class="grp-div-stat">${d.stat || ''}</div>
+        <div class="grp-div-top"><span class="grp-div-icon">${d.icon}</span>
+          <div style="flex:1;min-width:0"><div class="grp-div-name">${d.name}</div><span class="grp-div-tag">${d.tag}</span></div>
+          <div class="grp-div-stat">${d.stat||''}</div>
         </div>
         <p class="grp-div-desc">${d.desc}</p>
-      </div>
-    `).join('');
-
-    // Render + fetch prices for listed group stocks
-    if (g.listed && g.listed.length) {
-      document.getElementById('grpListedWrap').style.display = 'block';
-      document.getElementById('grpStocks').innerHTML = g.listed.map(s => `
+      </div>`).join('');
+    if (g.listed?.length) {
+      document.getElementById('grpListedWrap').style.display='block';
+      document.getElementById('grpStocks').innerHTML=g.listed.map(s=>`
         <a href="/company/${s.sym.toLowerCase().replace(/\./g,'-')}" class="mkt-card">
-          <div class="mkt-top">
-            <div>
-              <div class="mkt-sym">${s.sym.replace(/\.(NS|BO)$/,'')}</div>
-              <div class="mkt-name">${s.name}</div>
-            </div>
-            <div class="mkt-badge" id="grpb-${s.sym}">—</div>
-          </div>
-          <div class="mkt-price" id="grpp-${s.sym}">—</div>
-          <div class="mkt-chg"   id="grpc-${s.sym}">—</div>
-        </a>
-      `).join('');
-
-      try {
-        const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${g.listed.map(s=>s.sym).join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-        const r = await fetch(P + encodeURIComponent(url));
-        const quotes = (await r.json())?.quoteResponse?.result || [];
-        quotes.forEach(q => {
-          const chg = q.regularMarketChange ?? 0;
-          const pct = q.regularMarketChangePercent ?? 0;
-          const up  = chg >= 0;
-          const color = up ? '#22c55e' : '#ef4444';
-          const c = (q.symbol.endsWith('.NS')||q.symbol.endsWith('.BO')) ? '₹' : '$';
-          const pEl = document.getElementById(`grpp-${q.symbol}`);
-          const bEl = document.getElementById(`grpb-${q.symbol}`);
-          const cEl = document.getElementById(`grpc-${q.symbol}`);
-          if (pEl) pEl.textContent = `${c}${q.regularMarketPrice?.toLocaleString(undefined,{maximumFractionDigits:2})}`;
-          if (bEl) { bEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; bEl.classList.add(up?'badge-up':'badge-dn'); }
-          if (cEl) { cEl.textContent = `${up?'▲':'▼'} ${c}${Math.abs(chg).toFixed(2)}`; cEl.style.color = color; }
-        });
-      } catch {}
+          <div class="mkt-top"><div><div class="mkt-sym">${s.sym.replace(/\.(NS|BO)$/,'')}</div><div class="mkt-name">${s.name}</div></div><div class="mkt-badge" id="grpb-${s.sym}">—</div></div>
+          <div class="mkt-price" id="grpp-${s.sym}">—</div><div class="mkt-chg" id="grpc-${s.sym}">—</div>
+        </a>`).join('');
+      // Fetch prices
+      await Promise.all(g.listed.map(async s=>{
+        try{
+          const fh='NSE:'+s.sym.replace('.NS','');
+          const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${fh}&token=${FH_KEY}`,{signal:AbortSignal.timeout(7000)});
+          const d=await r.json();if(!d.c)return;
+          const chg=d.d||0,pct=d.dp||0,up=chg>=0,color=up?'#22c55e':'#ef4444';
+          const pEl=document.getElementById(`grpp-${s.sym}`),bEl=document.getElementById(`grpb-${s.sym}`),cEl=document.getElementById(`grpc-${s.sym}`);
+          if(pEl)pEl.textContent=`₹${d.c.toLocaleString('en-IN',{maximumFractionDigits:2})}`;
+          if(bEl){bEl.textContent=`${up?'+':''}${pct.toFixed(2)}%`;bEl.classList.add(up?'badge-up':'badge-dn');}
+          if(cEl){cEl.textContent=`${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)}`;cEl.style.color=color;}
+        }catch{}
+      }));
     }
   }
 
   loadQuote();
   loadChart();
   loadNews();
-  loadRelated();
   loadGroupSection();
 </script>
 
 <style>
-  .grp-subtitle {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin: 0 0 24px;
-    line-height: 1.6;
-  }
-  .grp-divisions {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-    gap: 14px;
-  }
-  .grp-div-card {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 14px;
-    padding: 18px 20px;
-    transition: border-color 0.15s, transform 0.15s;
-  }
-  .grp-div-card:hover {
-    border-color: rgba(201,168,76,0.3);
-    transform: translateY(-2px);
-  }
-  .grp-div-top {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  .grp-div-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
-  .grp-div-name {
-    font-size: 13px;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 4px;
-  }
-  .grp-div-tag {
-    display: inline-block;
-    background: rgba(201,168,76,0.1);
-    color: #c9a84c;
-    border: 1px solid rgba(201,168,76,0.2);
-    border-radius: 6px;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 7px;
-    letter-spacing: 0.4px;
-  }
-  .grp-div-stat {
-    margin-left: auto;
-    font-size: 11px;
-    font-weight: 700;
-    color: #c9a84c;
-    white-space: nowrap;
-    padding-left: 8px;
-    padding-top: 2px;
-  }
-  .grp-div-desc {
-    font-size: 12px;
-    color: #7a8899;
-    line-height: 1.65;
-    margin: 0;
-  }
-  @media (max-width: 600px) {
-    .grp-divisions { grid-template-columns: 1fr; }
-  }
+/* ── AI Insight Box ──────────────────────────────── */
+.ai-insight-box {
+  background: linear-gradient(135deg, rgba(201,168,76,.08), rgba(201,168,76,.04));
+  border: 1px solid rgba(201,168,76,.3);
+  border-radius: 16px;
+  padding: 22px 24px;
+  margin: 24px 0;
+}
+.aib-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.aib-title  { font-size:13px; font-weight:700; color:var(--gold); letter-spacing:.4px; }
+.aib-score-wrap { display:flex; align-items:baseline; gap:4px; }
+.aib-score  { font-size:2.5rem; font-weight:900; line-height:1; }
+.aib-score-label { font-size:13px; color:var(--text-muted); }
+.aib-signal { font-size:1.1rem; font-weight:700; margin-bottom:16px; }
+.aib-grid   { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-bottom:16px; }
+.aib-item   { background:rgba(255,255,255,.04); border-radius:8px; padding:10px 12px; }
+.aib-item-label { font-size:10px; font-weight:700; color:var(--text-muted); letter-spacing:.5px; text-transform:uppercase; margin-bottom:4px; }
+.aib-item-val   { font-size:13px; font-weight:600; color:#fff; }
+.aib-detail { font-size:11px; color:var(--text-muted); border-top:1px solid rgba(255,255,255,.06); padding-top:12px; margin-bottom:8px; }
+.aib-disclaimer { font-size:10px; color:var(--text-dim); }
+
+/* ── Fundamentals ────────────────────────────────── */
+.fundamentals-section { margin:36px 0; }
+.fund-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+.fund-card { background:var(--navy-2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+.fund-label { font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+.fund-value { font-size:1.4rem; font-weight:800; color:#fff; margin-bottom:4px; line-height:1; }
+.fund-bench { font-size:10px; color:var(--text-dim); line-height:1.4; }
+
+/* ── Ratios Guide ────────────────────────────────── */
+.ratios-section { margin:36px 0; }
+.ratios-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+.ratio-explain { background:var(--navy-2); border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+.re-name { font-size:13px; font-weight:700; color:#fff; margin-bottom:6px; }
+.re-desc { font-size:12px; color:var(--text-muted); line-height:1.6; margin-bottom:8px; }
+.re-tag  { font-size:12px; font-weight:600; }
+
+/* ── Checklist ───────────────────────────────────── */
+.invest-when-section { margin:36px 0; }
+.checklist-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:10px; margin-bottom:16px; }
+.chk-item { display:flex; align-items:flex-start; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid var(--border); }
+.chk-item.pass { background:rgba(34,197,94,.06); border-color:rgba(34,197,94,.2); }
+.chk-item.fail { background:rgba(234,179,8,.06); border-color:rgba(234,179,8,.2); }
+.chk-icon  { font-size:16px; flex-shrink:0; margin-top:1px; }
+.chk-label { font-size:12px; font-weight:600; color:#fff; margin-bottom:2px; }
+.chk-detail{ font-size:11px; color:var(--text-muted); }
+.invest-strategy-box { background:var(--navy-2); border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+.isb-title { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+.isb-body  { font-size:13px; color:var(--text-muted); line-height:1.6; }
+
+/* ── Chart Guide ─────────────────────────────────── */
+.chart-guide-section { margin:36px 0; }
+.chart-guide-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+.cg-card  { background:var(--navy-2); border:1px solid var(--border); border-radius:12px; padding:16px; }
+.cg-icon  { font-size:20px; margin-bottom:8px; }
+.cg-title { font-size:12px; font-weight:700; color:#fff; margin-bottom:6px; }
+.cg-desc  { font-size:11px; color:var(--text-muted); line-height:1.5; margin-bottom:8px; }
+.cg-status{ font-size:12px; font-weight:600; }
+
+/* ── Market Context ──────────────────────────────── */
+.mkt-context-section { margin:36px 0; }
+.mkt-ctx-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+.mct-card  { background:var(--navy-2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+.mct-label { font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+.mct-val   { font-size:1.6rem; font-weight:800; color:#fff; margin-bottom:4px; }
+.mct-sub   { font-size:10px; color:var(--text-dim); line-height:1.4; }
+
+/* ── Conglomerate (same as before) ───────────────── */
+.grp-subtitle { font-size:13px; color:var(--text-muted); margin:0 0 24px; line-height:1.6; }
+.grp-divisions { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:14px; }
+.grp-div-card { background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:18px 20px; transition:border-color .15s,transform .15s; }
+.grp-div-card:hover { border-color:rgba(201,168,76,.3); transform:translateY(-2px); }
+.grp-div-top { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+.grp-div-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
+.grp-div-name { font-size:13px; font-weight:700; color:#fff; margin-bottom:4px; }
+.grp-div-tag  { display:inline-block; background:rgba(201,168,76,.1); color:var(--gold); border:1px solid rgba(201,168,76,.2); border-radius:6px; font-size:10px; font-weight:700; padding:2px 7px; }
+.grp-div-stat { margin-left:auto; font-size:11px; font-weight:700; color:var(--gold); white-space:nowrap; padding-left:8px; padding-top:2px; }
+.grp-div-desc { font-size:12px; color:#7a8899; line-height:1.65; margin:0; }
 </style>

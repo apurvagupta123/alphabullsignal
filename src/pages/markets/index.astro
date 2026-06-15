@@ -2,139 +2,184 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const SECTORS: Record<string, { label: string; icon: string; desc: string; stocks: { sym: string; name: string }[] }> = {
-  tech: {
-    label: 'Technology', icon: '💻', desc: 'Software, semiconductors, internet & hardware',
+  banking: {
+    label: 'Banking', icon: '🏦',
+    desc: 'Private banks, PSU banks, small finance banks — NPA ratios, CASA, credit growth',
     stocks: [
-      { sym: 'AAPL',  name: 'Apple' },
-      { sym: 'MSFT',  name: 'Microsoft' },
-      { sym: 'GOOGL', name: 'Alphabet (Google)' },
-      { sym: 'NVDA',  name: 'NVIDIA' },
-      { sym: 'META',  name: 'Meta Platforms' },
-      { sym: 'AMZN',  name: 'Amazon' },
-      { sym: 'TSLA',  name: 'Tesla' },
-      { sym: 'AMD',   name: 'AMD' },
-      { sym: 'INTC',  name: 'Intel' },
-      { sym: 'CRM',   name: 'Salesforce' },
-      { sym: 'ORCL',  name: 'Oracle' },
-      { sym: 'ADBE',  name: 'Adobe' },
-      { sym: 'NFLX',  name: 'Netflix' },
-      { sym: 'QCOM',  name: 'Qualcomm' },
-      { sym: 'AVGO',  name: 'Broadcom' },
+      { sym: 'HDFCBANK.NS',  name: 'HDFC Bank' },
+      { sym: 'ICICIBANK.NS', name: 'ICICI Bank' },
+      { sym: 'KOTAKBANK.NS', name: 'Kotak Mahindra Bank' },
+      { sym: 'AXISBANK.NS',  name: 'Axis Bank' },
+      { sym: 'SBIN.NS',      name: 'State Bank of India' },
+      { sym: 'BANKBARODA.NS',name: 'Bank of Baroda' },
+      { sym: 'PNB.NS',       name: 'Punjab National Bank' },
+      { sym: 'INDUSINDBK.NS',name: 'IndusInd Bank' },
+      { sym: 'FEDERALBNK.NS',name: 'Federal Bank' },
+      { sym: 'IDFCFIRSTB.NS',name: 'IDFC First Bank' },
+      { sym: 'BANDHANBNK.NS',name: 'Bandhan Bank' },
+      { sym: 'AUBANK.NS',    name: 'AU Small Finance Bank' },
+    ],
+  },
+  it: {
+    label: 'IT & Tech', icon: '💻',
+    desc: 'Indian IT services — deal wins, margins, attrition, USD revenue growth',
+    stocks: [
+      { sym: 'TCS.NS',       name: 'Tata Consultancy Services' },
+      { sym: 'INFY.NS',      name: 'Infosys' },
+      { sym: 'WIPRO.NS',     name: 'Wipro' },
+      { sym: 'HCLTECH.NS',   name: 'HCL Technologies' },
+      { sym: 'TECHM.NS',     name: 'Tech Mahindra' },
+      { sym: 'LTIM.NS',      name: 'LTIMindtree' },
+      { sym: 'MPHASIS.NS',   name: 'Mphasis' },
+      { sym: 'PERSISTENT.NS',name: 'Persistent Systems' },
+      { sym: 'COFORGE.NS',   name: 'Coforge' },
+      { sym: 'KPITTECH.NS',  name: 'KPIT Technologies' },
     ],
   },
   finance: {
-    label: 'Finance', icon: '💰', desc: 'Banks, asset managers & payment networks',
+    label: 'Finance & NBFC', icon: '💳',
+    desc: 'NBFCs, insurance, asset management, fintech — AUM growth, NIM, credit cost',
     stocks: [
-      { sym: 'JPM',   name: 'JPMorgan Chase' },
-      { sym: 'BAC',   name: 'Bank of America' },
-      { sym: 'WFC',   name: 'Wells Fargo' },
-      { sym: 'GS',    name: 'Goldman Sachs' },
-      { sym: 'MS',    name: 'Morgan Stanley' },
-      { sym: 'C',     name: 'Citigroup' },
-      { sym: 'BLK',   name: 'BlackRock' },
-      { sym: 'V',     name: 'Visa' },
-      { sym: 'MA',    name: 'Mastercard' },
-      { sym: 'AXP',   name: 'American Express' },
-      { sym: 'BRK-B', name: 'Berkshire Hathaway' },
-      { sym: 'SCHW',  name: 'Charles Schwab' },
+      { sym: 'BAJFINANCE.NS', name: 'Bajaj Finance' },
+      { sym: 'BAJAJFINSV.NS', name: 'Bajaj Finserv' },
+      { sym: 'HDFCAMC.NS',   name: 'HDFC AMC' },
+      { sym: 'HDFCLIFE.NS',  name: 'HDFC Life Insurance' },
+      { sym: 'SBILIFE.NS',   name: 'SBI Life Insurance' },
+      { sym: 'ICICIGI.NS',   name: 'ICICI Lombard' },
+      { sym: 'ICICIPRULI.NS',name: 'ICICI Prudential Life' },
+      { sym: 'JIOFSL.NS',    name: 'Jio Financial Services' },
+      { sym: 'CHOLAFIN.NS',  name: 'Cholamandalam Finance' },
+      { sym: 'MUTHOOTFIN.NS',name: 'Muthoot Finance' },
+    ],
+  },
+  auto: {
+    label: 'Auto & EV', icon: '🚗',
+    desc: 'Passenger, commercial, 2-wheelers — monthly volumes, EV sales, PLI benefits',
+    stocks: [
+      { sym: 'TATAMOTORS.NS',name: 'Tata Motors' },
+      { sym: 'MARUTI.NS',    name: 'Maruti Suzuki' },
+      { sym: 'M&M.NS',       name: 'Mahindra & Mahindra' },
+      { sym: 'BAJAJ-AUTO.NS',name: 'Bajaj Auto' },
+      { sym: 'HEROMOTOCO.NS',name: 'Hero MotoCorp' },
+      { sym: 'EICHERMOT.NS', name: 'Eicher Motors (Royal Enfield)' },
+      { sym: 'TVSMOTORS.NS', name: 'TVS Motor Company' },
+      { sym: 'ASHOKLEY.NS',  name: 'Ashok Leyland' },
+      { sym: 'BOSCHLTD.NS',  name: 'Bosch India' },
+      { sym: 'MOTHERSON.NS', name: 'Samvardhana Motherson' },
+    ],
+  },
+  pharma: {
+    label: 'Pharma & Health', icon: '💊',
+    desc: 'Pharmaceuticals & healthcare — USFDA approvals, R&D pipeline, domestic formulations',
+    stocks: [
+      { sym: 'SUNPHARMA.NS', name: 'Sun Pharmaceutical' },
+      { sym: 'DRREDDY.NS',   name: 'Dr. Reddy\'s Laboratories' },
+      { sym: 'CIPLA.NS',     name: 'Cipla' },
+      { sym: 'DIVISLAB.NS',  name: 'Divi\'s Laboratories' },
+      { sym: 'AUROPHARMA.NS',name: 'Aurobindo Pharma' },
+      { sym: 'BIOCON.NS',    name: 'Biocon' },
+      { sym: 'LUPIN.NS',     name: 'Lupin' },
+      { sym: 'TORNTPHARM.NS',name: 'Torrent Pharmaceuticals' },
+      { sym: 'APOLLOHOSP.NS',name: 'Apollo Hospitals' },
+      { sym: 'MAXHEALTH.NS', name: 'Max Healthcare' },
+    ],
+  },
+  fmcg: {
+    label: 'FMCG & Consumer', icon: '🛒',
+    desc: 'Fast-moving consumer goods — rural demand recovery, volume growth, margin expansion',
+    stocks: [
+      { sym: 'HINDUNILVR.NS',name: 'Hindustan Unilever' },
+      { sym: 'ITC.NS',       name: 'ITC Limited' },
+      { sym: 'NESTLEIND.NS', name: 'Nestlé India' },
+      { sym: 'BRITANNIA.NS', name: 'Britannia Industries' },
+      { sym: 'DABUR.NS',     name: 'Dabur India' },
+      { sym: 'MARICO.NS',    name: 'Marico' },
+      { sym: 'GODREJCP.NS',  name: 'Godrej Consumer Products' },
+      { sym: 'ASIANPAINT.NS',name: 'Asian Paints' },
+      { sym: 'BERGERPAINTS.NS',name:'Berger Paints' },
+      { sym: 'TATACONSUM.NS',name: 'Tata Consumer Products' },
     ],
   },
   energy: {
-    label: 'Energy', icon: '⚡', desc: 'Oil, gas, renewables & utilities',
+    label: 'Energy & Oil', icon: '⚡',
+    desc: 'Oil & gas, refineries, power, renewables — GRM, gas volumes, renewable capacity',
     stocks: [
-      { sym: 'XOM',  name: 'ExxonMobil' },
-      { sym: 'CVX',  name: 'Chevron' },
-      { sym: 'COP',  name: 'ConocoPhillips' },
-      { sym: 'SLB',  name: 'SLB (Schlumberger)' },
-      { sym: 'EOG',  name: 'EOG Resources' },
-      { sym: 'MPC',  name: 'Marathon Petroleum' },
-      { sym: 'VLO',  name: 'Valero Energy' },
-      { sym: 'OXY',  name: 'Occidental Petroleum' },
-      { sym: 'HAL',  name: 'Halliburton' },
-      { sym: 'PSX',  name: 'Phillips 66' },
+      { sym: 'RELIANCE.NS',  name: 'Reliance Industries' },
+      { sym: 'ONGC.NS',      name: 'ONGC' },
+      { sym: 'IOC.NS',       name: 'Indian Oil Corporation' },
+      { sym: 'BPCL.NS',      name: 'Bharat Petroleum' },
+      { sym: 'HINDPETRO.NS', name: 'Hindustan Petroleum' },
+      { sym: 'GAIL.NS',      name: 'GAIL India' },
+      { sym: 'NTPC.NS',      name: 'NTPC' },
+      { sym: 'TATAPOWER.NS', name: 'Tata Power' },
+      { sym: 'ADANIGREEN.NS',name: 'Adani Green Energy' },
+      { sym: 'ADANIPORTS.NS',name: 'Adani Ports' },
     ],
   },
-  healthcare: {
-    label: 'Healthcare', icon: '🏥', desc: 'Pharma, biotech, devices & insurance',
+  infra: {
+    label: 'Infra & Capital Goods', icon: '🏗️',
+    desc: 'Construction, capital goods, railways — order book growth, govt capex cycle',
     stocks: [
-      { sym: 'JNJ',  name: 'Johnson & Johnson' },
-      { sym: 'UNH',  name: 'UnitedHealth Group' },
-      { sym: 'PFE',  name: 'Pfizer' },
-      { sym: 'MRK',  name: 'Merck' },
-      { sym: 'ABBV', name: 'AbbVie' },
-      { sym: 'TMO',  name: 'Thermo Fisher' },
-      { sym: 'ABT',  name: 'Abbott Laboratories' },
-      { sym: 'LLY',  name: 'Eli Lilly' },
-      { sym: 'BMY',  name: 'Bristol-Myers Squibb' },
-      { sym: 'AMGN', name: 'Amgen' },
+      { sym: 'LT.NS',        name: 'Larsen & Toubro' },
+      { sym: 'SIEMENS.NS',   name: 'Siemens India' },
+      { sym: 'ABB.NS',       name: 'ABB India' },
+      { sym: 'BEL.NS',       name: 'Bharat Electronics' },
+      { sym: 'HAL.NS',       name: 'Hindustan Aeronautics' },
+      { sym: 'RVNL.NS',      name: 'Rail Vikas Nigam' },
+      { sym: 'IRFC.NS',      name: 'Indian Railway Finance Corp' },
+      { sym: 'CUMMINSIND.NS',name: 'Cummins India' },
+      { sym: 'THERMAX.NS',   name: 'Thermax' },
+      { sym: 'KEC.NS',       name: 'KEC International' },
     ],
   },
-  consumer: {
-    label: 'Consumer', icon: '🛍️', desc: 'Retail, food, auto & discretionary',
+  metals: {
+    label: 'Metals & Mining', icon: '⚒️',
+    desc: 'Steel, aluminium, copper, mining — global commodity prices, domestic demand',
     stocks: [
-      { sym: 'HD',   name: 'Home Depot' },
-      { sym: 'MCD',  name: "McDonald's" },
-      { sym: 'NKE',  name: 'Nike' },
-      { sym: 'SBUX', name: 'Starbucks' },
-      { sym: 'TGT',  name: 'Target' },
-      { sym: 'LOW',  name: "Lowe's" },
-      { sym: 'TJX',  name: 'TJX Companies' },
-      { sym: 'BKNG', name: 'Booking Holdings' },
-      { sym: 'CMG',  name: 'Chipotle' },
-      { sym: 'F',    name: 'Ford' },
+      { sym: 'TATASTEEL.NS', name: 'Tata Steel' },
+      { sym: 'JSWSTEEL.NS',  name: 'JSW Steel' },
+      { sym: 'HINDALCO.NS',  name: 'Hindalco Industries' },
+      { sym: 'VEDL.NS',      name: 'Vedanta' },
+      { sym: 'SAIL.NS',      name: 'Steel Authority of India' },
+      { sym: 'NMDC.NS',      name: 'NMDC' },
+      { sym: 'COALINDIA.NS', name: 'Coal India' },
+      { sym: 'MOIL.NS',      name: 'MOIL' },
+      { sym: 'JSWENERGY.NS', name: 'JSW Energy' },
+      { sym: 'NATIONALUM.NS',name: 'National Aluminium Co.' },
     ],
   },
-  industrials: {
-    label: 'Industrials', icon: '🏭', desc: 'Aerospace, defense, machinery & logistics',
+  telecom: {
+    label: 'Telecom & Media', icon: '📡',
+    desc: '5G rollout, ARPU growth, subscriber additions — Jio, Airtel, Vi competition',
     stocks: [
-      { sym: 'BA',  name: 'Boeing' },
-      { sym: 'CAT', name: 'Caterpillar' },
-      { sym: 'GE',  name: 'GE Aerospace' },
-      { sym: 'UPS', name: 'UPS' },
-      { sym: 'HON', name: 'Honeywell' },
-      { sym: 'LMT', name: 'Lockheed Martin' },
-      { sym: 'RTX', name: 'RTX Corp' },
-      { sym: 'DE',  name: 'John Deere' },
-      { sym: 'NOC', name: 'Northrop Grumman' },
-      { sym: 'FDX', name: 'FedEx' },
-    ],
-  },
-  india: {
-    label: 'India 🇮🇳', icon: '🇮🇳', desc: 'NSE & BSE — top Indian listed companies',
-    stocks: [
-      { sym: 'RELIANCE.NS',   name: 'Reliance Industries' },
-      { sym: 'TCS.NS',        name: 'Tata Consultancy Services' },
-      { sym: 'HDFCBANK.NS',   name: 'HDFC Bank' },
-      { sym: 'INFY.NS',       name: 'Infosys' },
-      { sym: 'ICICIBANK.NS',  name: 'ICICI Bank' },
-      { sym: 'WIPRO.NS',      name: 'Wipro' },
-      { sym: 'BAJFINANCE.NS', name: 'Bajaj Finance' },
-      { sym: 'TATAMOTORS.NS', name: 'Tata Motors' },
-      { sym: 'BHARTIARTL.NS', name: 'Bharti Airtel' },
-      { sym: 'MARUTI.NS',     name: 'Maruti Suzuki' },
-      { sym: 'SBIN.NS',       name: 'State Bank of India' },
-      { sym: 'LT.NS',         name: 'Larsen & Toubro' },
+      { sym: 'BHARTIARTL.NS',name: 'Bharti Airtel' },
+      { sym: 'IDEA.NS',      name: 'Vodafone Idea' },
+      { sym: 'HFCL.NS',      name: 'HFCL (Himachal Futuristic)' },
+      { sym: 'TEJASNET.NS',  name: 'Tejas Networks' },
+      { sym: 'NETWORK18.NS', name: 'Network18 Media' },
+      { sym: 'TV18BRDCST.NS',name: 'TV18 Broadcast' },
+      { sym: 'ZEEL.NS',      name: 'Zee Entertainment' },
+      { sym: 'SUNTV.NS',     name: 'Sun TV Network' },
+      { sym: 'INDIAMART.NS', name: 'IndiaMart InterMESH' },
+      { sym: 'NAUKRI.NS',    name: 'Info Edge (Naukri.com)' },
     ],
   },
 };
 ---
-<BaseLayout title="Markets — The Business Ledger">
+<BaseLayout title="Indian Markets — The Business Ledger">
 
   <section class="content-section" style="margin-top:48px">
 
-    <!-- Header row -->
     <div class="mkts-header">
       <div>
-        <h1 class="mkts-title">Markets</h1>
-        <p class="mkts-sub">Live prices across every major sector</p>
+        <h1 class="mkts-title">🇮🇳 Indian Markets</h1>
+        <p class="mkts-sub">NSE & BSE live prices across all major Indian sectors</p>
       </div>
       <span class="section-live">LIVE</span>
     </div>
 
-    <!-- ── Sector controls: dropdown + pills ── -->
+    <!-- Sector controls -->
     <div class="mkts-controls">
-
-      <!-- Dropdown (always visible) -->
       <div class="mkts-dropdown-wrap">
         <label class="mkts-dropdown-label" for="sectorDropdown">Browse by sector</label>
         <select id="sectorDropdown" class="mkts-dropdown">
@@ -143,24 +188,26 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
           ))}
         </select>
       </div>
-
-      <!-- Pills (desktop only) -->
       <div class="mkts-pills" id="mktsPills">
         {Object.entries(SECTORS).map(([key, s]) => (
-          <button class={`mkts-pill ${key === 'tech' ? 'active' : ''}`} data-sector={key}>
+          <button class={`mkts-pill ${key === 'banking' ? 'active' : ''}`} data-sector={key}>
             {s.icon} {s.label}
           </button>
         ))}
       </div>
     </div>
 
-    <!-- Sector description -->
     <div class="mkts-desc-bar">
-      <span id="sectorDescText">{SECTORS['tech'].desc}</span>
+      <span id="sectorDescText">{SECTORS['banking'].desc}</span>
       <span class="section-live" style="margin-left:10px">LIVE</span>
     </div>
 
-    <!-- Company grid -->
+    <!-- What to watch for this sector -->
+    <div class="sector-guide-bar" id="sectorGuideBar">
+      <div class="sgb-title">What to watch</div>
+      <div class="sgb-items" id="sectorGuideItems"></div>
+    </div>
+
     <div class="sector-grid" id="companyGrid"></div>
 
   </section>
@@ -168,39 +215,52 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
 </BaseLayout>
 
 <script define:vars={{ SECTORS }}>
-  const PROXY = 'https://corsproxy.io/?';
-  let currentSector = 'tech';
-  let _prices = {};
+  const FH_KEY = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
+  let currentSector = 'banking';
 
-  async function fetchYF(syms) {
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-    const r = await fetch(PROXY + encodeURIComponent(url));
-    return (await r.json())?.quoteResponse?.result || [];
+  const SECTOR_GUIDES: Record<string, string[]> = {
+    banking:  ['NPA & GNPA ratios (lower = better)','Net Interest Margin (NIM) — target >3.5%','CASA ratio (higher = cheaper deposits)','Credit growth vs deposit growth','Return on Assets (RoA) >1% is healthy'],
+    it:       ['Revenue growth in constant currency','EBIT margin (top IT: 22–26%)','Deal Total Contract Value (TCV)','Employee attrition rate (lower = stable)','US/Europe revenue mix & macro sensitivity'],
+    finance:  ['AUM growth for AMCs/NBFCs','Net Interest Margin & credit cost','Gross NPA for NBFCs','Premium growth for insurers','Capital adequacy ratio (CAR)'],
+    auto:     ['Monthly wholesale volume data (SIAM)','EV as % of total sales','EBITDA margin (auto: 10–16%)','Export as % of total revenue','Commodity cost (steel, aluminium) impact'],
+    pharma:   ['USFDA 483 observations & import alerts','R&D spend as % of revenue','Domestic formulations growth','API vs formulations revenue split','Biosimilar pipeline milestones'],
+    fmcg:     ['Volume growth vs price growth','Gross margin expansion (commodity costs)','Rural vs urban demand mix','Market share in key categories','Distribution reach (town count)'],
+    energy:   ['Gross Refining Margin (GRM) for OMCs','Gas volume growth for GAIL/ONGC','Renewable capacity additions (MW)','Debt reduction trajectory','Upstream oil production volumes'],
+    infra:    ['Order inflow growth','Order book to revenue ratio (target >3x)','EBITDA margin (target >12%)','Working capital cycle','Govt capex allocation in Union Budget'],
+    metals:   ['Global steel/aluminium prices (LME)','Domestic demand (auto, infra, real estate)','EBITDA per tonne','Debt to EBITDA ratio','China export volume (price impact)'],
+    telecom:  ['ARPU (Average Revenue Per User) trend','Subscriber additions/churn','5G rollout speed & coverage','Debt servicing for Vi','AGR dues & spectrum payments'],
+  };
+
+  async function fetchIndianQuote(nsSym: string) {
+    const fhSym = 'NSE:' + nsSym.replace(/\.(NS|BO)$/, '');
+    try {
+      const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`, { signal: AbortSignal.timeout(7000) });
+      const d = await r.json();
+      if (!d.c) return null;
+      return { symbol: nsSym, regularMarketPrice: d.c, regularMarketChange: d.d||0, regularMarketChangePercent: d.dp||0 };
+    } catch { return null; }
   }
 
-  function renderCard(q) {
-    const chg   = q.regularMarketChange ?? 0;
-    const pct   = q.regularMarketChangePercent ?? 0;
-    const up    = chg >= 0;
+  function renderCard(q: any, name: string) {
+    const chg = q.regularMarketChange ?? 0;
+    const pct = q.regularMarketChangePercent ?? 0;
+    const up  = chg >= 0;
     const color = up ? '#22c55e' : '#ef4444';
-    const isIN  = q.symbol.endsWith('.NS') || q.symbol.endsWith('.BO');
-    const curr  = isIN ? '₹' : '$';
-
     const card = document.getElementById(`sc-${q.symbol}`);
     if (card) card.classList.add(up ? 'up' : 'dn');
     const bEl = document.getElementById(`scb-${q.symbol}`);
     if (bEl) { bEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; bEl.classList.remove('badge-up','badge-dn'); bEl.classList.add(up?'badge-up':'badge-dn'); }
     const pEl = document.getElementById(`scp-${q.symbol}`);
-    if (pEl) pEl.textContent = `${curr}${q.regularMarketPrice?.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    if (pEl) pEl.textContent = `₹${q.regularMarketPrice?.toLocaleString('en-IN',{maximumFractionDigits:2})}`;
     const cEl = document.getElementById(`scc-${q.symbol}`);
-    if (cEl) { cEl.textContent = `${up?'▲':'▼'} ${curr}${Math.abs(chg).toFixed(2)}`; cEl.style.color = color; }
-    _prices[q.symbol] = q;
+    if (cEl) { cEl.textContent = `${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)}`; cEl.style.color = color; }
   }
 
-  function buildGrid(sectorKey) {
+  function buildGrid(sectorKey: string) {
     const sector = SECTORS[sectorKey];
     const grid   = document.getElementById('companyGrid');
-    grid.innerHTML = sector.stocks.map(s => `
+    if (!grid) return;
+    grid.innerHTML = sector.stocks.map((s: any) => `
       <a href="/company/${s.sym.toLowerCase().replace(/\./g,'-')}" class="mkt-card sector-card" id="sc-${s.sym}">
         <div class="mkt-top">
           <div>
@@ -213,129 +273,69 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
         <div class="mkt-chg"   id="scc-${s.sym}">—</div>
       </a>
     `).join('');
-    sector.stocks.forEach(s => { if (_prices[s.sym]) renderCard(_prices[s.sym]); });
-  }
 
-  async function loadSector(sectorKey) {
-    currentSector = sectorKey;
-    buildGrid(sectorKey);
-    document.getElementById('sectorDescText').textContent = SECTORS[sectorKey].desc;
-
-    // sync both controls
-    const dd = document.getElementById('sectorDropdown');
-    if (dd) dd.value = sectorKey;
-    document.querySelectorAll('.mkts-pill').forEach(b => {
-      b.classList.toggle('active', b.dataset.sector === sectorKey);
-    });
-
-    const syms = SECTORS[sectorKey].stocks.map(s => s.sym);
-    for (let i = 0; i < syms.length; i += 10) {
-      try {
-        const quotes = await fetchYF(syms.slice(i, i + 10));
-        quotes.forEach(renderCard);
-      } catch {}
+    // Update sector guide
+    const guideItems = document.getElementById('sectorGuideItems');
+    if (guideItems) {
+      const guides = SECTOR_GUIDES[sectorKey] || [];
+      guideItems.innerHTML = guides.map((g: string) => `<span class="sgb-item">📌 ${g}</span>`).join('');
     }
   }
 
-  // dropdown change
-  document.getElementById('sectorDropdown').addEventListener('change', e => {
-    loadSector(e.target.value);
-  });
+  async function loadSector(sectorKey: string) {
+    currentSector = sectorKey;
+    buildGrid(sectorKey);
+    const descEl = document.getElementById('sectorDescText');
+    if (descEl) descEl.textContent = SECTORS[sectorKey].desc;
+    const dd = document.getElementById('sectorDropdown') as HTMLSelectElement;
+    if (dd) dd.value = sectorKey;
+    document.querySelectorAll('.mkts-pill').forEach(b => {
+      b.classList.toggle('active', (b as HTMLElement).dataset.sector === sectorKey);
+    });
+    const syms = SECTORS[sectorKey].stocks.map((s: any) => s.sym);
+    const nameMap: Record<string, string> = {};
+    SECTORS[sectorKey].stocks.forEach((s: any) => { nameMap[s.sym] = s.name; });
+    for (let i = 0; i < syms.length; i += 4) {
+      const chunk = syms.slice(i, i + 4);
+      const results = await Promise.allSettled(chunk.map(fetchIndianQuote));
+      results.forEach((r: any, idx: number) => {
+        if (r.status === 'fulfilled' && r.value) renderCard(r.value, nameMap[chunk[idx]]);
+      });
+    }
+  }
 
-  // pill clicks
+  // Check URL params for sector
+  const urlParams = new URLSearchParams(window.location.search);
+  const initSector = urlParams.get('sector') || 'banking';
+  const validSector = SECTORS[initSector] ? initSector : 'banking';
+
+  (document.getElementById('sectorDropdown') as HTMLSelectElement)?.addEventListener('change', (e: any) => loadSector(e.target.value));
   document.querySelectorAll('.mkts-pill').forEach(btn => {
-    btn.addEventListener('click', () => loadSector(btn.dataset.sector));
+    btn.addEventListener('click', () => loadSector((btn as HTMLElement).dataset.sector || 'banking'));
   });
 
-  loadSector('tech');
+  loadSector(validSector);
   setInterval(() => loadSector(currentSector), 60000);
 </script>
 
 <style>
-  .mkts-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-  }
-  .mkts-title { font-size: 2rem; font-weight: 900; color: #fff; margin: 0; }
-  .mkts-sub   { font-size: 13px; color: var(--text-muted); margin: 4px 0 0; }
-
-  /* Controls row */
-  .mkts-controls {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-  }
-
-  /* Dropdown */
-  .mkts-dropdown-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .mkts-dropdown-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-  .mkts-dropdown {
-    appearance: none;
-    -webkit-appearance: none;
-    background: var(--navy-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 10px 36px 10px 14px;
-    cursor: pointer;
-    min-width: 200px;
-    transition: border-color 0.15s;
-  }
-  .mkts-dropdown:focus { outline: none; border-color: var(--gold); }
-  .mkts-dropdown:hover { border-color: rgba(201,168,76,0.4); }
-  .mkts-dropdown option { background: #1a2235; color: #fff; }
-
-  /* Pills */
-  .mkts-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .mkts-pill {
-    padding: 7px 14px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: var(--navy-2);
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .mkts-pill:hover  { border-color: rgba(201,168,76,0.4); color: var(--gold); }
-  .mkts-pill.active { background: var(--gold); color: #0b0f1a; border-color: var(--gold); }
-
-  /* Description bar */
-  .mkts-desc-bar {
-    display: flex;
-    align-items: center;
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-    padding: 9px 14px;
-    background: var(--navy-2);
-    border-radius: 8px;
-    border: 1px solid var(--border);
-  }
-
-  @media (max-width: 700px) {
-    .mkts-pills { display: none; }
-    .mkts-dropdown { min-width: 160px; }
-  }
+  .mkts-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+  .mkts-title { font-size:2rem; font-weight:900; color:#fff; margin:0; }
+  .mkts-sub   { font-size:13px; color:var(--text-muted); margin:4px 0 0; }
+  .mkts-controls { display:flex; align-items:center; gap:16px; margin-bottom:14px; flex-wrap:wrap; }
+  .mkts-dropdown-wrap { display:flex; flex-direction:column; gap:4px; }
+  .mkts-dropdown-label { font-size:10px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--text-muted); }
+  .mkts-dropdown { appearance:none; -webkit-appearance:none; background:var(--navy-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center; border:1px solid var(--border); border-radius:10px; color:#fff; font-size:13px; font-weight:600; padding:10px 36px 10px 14px; cursor:pointer; min-width:220px; transition:border-color .15s; }
+  .mkts-dropdown:focus { outline:none; border-color:var(--gold); }
+  .mkts-dropdown option { background:#1a2235; color:#fff; }
+  .mkts-pills { display:flex; flex-wrap:wrap; gap:6px; }
+  .mkts-pill { padding:7px 14px; border-radius:20px; border:1px solid var(--border); background:var(--navy-2); color:var(--text-muted); font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; }
+  .mkts-pill:hover { border-color:rgba(201,168,76,.4); color:var(--gold); }
+  .mkts-pill.active { background:var(--gold); color:#0b0f1a; border-color:var(--gold); }
+  .mkts-desc-bar { display:flex; align-items:center; font-size:12px; color:var(--text-muted); margin-bottom:14px; padding:9px 14px; background:var(--navy-2); border-radius:8px; border:1px solid var(--border); }
+  .sector-guide-bar { background:rgba(201,168,76,.06); border:1px solid rgba(201,168,76,.15); border-radius:10px; padding:12px 16px; margin-bottom:20px; }
+  .sgb-title { font-size:10px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+  .sgb-items { display:flex; flex-wrap:wrap; gap:6px; }
+  .sgb-item { font-size:11px; color:var(--text-muted); background:rgba(255,255,255,.04); padding:4px 10px; border-radius:20px; border:1px solid var(--border); }
+  @media (max-width:700px) { .mkts-pills{display:none;} .mkts-dropdown{min-width:160px;} }
 </style>

@@ -1,0 +1,704 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Market Heat Map">
+
+<section style="margin-top:48px;padding:0 28px;max-width:1240px;margin-left:auto;margin-right:auto">
+
+  <!-- Header -->
+  <div class="hm-header">
+    <div>
+      <h1 class="hm-title">S&amp;P 500 Heat Map</h1>
+      <p class="hm-sub">Stocks sized by market cap · colored by performance</p>
+    </div>
+    <div class="hm-controls">
+      <div class="hm-view-toggle">
+        <button class="hm-view-btn active" id="btnSectors" onclick="setView('sectors')">Sectors</button>
+        <button class="hm-view-btn" id="btnStocks" onclick="setView('stocks')">Stocks</button>
+      </div>
+      <div class="hm-periods">
+        {['1D','5D','1M','3M','6M','YTD','1Y'].map(p => (
+          <button class={`hm-period ${p === '1D' ? 'active' : ''}`} data-p={p}>{p}</button>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend row -->
+  <div class="hm-legend-row">
+    <div class="hm-legend">
+      <span class="hm-leg-end" style="color:#ef4444">-5%</span>
+      <div class="hm-leg-bar"></div>
+      <span class="hm-leg-end" style="color:#22c55e">+5%</span>
+      <span class="hm-leg-note">Block size = Market Cap</span>
+    </div>
+    <span class="hm-updated" id="hmUpdated">—</span>
+  </div>
+
+  <!-- Loading -->
+  <div id="hmLoading" class="hm-loading">
+    <div class="hm-spinner"></div>
+    <span>Fetching market data…</span>
+  </div>
+
+  <!-- Map area -->
+  <div id="hmMap" class="hm-map" style="display:none"></div>
+
+  <!-- Tooltip -->
+  <div id="hmTip" class="hm-tip"></div>
+
+</section>
+
+<script>
+  // ─── Constants ────────────────────────────────────────────────────────────
+  const FMP_KEY = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
+  const PROXY   = 'https://corsproxy.io/?';
+
+  // Sector ETF tickers for sector view
+  const SECTOR_ETFS = [
+    { etf:'XLK',  name:'Technology',            weight:31.0 },
+    { etf:'XLF',  name:'Financials',             weight:13.0 },
+    { etf:'XLV',  name:'Healthcare',             weight:12.0 },
+    { etf:'XLY',  name:'Cons. Discretionary',   weight:10.0 },
+    { etf:'XLI',  name:'Industrials',            weight: 8.5 },
+    { etf:'XLC',  name:'Comm. Services',         weight: 8.5 },
+    { etf:'XLP',  name:'Cons. Staples',          weight: 6.0 },
+    { etf:'XLE',  name:'Energy',                 weight: 4.0 },
+    { etf:'XLRE', name:'Real Estate',            weight: 2.5 },
+    { etf:'XLB',  name:'Materials',              weight: 2.5 },
+    { etf:'XLU',  name:'Utilities',              weight: 2.5 },
+  ];
+
+  // Pre-defined S&P 500 stocks with sectors and market caps (in $B)
+  const STOCKS = [
+    // Technology
+    { sym:'AAPL',  name:'Apple',          sector:'Technology',          mcap:3400 },
+    { sym:'MSFT',  name:'Microsoft',      sector:'Technology',          mcap:3100 },
+    { sym:'NVDA',  name:'NVIDIA',         sector:'Technology',          mcap:2200 },
+    { sym:'AVGO',  name:'Broadcom',       sector:'Technology',          mcap: 850 },
+    { sym:'ORCL',  name:'Oracle',         sector:'Technology',          mcap: 420 },
+    { sym:'CRM',   name:'Salesforce',     sector:'Technology',          mcap: 285 },
+    { sym:'ADBE',  name:'Adobe',          sector:'Technology',          mcap: 245 },
+    { sym:'NOW',   name:'ServiceNow',     sector:'Technology',          mcap: 205 },
+    { sym:'QCOM',  name:'Qualcomm',       sector:'Technology',          mcap: 175 },
+    { sym:'TXN',   name:'Texas Instr.',   sector:'Technology',          mcap: 160 },
+    { sym:'AMAT',  name:'Applied Matls',  sector:'Technology',          mcap: 155 },
+    { sym:'AMD',   name:'AMD',            sector:'Technology',          mcap: 240 },
+    { sym:'INTC',  name:'Intel',          sector:'Technology',          mcap: 120 },
+    { sym:'MU',    name:'Micron',         sector:'Technology',          mcap: 118 },
+    { sym:'KLAC',  name:'KLA Corp',       sector:'Technology',          mcap: 108 },
+    // Financials
+    { sym:'BRK-B', name:'Berkshire',      sector:'Financials',          mcap: 910 },
+    { sym:'JPM',   name:'JPMorgan',       sector:'Financials',          mcap: 565 },
+    { sym:'V',     name:'Visa',           sector:'Financials',          mcap: 550 },
+    { sym:'MA',    name:'Mastercard',     sector:'Financials',          mcap: 435 },
+    { sym:'BAC',   name:'Bank of America',sector:'Financials',          mcap: 305 },
+    { sym:'WFC',   name:'Wells Fargo',    sector:'Financials',          mcap: 215 },
+    { sym:'GS',    name:'Goldman Sachs',  sector:'Financials',          mcap: 180 },
+    { sym:'MS',    name:'Morgan Stanley', sector:'Financials',          mcap: 205 },
+    { sym:'AXP',   name:'Amex',          sector:'Financials',          mcap: 195 },
+    { sym:'BLK',   name:'BlackRock',      sector:'Financials',          mcap: 145 },
+    { sym:'SCHW',  name:'Schwab',         sector:'Financials',          mcap: 130 },
+    { sym:'C',     name:'Citigroup',      sector:'Financials',          mcap: 115 },
+    // Healthcare
+    { sym:'LLY',   name:'Eli Lilly',      sector:'Healthcare',          mcap: 730 },
+    { sym:'UNH',   name:'UnitedHealth',   sector:'Healthcare',          mcap: 455 },
+    { sym:'JNJ',   name:'J&J',            sector:'Healthcare',          mcap: 385 },
+    { sym:'ABBV',  name:'AbbVie',         sector:'Healthcare',          mcap: 330 },
+    { sym:'MRK',   name:'Merck',          sector:'Healthcare',          mcap: 235 },
+    { sym:'TMO',   name:'Thermo Fisher',  sector:'Healthcare',          mcap: 225 },
+    { sym:'ABT',   name:'Abbott',         sector:'Healthcare',          mcap: 195 },
+    { sym:'DHR',   name:'Danaher',        sector:'Healthcare',          mcap: 185 },
+    { sym:'AMGN',  name:'Amgen',          sector:'Healthcare',          mcap: 178 },
+    { sym:'PFE',   name:'Pfizer',         sector:'Healthcare',          mcap: 155 },
+    { sym:'ISRG',  name:'Intuitive Surg', sector:'Healthcare',          mcap: 165 },
+    { sym:'VRTX',  name:'Vertex Pharma',  sector:'Healthcare',          mcap: 110 },
+    // Consumer Discretionary
+    { sym:'AMZN',  name:'Amazon',         sector:'Cons. Discretionary', mcap:2100 },
+    { sym:'TSLA',  name:'Tesla',          sector:'Cons. Discretionary', mcap: 560 },
+    { sym:'HD',    name:'Home Depot',     sector:'Cons. Discretionary', mcap: 335 },
+    { sym:'MCD',   name:"McDonald's",     sector:'Cons. Discretionary', mcap: 215 },
+    { sym:'LOW',   name:"Lowe's",         sector:'Cons. Discretionary', mcap: 128 },
+    { sym:'TJX',   name:'TJX Companies', sector:'Cons. Discretionary', mcap: 122 },
+    { sym:'BKNG',  name:'Booking',        sector:'Cons. Discretionary', mcap: 138 },
+    { sym:'NKE',   name:'Nike',           sector:'Cons. Discretionary', mcap: 118 },
+    { sym:'SBUX',  name:'Starbucks',      sector:'Cons. Discretionary', mcap:  98 },
+    { sym:'CMG',   name:'Chipotle',       sector:'Cons. Discretionary', mcap:  78 },
+    // Industrials
+    { sym:'GE',    name:'GE Aerospace',   sector:'Industrials',         mcap: 215 },
+    { sym:'CAT',   name:'Caterpillar',    sector:'Industrials',         mcap: 170 },
+    { sym:'RTX',   name:'RTX Corp',       sector:'Industrials',         mcap: 158 },
+    { sym:'HON',   name:'Honeywell',      sector:'Industrials',         mcap: 135 },
+    { sym:'UPS',   name:'UPS',            sector:'Industrials',         mcap: 132 },
+    { sym:'BA',    name:'Boeing',         sector:'Industrials',         mcap: 115 },
+    { sym:'DE',    name:'John Deere',     sector:'Industrials',         mcap: 112 },
+    { sym:'LMT',   name:'Lockheed',       sector:'Industrials',         mcap: 112 },
+    { sym:'NOC',   name:'Northrop',       sector:'Industrials',         mcap:  68 },
+    { sym:'FDX',   name:'FedEx',          sector:'Industrials',         mcap:  68 },
+    // Comm Services
+    { sym:'META',  name:'Meta',           sector:'Comm. Services',      mcap:1320 },
+    { sym:'GOOGL', name:'Alphabet',       sector:'Comm. Services',      mcap:2110 },
+    { sym:'NFLX',  name:'Netflix',        sector:'Comm. Services',      mcap: 315 },
+    { sym:'DIS',   name:'Disney',         sector:'Comm. Services',      mcap: 210 },
+    { sym:'T',     name:'AT&T',           sector:'Comm. Services',      mcap: 152 },
+    { sym:'VZ',    name:'Verizon',        sector:'Comm. Services',      mcap: 168 },
+    { sym:'CHTR',  name:'Charter Comm',   sector:'Comm. Services',      mcap:  62 },
+    // Consumer Staples
+    { sym:'WMT',   name:'Walmart',        sector:'Cons. Staples',       mcap: 700 },
+    { sym:'COST',  name:'Costco',         sector:'Cons. Staples',       mcap: 400 },
+    { sym:'PG',    name:'P&G',            sector:'Cons. Staples',       mcap: 375 },
+    { sym:'KO',    name:'Coca-Cola',      sector:'Cons. Staples',       mcap: 268 },
+    { sym:'PEP',   name:'PepsiCo',        sector:'Cons. Staples',       mcap: 208 },
+    { sym:'PM',    name:'Philip Morris',  sector:'Cons. Staples',       mcap: 178 },
+    { sym:'MO',    name:'Altria',         sector:'Cons. Staples',       mcap:  82 },
+    { sym:'MDLZ',  name:'Mondelez',       sector:'Cons. Staples',       mcap:  87 },
+    // Energy
+    { sym:'XOM',   name:'ExxonMobil',     sector:'Energy',              mcap: 525 },
+    { sym:'CVX',   name:'Chevron',        sector:'Energy',              mcap: 285 },
+    { sym:'COP',   name:'ConocoPhillips', sector:'Energy',              mcap: 132 },
+    { sym:'SLB',   name:'SLB',            sector:'Energy',              mcap:  62 },
+    { sym:'EOG',   name:'EOG Resources',  sector:'Energy',              mcap:  68 },
+    { sym:'MPC',   name:'Marathon Pet.',  sector:'Energy',              mcap:  62 },
+    { sym:'OXY',   name:'Occidental',     sector:'Energy',              mcap:  58 },
+    { sym:'VLO',   name:'Valero',         sector:'Energy',              mcap:  52 },
+    // Real Estate
+    { sym:'PLD',   name:'Prologis',       sector:'Real Estate',         mcap: 112 },
+    { sym:'AMT',   name:'Amer. Tower',    sector:'Real Estate',         mcap:  92 },
+    { sym:'EQIX',  name:'Equinix',        sector:'Real Estate',         mcap:  78 },
+    { sym:'SPG',   name:'Simon Property', sector:'Real Estate',         mcap:  62 },
+    { sym:'CCI',   name:'Crown Castle',   sector:'Real Estate',         mcap:  48 },
+    { sym:'WELL',  name:'Welltower',      sector:'Real Estate',         mcap:  58 },
+    // Materials
+    { sym:'LIN',   name:'Linde',          sector:'Materials',           mcap: 212 },
+    { sym:'SHW',   name:'Sherwin-Will.',  sector:'Materials',           mcap:  92 },
+    { sym:'APD',   name:'Air Products',   sector:'Materials',           mcap:  68 },
+    { sym:'FCX',   name:'Freeport',       sector:'Materials',           mcap:  62 },
+    { sym:'NEM',   name:'Newmont',        sector:'Materials',           mcap:  58 },
+    { sym:'DOW',   name:'Dow Inc',        sector:'Materials',           mcap:  32 },
+    // Utilities
+    { sym:'NEE',   name:'NextEra',        sector:'Utilities',           mcap: 148 },
+    { sym:'DUK',   name:'Duke Energy',    sector:'Utilities',           mcap:  82 },
+    { sym:'SO',    name:'Southern Co.',   sector:'Utilities',           mcap:  78 },
+    { sym:'SRE',   name:'Sempra',         sector:'Utilities',           mcap:  52 },
+    { sym:'AEP',   name:'AEP',            sector:'Utilities',           mcap:  48 },
+    { sym:'D',     name:'Dominion',       sector:'Utilities',           mcap:  46 },
+    { sym:'EXC',   name:'Exelon',         sector:'Utilities',           mcap:  38 },
+    { sym:'XEL',   name:'Xcel Energy',    sector:'Utilities',           mcap:  35 },
+  ];
+
+  // State
+  let currentView   = 'sectors';
+  let currentPeriod = '1D';
+  let changeMap     = {}; // sym → % change
+  let priceMap      = {}; // sym → price
+  let allLoaded     = false;
+
+  // ─── Color function ────────────────────────────────────────────────────────
+  function pctColor(pct) {
+    if (pct >=  5) return '#14532d';
+    if (pct >=  3) return '#166534';
+    if (pct >=  2) return '#16a34a';
+    if (pct >=  1) return '#22c55e';
+    if (pct >= 0.3)return '#4ade80';
+    if (pct > -0.3)return '#1e2d3d';
+    if (pct >= -1) return '#f87171';
+    if (pct >= -2) return '#ef4444';
+    if (pct >= -3) return '#dc2626';
+    if (pct >= -5) return '#b91c1c';
+    return '#7f1d1d';
+  }
+  function textColor(pct) {
+    return (pct > 0.3 || pct < -0.3) ? '#fff' : '#94a3b8';
+  }
+
+  // ─── Fetch price changes ───────────────────────────────────────────────────
+  async function fetchChanges(syms) {
+    // Batch into groups of 40
+    const batches = [];
+    for (let i = 0; i < syms.length; i += 40) batches.push(syms.slice(i, i + 40));
+
+    const results = [];
+    await Promise.all(batches.map(async (batch) => {
+      try {
+        const r = await fetch(`https://financialmodelingprep.com/api/v3/stock-price-change/${batch.join(',')}?apikey=${FMP_KEY}`);
+        const d = await r.json();
+        if (Array.isArray(d)) results.push(...d);
+      } catch {}
+    }));
+
+    // Build changeMap
+    changeMap = {};
+    priceMap  = {};
+    results.forEach(item => {
+      const key = currentPeriod === 'YTD' ? 'ytd' : currentPeriod;
+      changeMap[item.symbol] = item[key] ?? item['1D'] ?? 0;
+    });
+
+    // Also fetch current prices from FMP quote
+    try {
+      const allSyms = syms.join(',');
+      const r2 = await fetch(`https://financialmodelingprep.com/api/v3/quote-short/${allSyms}?apikey=${FMP_KEY}`);
+      const d2 = await r2.json();
+      if (Array.isArray(d2)) d2.forEach(q => { priceMap[q.symbol] = q.price; });
+    } catch {}
+  }
+
+  async function fetchSectorChanges() {
+    const etfSyms = SECTOR_ETFS.map(s => s.etf);
+    await fetchChanges(etfSyms);
+  }
+
+  async function fetchStockChanges() {
+    const allSyms = STOCKS.map(s => s.sym);
+    await fetchChanges(allSyms);
+  }
+
+  // ─── Render sectors view ───────────────────────────────────────────────────
+  function renderSectors() {
+    const map = document.getElementById('hmMap');
+    map.innerHTML = '';
+    map.className = 'hm-map hm-sectors-grid';
+
+    const total = SECTOR_ETFS.reduce((s, e) => s + e.weight, 0);
+
+    SECTOR_ETFS.forEach(sec => {
+      const pct = changeMap[sec.etf] ?? 0;
+      const bg  = pctColor(pct);
+      const tc  = textColor(pct);
+      const flexVal = (sec.weight / total * 100).toFixed(1);
+
+      const div = document.createElement('div');
+      div.className = 'hm-sector-cell';
+      div.style.cssText = `background:${bg};flex:${flexVal} 1 0%;color:${tc}`;
+      div.innerHTML = `
+        <div class="hm-sec-name">${sec.name}</div>
+        <div class="hm-sec-pct" style="color:${pct >= 0 ? '#86efac' : '#fca5a5'}">${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%</div>
+        <div class="hm-sec-etf">${sec.etf}</div>
+      `;
+      div.addEventListener('mouseenter', (e) => showTip(e, null, sec.name, priceMap[sec.etf], pct));
+      div.addEventListener('mouseleave', hideTip);
+      div.addEventListener('click', () => {
+        window.location.href = `/company/${sec.etf.toLowerCase()}`;
+      });
+      map.appendChild(div);
+    });
+  }
+
+  // ─── Squarified treemap (lightweight, no D3) ──────────────────────────────
+  function squarify(items, x, y, w, h) {
+    // Sort by value descending
+    items = [...items].sort((a, b) => b.value - a.value);
+    const total = items.reduce((s, i) => s + i.value, 0);
+    const rects = [];
+    squarifyRow(items, x, y, w, h, total, rects);
+    return rects;
+  }
+
+  function squarifyRow(items, x, y, w, h, total, rects) {
+    if (!items.length) return;
+    if (items.length === 1) {
+      rects.push({ item: items[0], x, y, w, h });
+      return;
+    }
+
+    // Try to find best row
+    const isHoriz = w >= h;
+    let rowArea = 0;
+    let rowItems = [];
+    let best = Infinity;
+
+    for (let i = 0; i < items.length; i++) {
+      const candidate = items[i];
+      const candidateArea = (candidate.value / total) * w * h;
+      rowArea += candidateArea;
+      rowItems = items.slice(0, i + 1);
+
+      const rowDim = isHoriz ? h : w;
+      const rowLen = rowArea / rowDim;
+      const worst = Math.max(
+        ...rowItems.map(it => {
+          const a = (it.value / total) * w * h;
+          return Math.max(rowLen / (a / rowLen), (a / rowLen) / rowLen);
+        })
+      );
+
+      if (worst > best) {
+        rowItems = items.slice(0, i);
+        rowArea -= candidateArea;
+        break;
+      }
+      best = worst;
+    }
+
+    if (!rowItems.length) rowItems = [items[0]];
+
+    const rowAreaTotal = rowItems.reduce((s, it) => s + (it.value / total) * w * h, 0);
+    const rowDim = isHoriz ? h : w;
+    const rowLen = rowAreaTotal / rowDim;
+
+    let pos = isHoriz ? x : y;
+    rowItems.forEach(it => {
+      const a = (it.value / total) * w * h;
+      const dim = a / rowLen;
+      if (isHoriz) {
+        rects.push({ item: it, x: x, y: pos, w: rowLen, h: dim });
+        pos += dim;
+      } else {
+        rects.push({ item: it, x: pos, y: y, w: dim, h: rowLen });
+        pos += dim;
+      }
+    });
+
+    const remaining = items.slice(rowItems.length);
+    if (remaining.length) {
+      const remainArea = remaining.reduce((s, it) => s + it.value, 0);
+      if (isHoriz) {
+        squarifyRow(remaining, x + rowLen, y, w - rowLen, h, total, rects);
+      } else {
+        squarifyRow(remaining, x, y + rowLen, w, h - rowLen, total, rects);
+      }
+    }
+  }
+
+  // ─── Render stocks view ────────────────────────────────────────────────────
+  function renderStocks() {
+    const map = document.getElementById('hmMap');
+    map.innerHTML = '';
+    map.className = 'hm-map hm-stocks-wrap';
+    map.style.position = 'relative';
+
+    // Group by sector
+    const sectors = {};
+    STOCKS.forEach(s => {
+      if (!sectors[s.sector]) sectors[s.sector] = [];
+      sectors[s.sector].push({ ...s, value: s.mcap });
+    });
+
+    // Layout the sector groups side by side
+    const containerW = map.clientWidth || 1100;
+    const containerH = Math.max(580, Math.round(containerW * 0.56));
+    map.style.height = containerH + 'px';
+
+    // Build top-level items (sectors)
+    const totalMcap = STOCKS.reduce((s, st) => s + st.mcap, 0);
+    const sectorItems = Object.entries(sectors).map(([name, stocks]) => ({
+      name,
+      value: stocks.reduce((s, st) => s + st.mcap, 0),
+      stocks
+    }));
+
+    // Sector-level treemap
+    const GAP = 3;
+    const sectorRects = squarify(
+      sectorItems.map(s => ({ ...s, value: s.value })),
+      GAP, GAP, containerW - GAP * 2, containerH - GAP * 2
+    );
+
+    sectorRects.forEach(({ item: sector, x: sx, y: sy, w: sw, h: sh }) => {
+      // Sector label bar
+      const LABEL_H = 20;
+      const secDiv = document.createElement('div');
+      secDiv.className = 'hm-sec-group';
+      secDiv.style.cssText = `left:${sx}px;top:${sy}px;width:${sw}px;height:${sh}px`;
+
+      const label = document.createElement('div');
+      label.className = 'hm-sec-group-label';
+      label.textContent = sector.name;
+      secDiv.appendChild(label);
+
+      // Stock treemap within this sector
+      const stockItems = sector.stocks.map(s => ({ ...s, value: s.mcap }));
+      const stockRects = squarify(
+        stockItems,
+        0, LABEL_H, sw - GAP, sh - LABEL_H - GAP
+      );
+
+      stockRects.forEach(({ item: stock, x: stx, y: sty, w: stw, h: sth }) => {
+        const pct = changeMap[stock.sym] ?? 0;
+        const bg  = pctColor(pct);
+        const tc  = textColor(pct);
+        const showName = stw > 50 && sth > 30;
+        const showSym  = stw > 30 && sth > 20;
+
+        const cell = document.createElement('div');
+        cell.className = 'hm-stock-cell';
+        cell.style.cssText = `left:${stx}px;top:${sty}px;width:${stw - GAP}px;height:${sth - GAP}px;background:${bg};color:${tc}`;
+
+        if (showSym) {
+          cell.innerHTML = `
+            ${showName ? `<div class="hm-stock-sym" style="font-size:${stw > 80 ? 12 : 10}px">${stock.sym}</div>` : ''}
+            ${showName && stw > 60 && sth > 44 ? `<div class="hm-stock-name" style="font-size:9px;opacity:.7">${stock.name}</div>` : ''}
+            <div class="hm-stock-pct" style="font-size:${stw > 60 ? 12 : 10}px;color:${pct >= 0 ? '#86efac' : '#fca5a5'}">${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%</div>
+          `;
+        }
+
+        cell.addEventListener('mouseenter', (e) => showTip(e, stock.sym, stock.name, priceMap[stock.sym], pct, stock.mcap));
+        cell.addEventListener('mouseleave', hideTip);
+        cell.addEventListener('click', () => {
+          window.location.href = `/company/${stock.sym.toLowerCase().replace(/\./g,'-')}`;
+        });
+        secDiv.appendChild(cell);
+      });
+
+      map.appendChild(secDiv);
+    });
+  }
+
+  // ─── Tooltip ───────────────────────────────────────────────────────────────
+  function showTip(e, sym, name, price, pct, mcap) {
+    const tip = document.getElementById('hmTip');
+    const up  = pct >= 0;
+    const mcapStr = mcap ? (mcap >= 1000 ? `$${(mcap/1000).toFixed(1)}T` : `$${mcap.toFixed(0)}B`) : '';
+    tip.innerHTML = `
+      <div class="tip-name">${name}${sym ? ` <span class="tip-sym">(${sym})</span>` : ''}</div>
+      ${price ? `<div class="tip-price">$${parseFloat(price).toFixed(2)}</div>` : ''}
+      <div class="tip-pct" style="color:${up ? '#4ade80' : '#f87171'}">${up?'+':''}${pct.toFixed(2)}%</div>
+      ${mcapStr ? `<div class="tip-mcap">Market Cap: ${mcapStr}</div>` : ''}
+    `;
+    tip.style.display = 'block';
+    moveTip(e);
+  }
+  function moveTip(e) {
+    const tip = document.getElementById('hmTip');
+    tip.style.left = (e.clientX + 14) + 'px';
+    tip.style.top  = (e.clientY - 10) + 'px';
+  }
+  function hideTip() {
+    document.getElementById('hmTip').style.display = 'none';
+  }
+  document.addEventListener('mousemove', (e) => {
+    const tip = document.getElementById('hmTip');
+    if (tip.style.display === 'block') moveTip(e);
+  });
+
+  // ─── Load & render ─────────────────────────────────────────────────────────
+  async function load() {
+    document.getElementById('hmLoading').style.display = 'flex';
+    document.getElementById('hmMap').style.display     = 'none';
+
+    if (currentView === 'sectors') {
+      await fetchSectorChanges();
+      renderSectors();
+    } else {
+      await fetchStockChanges();
+      renderStocks();
+    }
+
+    document.getElementById('hmLoading').style.display = 'none';
+    document.getElementById('hmMap').style.display     = 'block';
+    document.getElementById('hmUpdated').textContent   = `Updated ${new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' })}`;
+  }
+
+  // ─── View toggle ───────────────────────────────────────────────────────────
+  window.setView = function(v) {
+    currentView = v;
+    document.getElementById('btnSectors').classList.toggle('active', v === 'sectors');
+    document.getElementById('btnStocks').classList.toggle('active', v === 'stocks');
+    load();
+  };
+
+  // ─── Period buttons ────────────────────────────────────────────────────────
+  document.querySelectorAll('.hm-period').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.hm-period').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentPeriod = btn.dataset.p;
+      load();
+    });
+  });
+
+  // ─── Init ──────────────────────────────────────────────────────────────────
+  load();
+  setInterval(load, 90000);
+</script>
+
+<style>
+  .hm-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-top: 12px;
+  }
+  .hm-title { font-size: 1.9rem; font-weight: 900; color: #fff; margin: 0; }
+  .hm-sub   { font-size: 13px; color: var(--text-muted); margin: 4px 0 0; }
+
+  .hm-controls { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+
+  .hm-view-toggle {
+    display: flex;
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .hm-view-btn {
+    padding: 7px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .hm-view-btn.active { background: var(--gold); color: #0b0f1a; }
+
+  .hm-periods { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+  .hm-period {
+    padding: 5px 11px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--navy-2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .5px;
+  }
+  .hm-period:hover  { border-color: rgba(201,168,76,.4); color: var(--gold); }
+  .hm-period.active { background: var(--gold); color: #0b0f1a; border-color: var(--gold); }
+
+  /* Legend */
+  .hm-legend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 11px;
+  }
+  .hm-legend { display: flex; align-items: center; gap: 8px; }
+  .hm-leg-end { font-weight: 700; font-size: 11px; }
+  .hm-leg-bar {
+    width: 160px;
+    height: 10px;
+    border-radius: 4px;
+    background: linear-gradient(to right,
+      #7f1d1d, #dc2626, #ef4444, #f87171,
+      #1e2d3d,
+      #4ade80, #22c55e, #16a34a, #14532d
+    );
+  }
+  .hm-leg-note { color: var(--text-muted); font-size: 11px; margin-left: 8px; }
+  .hm-updated { color: var(--text-muted); font-size: 11px; }
+
+  /* Loading */
+  .hm-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 0;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .hm-spinner {
+    width: 22px; height: 22px;
+    border: 2px solid rgba(201,168,76,.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Map */
+  .hm-map { width: 100%; border-radius: 10px; overflow: hidden; }
+
+  /* Sector grid view */
+  .hm-sectors-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    height: 320px;
+  }
+  .hm-sector-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity .15s, filter .15s;
+    padding: 8px;
+    text-align: center;
+    min-width: 80px;
+    flex-grow: 1;
+  }
+  .hm-sector-cell:hover { filter: brightness(1.15); }
+  .hm-sec-name { font-size: 12px; font-weight: 700; margin-bottom: 4px; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+  .hm-sec-pct  { font-size: 18px; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+  .hm-sec-etf  { font-size: 10px; opacity: .6; margin-top: 3px; }
+
+  /* Stock treemap view */
+  .hm-stocks-wrap { position: relative; }
+  .hm-sec-group {
+    position: absolute;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .hm-sec-group-label {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 20px;
+    background: rgba(0,0,0,.55);
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,.7);
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    z-index: 2;
+  }
+  .hm-stock-cell {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: filter .1s;
+    border: 1px solid rgba(0,0,0,.2);
+    overflow: hidden;
+    text-align: center;
+    padding: 2px;
+  }
+  .hm-stock-cell:hover { filter: brightness(1.2); z-index: 10; }
+  .hm-stock-sym  { font-weight: 800; line-height: 1.2; }
+  .hm-stock-name { line-height: 1.2; white-space: nowrap; overflow: hidden; }
+  .hm-stock-pct  { font-weight: 700; line-height: 1.2; }
+
+  /* Tooltip */
+  .hm-tip {
+    position: fixed;
+    display: none;
+    background: #1a2332;
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 10px 14px;
+    z-index: 9999;
+    pointer-events: none;
+    min-width: 150px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  }
+  .tip-name  { font-size: 13px; font-weight: 700; color: #fff; }
+  .tip-sym   { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+  .tip-price { font-size: 18px; font-weight: 700; color: var(--gold); margin: 4px 0; }
+  .tip-pct   { font-size: 14px; font-weight: 700; }
+  .tip-mcap  { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  @media (max-width: 700px) {
+    .hm-header { flex-direction: column; }
+    .hm-controls { align-items: flex-start; }
+    .hm-leg-bar { width: 100px; }
+  }
+</style>
+
+</BaseLayout>

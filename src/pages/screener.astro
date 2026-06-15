@@ -1,0 +1,680 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Stock Screener">
+
+<section style="margin-top:48px;padding:0 28px;max-width:1240px;margin-left:auto;margin-right:auto">
+
+  <!-- Header -->
+  <div class="scr-header">
+    <div>
+      <h1 class="scr-title">Stock Screener</h1>
+      <p class="scr-sub">Filter US stocks by fundamentals, sector, and market metrics</p>
+    </div>
+    <div class="scr-header-right">
+      <span class="scr-result-count" id="scrCount">—</span>
+      <button class="scr-export-btn" id="scrExport">⬇ Export CSV</button>
+    </div>
+  </div>
+
+  <!-- Filter Panel -->
+  <div class="scr-filters" id="scrFilters">
+
+    <div class="scr-filter-group">
+      <label class="scr-label">Sector</label>
+      <select class="scr-select" id="fSector">
+        <option value="">Any Sector</option>
+        <option value="Technology">Technology</option>
+        <option value="Financials">Financials</option>
+        <option value="Healthcare">Healthcare</option>
+        <option value="Consumer Cyclical">Consumer Cyclical</option>
+        <option value="Consumer Defensive">Consumer Defensive</option>
+        <option value="Industrials">Industrials</option>
+        <option value="Communication Services">Communication Services</option>
+        <option value="Energy">Energy</option>
+        <option value="Real Estate">Real Estate</option>
+        <option value="Basic Materials">Basic Materials</option>
+        <option value="Utilities">Utilities</option>
+      </select>
+    </div>
+
+    <div class="scr-filter-group">
+      <label class="scr-label">Market Cap</label>
+      <select class="scr-select" id="fMcap">
+        <option value="">Any</option>
+        <option value="mega">Mega (&gt;$200B)</option>
+        <option value="large">Large ($10B–$200B)</option>
+        <option value="mid">Mid ($2B–$10B)</option>
+        <option value="small">Small ($300M–$2B)</option>
+        <option value="micro">Micro (&lt;$300M)</option>
+      </select>
+    </div>
+
+    <div class="scr-filter-group">
+      <label class="scr-label">Exchange</label>
+      <select class="scr-select" id="fExchange">
+        <option value="">Any</option>
+        <option value="NYSE">NYSE</option>
+        <option value="NASDAQ">NASDAQ</option>
+        <option value="AMEX">AMEX</option>
+      </select>
+    </div>
+
+    <div class="scr-filter-group">
+      <label class="scr-label">Country</label>
+      <select class="scr-select" id="fCountry">
+        <option value="">Any</option>
+        <option value="US">United States</option>
+        <option value="CA">Canada</option>
+        <option value="GB">United Kingdom</option>
+        <option value="DE">Germany</option>
+        <option value="JP">Japan</option>
+        <option value="CN">China</option>
+        <option value="IN">India</option>
+      </select>
+    </div>
+
+    <div class="scr-filter-group">
+      <label class="scr-label">Price ($)</label>
+      <div class="scr-range-row">
+        <input type="number" class="scr-input" id="fPriceMin" placeholder="Min" min="0" />
+        <span class="scr-range-sep">–</span>
+        <input type="number" class="scr-input" id="fPriceMax" placeholder="Max" min="0" />
+      </div>
+    </div>
+
+    <div class="scr-filter-group">
+      <label class="scr-label">Volume (min)</label>
+      <select class="scr-select" id="fVolume">
+        <option value="">Any</option>
+        <option value="100000">100K+</option>
+        <option value="500000">500K+</option>
+        <option value="1000000">1M+</option>
+        <option value="5000000">5M+</option>
+        <option value="10000000">10M+</option>
+      </select>
+    </div>
+
+    <div class="scr-filter-group">
+      <label class="scr-label">Beta</label>
+      <select class="scr-select" id="fBeta">
+        <option value="">Any</option>
+        <option value="low">Low (&lt;0.5)</option>
+        <option value="medium">Medium (0.5–1.5)</option>
+        <option value="high">High (&gt;1.5)</option>
+      </select>
+    </div>
+
+    <div class="scr-filter-group">
+      <label class="scr-label">Dividend Yield</label>
+      <select class="scr-select" id="fDiv">
+        <option value="">Any</option>
+        <option value="0.01">1%+</option>
+        <option value="0.02">2%+</option>
+        <option value="0.03">3%+</option>
+        <option value="0.05">5%+</option>
+      </select>
+    </div>
+
+    <div class="scr-filter-group" style="flex-direction:row;align-items:flex-end;gap:10px">
+      <button class="scr-run-btn" id="scrRun">Run Screener →</button>
+      <button class="scr-reset-btn" id="scrReset">Reset</button>
+    </div>
+
+  </div>
+
+  <!-- Active filters chips -->
+  <div class="scr-chips" id="scrChips"></div>
+
+  <!-- Loading -->
+  <div id="scrLoading" class="scr-loading" style="display:none">
+    <div class="scr-spinner"></div>
+    <span>Scanning markets…</span>
+  </div>
+
+  <!-- Results Table -->
+  <div class="scr-table-wrap" id="scrTableWrap" style="display:none">
+    <table class="scr-table" id="scrTable">
+      <thead>
+        <tr>
+          <th data-col="rank">#</th>
+          <th data-col="symbol">Ticker</th>
+          <th data-col="companyName">Company</th>
+          <th data-col="sector">Sector</th>
+          <th data-col="price">Price</th>
+          <th data-col="changesPercentage" class="sort-active">Chg %</th>
+          <th data-col="marketCap">Mkt Cap</th>
+          <th data-col="volume">Volume</th>
+          <th data-col="pe">P/E</th>
+          <th data-col="beta">Beta</th>
+          <th data-col="lastAnnualDividend">Div %</th>
+        </tr>
+      </thead>
+      <tbody id="scrBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Empty state -->
+  <div id="scrEmpty" class="scr-empty" style="display:none">
+    <div class="scr-empty-icon">🔍</div>
+    <p>No stocks matched your filters.</p>
+    <p style="font-size:12px;color:var(--text-muted)">Try broadening your criteria.</p>
+  </div>
+
+  <!-- Initial prompt -->
+  <div id="scrPrompt" class="scr-prompt">
+    <div class="scr-prompt-icon">📊</div>
+    <p>Set your filters above and click <strong>Run Screener</strong> to find matching stocks.</p>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:8px">Powered by Financial Modeling Prep · US markets (NYSE, NASDAQ, AMEX)</p>
+  </div>
+
+</section>
+
+<script>
+  const FMP_KEY = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
+  const FMP_BASE = 'https://financialmodelingprep.com/api/v3';
+
+  let results      = [];
+  let sortCol      = 'changesPercentage';
+  let sortAsc      = false;
+  let quoteMap     = {};
+
+  // ─── Build FMP screener URL ────────────────────────────────────────────────
+  function buildUrl() {
+    const params = new URLSearchParams({ apikey: FMP_KEY, limit: '200', isActivelyTrading: 'true', isEtf: 'false' });
+
+    const sector   = document.getElementById('fSector').value;
+    const mcap     = document.getElementById('fMcap').value;
+    const exchange = document.getElementById('fExchange').value;
+    const country  = document.getElementById('fCountry').value;
+    const priceMin = document.getElementById('fPriceMin').value;
+    const priceMax = document.getElementById('fPriceMax').value;
+    const volume   = document.getElementById('fVolume').value;
+    const betaVal  = document.getElementById('fBeta').value;
+    const divVal   = document.getElementById('fDiv').value;
+
+    if (sector)   params.set('sector', sector);
+    if (exchange) params.set('exchange', exchange);
+    if (country)  params.set('country', country);
+
+    // Market cap tiers
+    const mcapMap = {
+      mega:  [200e9, null],
+      large: [10e9,  200e9],
+      mid:   [2e9,   10e9],
+      small: [300e6, 2e9],
+      micro: [null,  300e6],
+    };
+    if (mcap && mcapMap[mcap]) {
+      const [lo, hi] = mcapMap[mcap];
+      if (lo) params.set('marketCapMoreThan', String(lo));
+      if (hi) params.set('marketCapLowerThan', String(hi));
+    }
+
+    if (priceMin) params.set('priceMoreThan', priceMin);
+    if (priceMax) params.set('priceLowerThan', priceMax);
+    if (volume)   params.set('volumeMoreThan', volume);
+
+    if (betaVal === 'low')    { params.set('betaLowerThan', '0.5'); }
+    if (betaVal === 'high')   { params.set('betaMoreThan', '1.5'); }
+    if (betaVal === 'medium') { params.set('betaMoreThan', '0.5'); params.set('betaLowerThan', '1.5'); }
+
+    if (divVal) params.set('dividendMoreThan', divVal);
+
+    return `${FMP_BASE}/stock-screener?${params}`;
+  }
+
+  // ─── Format helpers ────────────────────────────────────────────────────────
+  function fmtMcap(v) {
+    if (!v || v === 0) return '—';
+    if (v >= 1e12) return `$${(v/1e12).toFixed(2)}T`;
+    if (v >= 1e9)  return `$${(v/1e9).toFixed(1)}B`;
+    if (v >= 1e6)  return `$${(v/1e6).toFixed(0)}M`;
+    return `$${v}`;
+  }
+  function fmtVol(v) {
+    if (!v) return '—';
+    if (v >= 1e6) return `${(v/1e6).toFixed(1)}M`;
+    if (v >= 1e3) return `${(v/1e3).toFixed(0)}K`;
+    return v;
+  }
+  function fmtNum(v, dec = 2) {
+    return (v == null || isNaN(v)) ? '—' : parseFloat(v).toFixed(dec);
+  }
+
+  // ─── Render chips ──────────────────────────────────────────────────────────
+  function renderChips() {
+    const chips = [];
+    const sel = (id, label) => {
+      const el = document.getElementById(id);
+      if (el && el.value) chips.push(`${label}: <strong>${el.options[el.selectedIndex].text}</strong>`);
+    };
+    const inp = (id, label) => {
+      const el = document.getElementById(id);
+      if (el && el.value) chips.push(`${label}: <strong>${el.value}</strong>`);
+    };
+    sel('fSector','Sector'); sel('fMcap','Market Cap'); sel('fExchange','Exchange');
+    sel('fCountry','Country'); sel('fVolume','Volume'); sel('fBeta','Beta'); sel('fDiv','Dividend');
+    inp('fPriceMin','Price ≥'); inp('fPriceMax','Price ≤');
+
+    const container = document.getElementById('scrChips');
+    container.innerHTML = chips.length
+      ? chips.map(c => `<span class="scr-chip">${c}</span>`).join('')
+      : '';
+  }
+
+  // ─── Fetch quote data to get changesPercentage + PE ───────────────────────
+  async function fetchQuotes(syms) {
+    quoteMap = {};
+    const batches = [];
+    for (let i = 0; i < syms.length; i += 50) batches.push(syms.slice(i, i + 50));
+    await Promise.all(batches.map(async (batch) => {
+      try {
+        const r = await fetch(`${FMP_BASE}/quote/${batch.join(',')}?apikey=${FMP_KEY}`);
+        const d = await r.json();
+        if (Array.isArray(d)) d.forEach(q => { quoteMap[q.symbol] = q; });
+      } catch {}
+    }));
+  }
+
+  // ─── Sort ─────────────────────────────────────────────────────────────────
+  function sortData(data) {
+    return [...data].sort((a, b) => {
+      let va = a[sortCol] ?? (quoteMap[a.symbol]?.[sortCol] ?? -Infinity);
+      let vb = b[sortCol] ?? (quoteMap[b.symbol]?.[sortCol] ?? -Infinity);
+      if (sortCol === 'companyName' || sortCol === 'symbol' || sortCol === 'sector') {
+        va = String(va).toLowerCase();
+        vb = String(vb).toLowerCase();
+        return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+      }
+      return sortAsc ? va - vb : vb - va;
+    });
+  }
+
+  // ─── Render table ─────────────────────────────────────────────────────────
+  function renderTable(data) {
+    const sorted = sortData(data);
+    const tbody  = document.getElementById('scrBody');
+
+    tbody.innerHTML = sorted.map((stock, i) => {
+      const q   = quoteMap[stock.symbol] || {};
+      const pct = q.changesPercentage ?? stock.changesPercentage ?? null;
+      const pe  = q.pe ?? null;
+      const up  = pct != null && pct >= 0;
+      const price = q.price ?? stock.price ?? null;
+      const divPct = stock.lastAnnualDividend && price
+        ? ((stock.lastAnnualDividend / price) * 100).toFixed(2) + '%'
+        : '—';
+
+      return `<tr onclick="window.location.href='/company/${stock.symbol.toLowerCase().replace(/[^a-z0-9]/g,'-')}'" style="cursor:pointer">
+        <td class="scr-rank">${i + 1}</td>
+        <td><a href="/company/${stock.symbol.toLowerCase().replace(/[^a-z0-9]/g,'-')}" class="scr-ticker">${stock.symbol}</a></td>
+        <td class="scr-cname">${stock.companyName || '—'}</td>
+        <td class="scr-sector-tag">${stock.sector || '—'}</td>
+        <td class="scr-price">${price != null ? '$' + parseFloat(price).toFixed(2) : '—'}</td>
+        <td class="${pct != null ? (up ? 'scr-up' : 'scr-dn') : ''}">
+          ${pct != null ? (up ? '+' : '') + fmtNum(pct) + '%' : '—'}
+        </td>
+        <td>${fmtMcap(stock.marketCap)}</td>
+        <td>${fmtVol(q.volume ?? stock.volume)}</td>
+        <td>${pe != null ? fmtNum(pe, 1) : '—'}</td>
+        <td>${stock.beta != null ? fmtNum(stock.beta, 2) : '—'}</td>
+        <td>${divPct}</td>
+      </tr>`;
+    }).join('');
+
+    // Update sort indicators
+    document.querySelectorAll('.scr-table th').forEach(th => {
+      th.classList.remove('sort-active','sort-asc','sort-desc');
+      if (th.dataset.col === sortCol) {
+        th.classList.add('sort-active', sortAsc ? 'sort-asc' : 'sort-desc');
+      }
+    });
+  }
+
+  // ─── Run screener ─────────────────────────────────────────────────────────
+  async function runScreener() {
+    document.getElementById('scrLoading').style.display   = 'flex';
+    document.getElementById('scrTableWrap').style.display = 'none';
+    document.getElementById('scrEmpty').style.display     = 'none';
+    document.getElementById('scrPrompt').style.display    = 'none';
+    document.getElementById('scrCount').textContent       = '—';
+    renderChips();
+
+    try {
+      const url  = buildUrl();
+      const resp = await fetch(url);
+      const data = await resp.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        document.getElementById('scrEmpty').style.display = 'block';
+        document.getElementById('scrCount').textContent   = '0 results';
+        return;
+      }
+
+      results = data;
+      document.getElementById('scrCount').textContent = `${results.length} stocks found`;
+
+      // Fetch live quotes for change% and PE
+      await fetchQuotes(results.map(s => s.symbol));
+
+      renderTable(results);
+      document.getElementById('scrTableWrap').style.display = 'block';
+
+    } catch (err) {
+      document.getElementById('scrEmpty').style.display = 'block';
+      console.error('Screener error:', err);
+    } finally {
+      document.getElementById('scrLoading').style.display = 'none';
+    }
+  }
+
+  // ─── Column sort ──────────────────────────────────────────────────────────
+  document.querySelectorAll('.scr-table th[data-col]').forEach(th => {
+    th.style.cursor = 'pointer';
+    th.addEventListener('click', () => {
+      if (sortCol === th.dataset.col) {
+        sortAsc = !sortAsc;
+      } else {
+        sortCol = th.dataset.col;
+        sortAsc = false;
+      }
+      if (results.length) renderTable(results);
+    });
+  });
+
+  // ─── Buttons ──────────────────────────────────────────────────────────────
+  document.getElementById('scrRun').addEventListener('click', runScreener);
+
+  document.getElementById('scrReset').addEventListener('click', () => {
+    ['fSector','fMcap','fExchange','fCountry','fVolume','fBeta','fDiv'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    ['fPriceMin','fPriceMax'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('scrChips').innerHTML = '';
+    results = [];
+    document.getElementById('scrTableWrap').style.display = 'none';
+    document.getElementById('scrEmpty').style.display     = 'none';
+    document.getElementById('scrPrompt').style.display    = 'flex';
+    document.getElementById('scrCount').textContent       = '—';
+  });
+
+  // Also run on Enter key
+  document.querySelectorAll('.scr-select, .scr-input').forEach(el => {
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') runScreener(); });
+  });
+
+  // ─── CSV Export ───────────────────────────────────────────────────────────
+  document.getElementById('scrExport').addEventListener('click', () => {
+    if (!results.length) return;
+    const headers = ['Symbol','Company','Sector','Price','Chg%','MarketCap','Volume','PE','Beta','DivYield'];
+    const rows = sortData(results).map(s => {
+      const q   = quoteMap[s.symbol] || {};
+      const pct = (q.changesPercentage ?? '').toString();
+      const price = q.price ?? s.price ?? '';
+      const divPct = s.lastAnnualDividend && price
+        ? ((s.lastAnnualDividend / parseFloat(price)) * 100).toFixed(2)
+        : '';
+      return [
+        s.symbol, `"${s.companyName}"`, `"${s.sector}"`,
+        price, pct, s.marketCap, q.volume ?? s.volume,
+        q.pe ?? '', s.beta ?? '', divPct
+      ].join(',');
+    });
+    const csv  = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = `screener-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  });
+</script>
+
+<style>
+  /* ─── Header ─── */
+  .scr-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 12px;
+    margin-bottom: 20px;
+  }
+  .scr-title { font-size: 1.9rem; font-weight: 900; color: #fff; margin: 0; }
+  .scr-sub   { font-size: 13px; color: var(--text-muted); margin: 4px 0 0; }
+  .scr-header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .scr-result-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+  }
+  .scr-export-btn {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 8px;
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .scr-export-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ─── Filter Panel ─── */
+  .scr-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-end;
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .scr-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 140px;
+  }
+  .scr-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text-muted);
+  }
+  .scr-select {
+    appearance: none;
+    background: var(--navy-3) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 30px 8px 12px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .scr-select:focus { outline: none; border-color: var(--gold); }
+  .scr-select option { background: #1a2235; }
+
+  .scr-range-row { display: flex; align-items: center; gap: 6px; }
+  .scr-input {
+    background: var(--navy-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    padding: 8px 10px;
+    width: 80px;
+    transition: border-color .15s;
+  }
+  .scr-input:focus { outline: none; border-color: var(--gold); }
+  .scr-range-sep { color: var(--text-muted); font-size: 12px; }
+
+  .scr-run-btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    background: var(--gold);
+    color: #0b0f1a;
+    font-size: 13px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    letter-spacing: .3px;
+    transition: opacity .15s;
+    white-space: nowrap;
+  }
+  .scr-run-btn:hover { opacity: .88; }
+
+  .scr-reset-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .scr-reset-btn:hover { border-color: rgba(201,168,76,.4); color: var(--gold); }
+
+  /* ─── Filter Chips ─── */
+  .scr-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; min-height: 0; }
+  .scr-chip {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+  }
+  .scr-chip strong { color: var(--gold); }
+
+  /* ─── Loading ─── */
+  .scr-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 0;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .scr-spinner {
+    width: 22px; height: 22px;
+    border: 2px solid rgba(201,168,76,.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── Table ─── */
+  .scr-table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--navy-2);
+  }
+  .scr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .scr-table thead {
+    background: var(--navy-3);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .scr-table th {
+    padding: 11px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    user-select: none;
+    cursor: pointer;
+    transition: color .15s;
+  }
+  .scr-table th:hover { color: var(--gold); }
+  .scr-table th.sort-active { color: var(--gold); }
+  .scr-table th.sort-asc::after  { content: ' ↑'; }
+  .scr-table th.sort-desc::after { content: ' ↓'; }
+
+  .scr-table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    transition: background .1s;
+  }
+  .scr-table tbody tr:hover { background: var(--navy-3); }
+  .scr-table tbody tr:last-child { border-bottom: none; }
+
+  .scr-table td {
+    padding: 10px 12px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .scr-rank   { color: var(--text-muted); font-size: 11px; width: 30px; }
+  .scr-ticker {
+    font-weight: 800;
+    color: var(--gold);
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .scr-ticker:hover { text-decoration: underline; }
+  .scr-cname  { max-width: 200px; overflow: hidden; text-overflow: ellipsis; color: #fff; font-weight: 500; }
+  .scr-sector-tag {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--navy-3);
+    border-radius: 4px;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+  .scr-price  { font-weight: 600; color: #fff; }
+  .scr-up     { color: #22c55e; font-weight: 600; }
+  .scr-dn     { color: #ef4444; font-weight: 600; }
+
+  /* ─── States ─── */
+  .scr-empty, .scr-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .scr-empty-icon, .scr-prompt-icon { font-size: 40px; margin-bottom: 12px; }
+  .scr-prompt strong { color: var(--gold); }
+
+  @media (max-width: 700px) {
+    .scr-filters { padding: 14px; gap: 10px; }
+    .scr-filter-group { min-width: 120px; }
+    .scr-header { flex-direction: column; }
+  }
+</style>
+
+</BaseLayout>

@@ -1,0 +1,206 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const NSE_STOCKS = [
+  { sym: 'RELIANCE.NS',    name: 'Reliance Industries' },
+  { sym: 'TCS.NS',         name: 'Tata Consultancy Services' },
+  { sym: 'HDFCBANK.NS',    name: 'HDFC Bank' },
+  { sym: 'INFY.NS',        name: 'Infosys' },
+  { sym: 'ICICIBANK.NS',   name: 'ICICI Bank' },
+  { sym: 'HINDUNILVR.NS',  name: 'Hindustan Unilever' },
+  { sym: 'BAJFINANCE.NS',  name: 'Bajaj Finance' },
+  { sym: 'KOTAKBANK.NS',   name: 'Kotak Mahindra Bank' },
+  { sym: 'LT.NS',          name: 'Larsen & Toubro' },
+  { sym: 'SBIN.NS',        name: 'State Bank of India' },
+  { sym: 'WIPRO.NS',       name: 'Wipro' },
+  { sym: 'TATAMOTORS.NS',  name: 'Tata Motors' },
+  { sym: 'BHARTIARTL.NS',  name: 'Bharti Airtel' },
+  { sym: 'MARUTI.NS',      name: 'Maruti Suzuki' },
+  { sym: 'ADANIENT.NS',    name: 'Adani Enterprises' },
+];
+
+const BSE_STOCKS = [
+  { sym: 'RELIANCE.BO',   name: 'Reliance Industries' },
+  { sym: 'TCS.BO',        name: 'Tata Consultancy Services' },
+  { sym: 'HDFCBANK.BO',   name: 'HDFC Bank' },
+  { sym: 'INFY.BO',       name: 'Infosys' },
+  { sym: 'ICICIBANK.BO',  name: 'ICICI Bank' },
+  { sym: 'TATASTEEL.BO',  name: 'Tata Steel' },
+  { sym: 'SUNPHARMA.BO',  name: 'Sun Pharmaceutical' },
+  { sym: 'ONGC.BO',       name: 'ONGC' },
+  { sym: 'BAJAJFINSV.BO', name: 'Bajaj Finserv' },
+  { sym: 'POWERGRID.BO',  name: 'Power Grid Corp' },
+];
+---
+<BaseLayout title="India Markets — NSE & BSE">
+
+  <section class="content-section" style="margin-top:48px">
+    <div class="sector-hero" style="background:linear-gradient(135deg,rgba(255,153,0,0.12),rgba(19,136,8,0.10))">
+      <div class="sh-icon">🇮🇳</div>
+      <div>
+        <h1 class="sh-title">India Markets</h1>
+        <p class="sh-sub">NSE & BSE — live data via Yahoo Finance</p>
+      </div>
+      <div class="sh-perf">
+        <span class="shp-label">NIFTY 50 TODAY</span>
+        <span class="shp-val" id="niftyChg">Loading…</span>
+      </div>
+    </div>
+
+    <!-- Indices Bar -->
+    <div class="indices-grid" style="margin-top:24px" id="indiaIndices">
+      <div class="idx-card skeleton" id="idx-NSEI">
+        <span class="idx-name">NIFTY 50</span>
+        <span class="idx-price" id="nsei-price">—</span>
+        <span class="idx-chg"   id="nsei-chg">—</span>
+      </div>
+      <div class="idx-card skeleton" id="idx-BSESN">
+        <span class="idx-name">SENSEX</span>
+        <span class="idx-price" id="bsesn-price">—</span>
+        <span class="idx-chg"   id="bsesn-chg">—</span>
+      </div>
+      <div class="idx-card skeleton" id="idx-NSEBANK">
+        <span class="idx-name">NIFTY BANK</span>
+        <span class="idx-price" id="nsebank-price">—</span>
+        <span class="idx-chg"   id="nsebank-chg">—</span>
+      </div>
+      <div class="idx-card skeleton" id="idx-NIFTYMIDCAP">
+        <span class="idx-name">NIFTY MIDCAP</span>
+        <span class="idx-price" id="mid-price">—</span>
+        <span class="idx-chg"   id="mid-chg">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- NSE Stocks -->
+  <section class="content-section" style="margin-top:32px">
+    <div class="section-head">
+      <h2 class="section-title">NSE Top Stocks</h2>
+      <span class="section-live">LIVE</span>
+    </div>
+    <div class="sector-grid" id="nseGrid">
+      {NSE_STOCKS.map(s => (
+        <a href={`/company/${s.sym.toLowerCase().replace('.','_')}`} class="mkt-card sector-card" id={`sc-${s.sym}`}>
+          <div class="mkt-top">
+            <div>
+              <div class="mkt-sym">{s.sym.replace('.NS','')}</div>
+              <div class="mkt-name">{s.name}</div>
+            </div>
+            <div class="mkt-badge" id={`scb-${s.sym}`}>—</div>
+          </div>
+          <div class="mkt-price" id={`scp-${s.sym}`}>—</div>
+          <div class="mkt-chg"   id={`scc-${s.sym}`}>—</div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- BSE Stocks -->
+  <section class="content-section" style="margin-top:32px">
+    <div class="section-head">
+      <h2 class="section-title">BSE Top Stocks</h2>
+      <span class="section-live">LIVE</span>
+    </div>
+    <div class="sector-grid" id="bseGrid">
+      {BSE_STOCKS.map(s => (
+        <a href={`/company/${s.sym.toLowerCase().replace('.','_')}`} class="mkt-card sector-card" id={`sc-${s.sym}`}>
+          <div class="mkt-top">
+            <div>
+              <div class="mkt-sym">{s.sym.replace('.BO','')}</div>
+              <div class="mkt-name">{s.name}</div>
+            </div>
+            <div class="mkt-badge" id={`scb-${s.sym}`}>—</div>
+          </div>
+          <div class="mkt-price" id={`scp-${s.sym}`}>—</div>
+          <div class="mkt-chg"   id={`scc-${s.sym}`}>—</div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Other Markets -->
+  <section class="content-section" style="margin-top:48px">
+    <div class="section-head">
+      <h2 class="section-title">Other Markets</h2>
+    </div>
+    <div class="sector-pills">
+      <a href="/markets/tech"    class="sector-pill">💻 US Tech</a>
+      <a href="/markets/finance" class="sector-pill">💰 US Finance</a>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<script define:vars={{
+  nseSyms: ['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS','HINDUNILVR.NS','BAJFINANCE.NS','KOTAKBANK.NS','LT.NS','SBIN.NS','WIPRO.NS','TATAMOTORS.NS','BHARTIARTL.NS','MARUTI.NS','ADANIENT.NS'],
+  bseSyms: ['RELIANCE.BO','TCS.BO','HDFCBANK.BO','INFY.BO','ICICIBANK.BO','TATASTEEL.BO','SUNPHARMA.BO','ONGC.BO','BAJAJFINSV.BO','POWERGRID.BO']
+}}>
+  const PROXY = 'https://corsproxy.io/?';
+
+  async function yfQuotes(syms) {
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+    const r = await fetch(PROXY + encodeURIComponent(url));
+    return (await r.json())?.quoteResponse?.result || [];
+  }
+
+  function renderQuotes(quotes) {
+    let totalPct = 0, count = 0;
+    quotes.forEach(q => {
+      const chg = q.regularMarketChange ?? 0;
+      const pct = q.regularMarketChangePercent ?? 0;
+      const up  = chg >= 0;
+      const color = up ? '#22c55e' : '#ef4444';
+      totalPct += pct; count++;
+
+      const card = document.getElementById(`sc-${q.symbol}`);
+      if (card) card.classList.add(up ? 'up' : 'dn');
+      const bEl = document.getElementById(`scb-${q.symbol}`);
+      if (bEl) { bEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; bEl.classList.add(up?'badge-up':'badge-dn'); }
+      const pEl = document.getElementById(`scp-${q.symbol}`);
+      if (pEl) pEl.textContent = `₹${q.regularMarketPrice?.toFixed(2)}`;
+      const cEl = document.getElementById(`scc-${q.symbol}`);
+      if (cEl) { cEl.textContent = `${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)}`; cEl.style.color = color; }
+    });
+    return count ? totalPct / count : 0;
+  }
+
+  async function loadIndices() {
+    try {
+      const quotes = await yfQuotes(['^NSEI','^BSESN','^NSEBANK','^NIFTYMIDCAP150']);
+      quotes.forEach(q => {
+        const chg = q.regularMarketChange ?? 0;
+        const pct = q.regularMarketChangePercent ?? 0;
+        const up  = chg >= 0;
+        const color = up ? '#22c55e' : '#ef4444';
+        const idMap = {'^NSEI':'nsei','^BSESN':'bsesn','^NSEBANK':'nsebank','^NIFTYMIDCAP150':'mid'};
+        const key = idMap[q.symbol];
+        if (!key) return;
+        const card = document.getElementById(`idx-${q.symbol.replace('^','')}`);
+        if (card) { card.classList.remove('skeleton'); card.classList.add(up?'up':'dn'); }
+        const pEl = document.getElementById(`${key}-price`);
+        if (pEl) pEl.textContent = q.regularMarketPrice?.toLocaleString('en-IN', {maximumFractionDigits:2});
+        const cEl = document.getElementById(`${key}-chg`);
+        if (cEl) { cEl.textContent = `${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`; cEl.style.color = color; }
+      });
+      const nifty = quotes.find(q => q.symbol === '^NSEI');
+      if (nifty) {
+        const pct = nifty.regularMarketChangePercent ?? 0;
+        const up = pct >= 0;
+        const el = document.getElementById('niftyChg');
+        if (el) { el.textContent = `${up?'+':''}${pct.toFixed(2)}%`; el.style.color = up?'#22c55e':'#ef4444'; }
+      }
+    } catch {}
+  }
+
+  async function loadIndia() {
+    try {
+      const [nseQ, bseQ] = await Promise.all([yfQuotes(nseSyms), yfQuotes(bseSyms)]);
+      renderQuotes(nseQ);
+      renderQuotes(bseQ);
+    } catch {}
+  }
+
+  loadIndices();
+  loadIndia();
+  setInterval(() => { loadIndices(); loadIndia(); }, 60000);
+</script>
