@@ -338,4 +338,37 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
   .sgb-items { display:flex; flex-wrap:wrap; gap:6px; }
   .sgb-item { font-size:11px; color:var(--text-muted); background:rgba(255,255,255,.04); padding:4px 10px; border-radius:20px; border:1px solid var(--border); }
   @media (max-width:700px) { .mkts-pills{display:none;} .mkts-dropdown{min-width:160px;} }
+
+  /* Sector stock grid */
+  .sector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .sector-card {
+    background: var(--navy-2, #131d2e);
+    border: 1px solid var(--border, rgba(255,255,255,.08));
+    border-radius: 12px;
+    padding: 16px;
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color .15s, transform .15s;
+    cursor: pointer;
+  }
+  .sector-card:hover { border-color: rgba(201,168,76,.4); transform: translateY(-2px); }
+  .sector-card.up { border-left: 3px solid #22c55e; }
+  .sector-card.dn { border-left: 3px solid #ef4444; }
+  .sector-card .mkt-top { display:flex; justify-content:space-between; align-items:flex-start; }
+  .sector-card .mkt-sym { font-size:14px; font-weight:800; color:#fff; letter-spacing:.3px; }
+  .sector-card .mkt-name { font-size:11px; color:var(--text-muted,#94a3b8); margin-top:2px; }
+  .sector-card .mkt-badge { font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+  .sector-card .badge-up { background:rgba(34,197,94,.15); color:#22c55e; }
+  .sector-card .badge-dn { background:rgba(239,68,68,.15); color:#ef4444; }
+  .sector-card .mkt-price { font-size:20px; font-weight:800; color:#fff; }
+  .sector-card .mkt-chg { font-size:12px; font-weight:600; color:var(--text-muted,#94a3b8); }
+  @media (max-width:600px) { .sector-grid { grid-template-columns: repeat(2, 1fr); gap:10px; } }
 </style>
