@@ -12,29 +12,28 @@ export async function getStaticPaths() {
     'HDFCBANK.NS','ICICIBANK.NS','KOTAKBANK.NS','AXISBANK.NS','SBIN.NS','BANKBARODA.NS','PNB.NS',
     'INDUSINDBK.NS','FEDERALBNK.NS','IDFCFIRSTB.NS','BANDHANBNK.NS','AUBANK.NS',
     // IT
-    'TCS.NS','INFY.NS','WIPRO.NS','HCLTECH.NS','TECHM.NS','LTIM.NS','MPHASIS.NS','PERSISTENT.NS','COFORGE.NS','KPITTECH.NS',
-    // Finance
+    'TCS.NS','INFY.NS','WIPRO.NS','HCLTECH.NS','TECHM.NS','LTTS.NS','MPHASIS.NS','PERSISTENT.NS','COFORGE.NS','KPITTECH.NS',
+    // Finance & NBFC
     'BAJFINANCE.NS','BAJAJFINSV.NS','HDFCAMC.NS','HDFCLIFE.NS','SBILIFE.NS','ICICIGI.NS','ICICIPRULI.NS',
-    'JIOFSL.NS','CHOLAFIN.NS','MUTHOOTFIN.NS',
+    'JIOFIN.NS','CHOLAFIN.NS','MUTHOOTFIN.NS',
     // Auto
-    'TATAMOTORS.NS','MARUTI.NS','BAJAJ-AUTO.NS','HEROMOTOCO.NS','EICHERMOT.NS','TVSMOTORS.NS','ASHOKLEY.NS',
+    'TMCV.NS','MARUTI.NS','BAJAJ-AUTO.NS','HEROMOTOCO.NS','EICHERMOT.NS','TVSMOTOR.NS','ASHOKLEY.NS',
+    'BOSCHLTD.NS','MOTHERSON.NS',
     // Pharma
-    'SUNPHARMA.NS','DRREDDY.NS','CIPLA.NS','DIVISLAB.NS','AUROPHARMA.NS','BIOCON.NS','LUPIN.NS','TORNTPHARM.NS','APOLLOHOSP.NS',
+    'SUNPHARMA.NS','DRREDDY.NS','CIPLA.NS','DIVISLAB.NS','AUROPHARMA.NS','BIOCON.NS','LUPIN.NS','TORNTPHARM.NS','APOLLOHOSP.NS','MAXHEALTH.NS',
     // FMCG
     'HINDUNILVR.NS','ITC.NS','NESTLEIND.NS','BRITANNIA.NS','DABUR.NS','MARICO.NS','GODREJCP.NS',
-    'ASIANPAINT.NS','BERGERPAINTS.NS','TATACONSUM.NS',
+    'ASIANPAINT.NS','BERGEPAINT.NS','TATACONSUM.NS',
     // Energy
     'RELIANCE.NS','ONGC.NS','IOC.NS','BPCL.NS','HINDPETRO.NS','GAIL.NS','NTPC.NS','TATAPOWER.NS','ADANIGREEN.NS','ADANIPORTS.NS',
     // Infra
-    'LT.NS','SIEMENS.NS','ABB.NS','BEL.NS','HAL.NS','RVNL.NS','IRFC.NS','CUMMINSIND.NS',
+    'LT.NS','SIEMENS.NS','ABB.NS','BEL.NS','HAL.NS','RVNL.NS','IRFC.NS','CUMMINSIND.NS','THERMAX.NS','KEC.NS',
     // Metals
-    'TATASTEEL.NS','JSWSTEEL.NS','HINDALCO.NS','VEDL.NS','SAIL.NS','NMDC.NS','COALINDIA.NS',
-    // Telecom/Others
-    'BHARTIARTL.NS','ZEEL.NS','NAUKRI.NS','INDIAMART.NS',
-    // Conglomerates
-    'NETWORK18.NS','TV18BRDCST.NS','TITAN.NS','MOTHERSON.NS',
-    // More Tata
-    'TATASTEEL.NS','TATACONSUM.NS','M&M.NS','BOSCHLTD.NS',
+    'TATASTEEL.NS','JSWSTEEL.NS','HINDALCO.NS','VEDL.NS','SAIL.NS','NMDC.NS','COALINDIA.NS','MOIL.NS','JSWENERGY.NS','NATIONALUM.NS',
+    // Telecom / Media / Others
+    'BHARTIARTL.NS','IDEA.NS','HFCL.NS','NETWORK18.NS','ZEEL.NS','SUNTV.NS','INDIAMART.NS','NAUKRI.NS','TATACOMM.NS',
+    // Misc
+    'TITAN.NS','M&M.NS','ADANIENT.NS',
   ];
   const unique = [...new Set(symbols)];
   return unique.map(s => ({ params: { symbol: s.toLowerCase().replace(/\./g, '-') } }));
@@ -317,63 +316,29 @@ export async function getStaticPaths() {
 </BaseLayout>
 
 <script define:vars={{ sym, curr, isIndian }}>
-  const PROXIES = ['https://corsproxy.io/?','https://api.allorigins.win/raw?url='];
-  const FH_KEY  = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
-  const FMP_KEY = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
   let chartInstance = null;
+  let _companyData  = null;   // cached company JSON (loaded once, reused for chart + quote)
 
-  const fhSym = 'NSE:' + sym.replace(/\.(NS|BO)$/, '');
-  const rangeMap = { 30:['1mo','1d'], 90:['3mo','1d'], 180:['6mo','1wk'], 365:['1y','1wk'], 1825:['5y','1mo'] };
-  const fhRes   = { '1d':'D', '1wk':'W', '1mo':'M' };
+  const rangeMap = { 30:'1mo', 90:'3mo', 180:'6mo', 365:'1y', 1825:'5y' };
 
-  async function fhQuote() {
-    const [qRes, pRes, mRes] = await Promise.allSettled([
-      fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`, {signal:AbortSignal.timeout(7000)}).then(r=>r.json()),
-      fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${fhSym}&token=${FH_KEY}`, {signal:AbortSignal.timeout(7000)}).then(r=>r.json()),
-      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${fhSym}&metric=all&token=${FH_KEY}`, {signal:AbortSignal.timeout(7000)}).then(r=>r.json()),
-    ]);
-    const q = qRes.status==='fulfilled' ? qRes.value : {};
-    const p = pRes.status==='fulfilled' ? pRes.value : {};
-    const m = mRes.status==='fulfilled' ? mRes.value : {};
-    const metric = m?.metric || {};
-    if (!q.c) return null;
-    return {
-      symbol:sym, shortName:p.name||sym.replace('.NS',''), longName:p.name||sym.replace('.NS',''),
-      regularMarketPrice:q.c, regularMarketChange:q.d||0, regularMarketChangePercent:q.dp||0,
-      marketCap:p.marketCapitalization?p.marketCapitalization*1e6:null,
-      trailingPE:metric['peNormalizedAnnual']||metric['peTTM']||null,
-      priceToBook:metric['pbQuarterly']||metric['pbAnnual']||null,
-      epsEstimateCurrentYear:metric['epsNormalizedAnnual']||null,
-      trailingEps:metric['epsTTM']||null,
-      returnOnEquity:metric['roeTTM']||null,
-      dividendYield:metric['dividendYieldIndicatedAnnual']||null,
-      beta:metric['beta']||null,
-      fiftyTwoWeekHigh:metric['52WeekHigh']||q.h||null,
-      fiftyTwoWeekLow:metric['52WeekLow']||q.l||null,
-      averageVolume:metric['10DayAverageTradingVolume']?metric['10DayAverageTradingVolume']*1e6:null,
-      longBusinessSummary:null,
-      sector:p.finnhubIndustry||null,
-      industry:p.finnhubIndustry||null,
-      website:p.weburl||null,
-      country:'India',
-      fullTimeEmployees:null,
-      _metric: metric,
-    };
-  }
-
-  async function fhCandle(days, interval) {
-    const to = Math.floor(Date.now()/1000);
-    const from = to - days*86400;
-    const res = fhRes[interval]||'D';
-    const r = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${fhSym}&resolution=${res}&from=${from}&to=${to}&token=${FH_KEY}`, {signal:AbortSignal.timeout(8000)});
-    const d = await r.json();
-    if (d.s!=='ok'||!d.c?.length) return null;
-    return { indicators:{quote:[{close:d.c}]}, timestamp:d.t };
+  // Load and cache /data/company/{SYM-NS}.json
+  async function getCompanyData() {
+    if (_companyData) return _companyData;
+    const fname = sym.replace(/\./g, '-');
+    try {
+      const res = await fetch(`/data/company/${fname}.json`);
+      if (!res.ok) return null;
+      _companyData = await res.json();
+      return _companyData;
+    } catch { return null; }
   }
 
   async function loadQuote() {
-    const q = await fhQuote();
-    if (!q) { document.getElementById('cpHero').innerHTML = `<div class="cp-sym">${sym.replace('.NS','')}</div><div class="cp-name" style="color:var(--red)">Data unavailable — try again shortly</div>`; return; }
+    const q = await getCompanyData();
+    if (!q || !q.regularMarketPrice) {
+      document.getElementById('cpHero').innerHTML = `<div class="cp-sym">${sym.replace('.NS','')}</div><div class="cp-name" style="color:var(--red)">Data unavailable — market data updates twice daily</div>`;
+      return;
+    }
 
     const chg = q.regularMarketChange??0, pct = q.regularMarketChangePercent??0;
     const up = chg>=0, color = up?'#22c55e':'#ef4444';
@@ -567,14 +532,13 @@ export async function getStaticPaths() {
       trendEl.style.color = pct>=0?'#22c55e':'#ef4444';
     }
 
-    const ctxVixEl = document.getElementById('ctxVix');
+    const ctxVixEl  = document.getElementById('ctxVix');
     const ctxVixSub = document.getElementById('ctxVixSub');
-    // Load VIX
-    const url = `https://query2.finance.yahoo.com/v8/finance/chart/%5EINDIAVIX?range=1d&interval=5m`;
-    fetch('https://corsproxy.io/?'+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)}).then(r=>r.json()).then(d=>{
-      const meta=d?.chart?.result?.[0]?.meta;
-      if(meta?.regularMarketPrice){
-        const vix=meta.regularMarketPrice;
+    // Load VIX from local india-indices.json (no CORS)
+    fetch('/data/india-indices.json').then(r=>r.json()).then(d=>{
+      const vixEntry = d?.indices?.find((i: any) => i.symbol==='^INDIAVIX');
+      if (vixEntry?.regularMarketPrice) {
+        const vix = vixEntry.regularMarketPrice;
         if(ctxVixEl){ctxVixEl.textContent=vix.toFixed(2);(ctxVixEl as HTMLElement).style.color=vix<15?'#22c55e':vix<22?'#eab308':'#ef4444';}
         if(ctxVixSub) ctxVixSub.textContent=vix<15?'Low fear — market calm':vix<22?'Moderate volatility':'High fear — watch carefully';
       }
@@ -602,13 +566,15 @@ export async function getStaticPaths() {
   }
 
   async function loadChart(days = 30) {
-    const [range, interval] = rangeMap[days]||['1mo','1d'];
-    const cd = await fhCandle(days, interval).catch(()=>null);
-    const closes    = cd?.indicators?.quote?.[0]?.close?.filter(Boolean)||[];
-    const timestamps = cd?.timestamp||[];
+    const data = await getCompanyData();
+    if (!data?.history?.length) return;
+    const cutoff  = Date.now()/1000 - days * 86400;
+    const filtered = data.history.filter(h => h.t >= cutoff);
+    const closes    = filtered.map(h => h.c);
+    const timestamps = filtered.map(h => h.t);
     if (!closes.length) return;
-    const up = closes[closes.length-1]>=closes[0], color = up?'#22c55e':'#ef4444';
-    const labels = timestamps.map(t=>new Date(t*1000).toLocaleDateString('en-IN',{month:'short',day:'numeric'}));
+    const up = closes[closes.length-1] >= closes[0], color = up ? '#22c55e' : '#ef4444';
+    const labels = timestamps.map(t => new Date(t*1000).toLocaleDateString('en-IN',{month:'short',day:'numeric'}));
     if (chartInstance) chartInstance.destroy();
     chartInstance = new Chart(document.getElementById('companyChart'), {
       type:'line',
@@ -665,9 +631,9 @@ export async function getStaticPaths() {
         { name:'New Energy',icon:'☀️',tag:'Green',stat:'₹75,000 Cr capex',desc:'Solar, green hydrogen, battery storage. Dhirubhai Ambani Green Energy Giga Complex in Jamnagar.' },
         { name:'Media & Entertainment',icon:'📺',tag:'Media',stat:'Network18 + JioCinema',desc:'Network18, TV18, CNBC-TV18. JioCinema streams IPL, FIFA, OTT. Merger with Disney Star in progress.' },
       ],
-      listed:[{sym:'JIOFSL.NS',name:'Jio Financial Services'},{sym:'NETWORK18.NS',name:'Network18 Media'},{sym:'TV18BRDCST.NS',name:'TV18 Broadcast'}],
+      listed:[{sym:'JIOFIN.NS',name:'Jio Financial Services'},{sym:'NETWORK18.NS',name:'Network18 Media'},{sym:'TATACOMM.NS',name:'Tata Communications'}],
     },
-    'TATAMOTORS.NS': {
+    'TMCV.NS': {
       groupName:'Tata Group',subtitle:'India\'s oldest and most diversified conglomerate — 100+ countries, 30+ industries.',
       divisions:[
         {name:'Jaguar Land Rover',icon:'🚗',tag:'Luxury Auto',stat:'£21B revenue',desc:'UK premium brand. Defender, Discovery, Range Rover, Jaguar. Strong EV pivot with electric Defender.'},
@@ -675,7 +641,7 @@ export async function getStaticPaths() {
         {name:'Air India',icon:'✈️',tag:'Aviation',stat:'Re-acquired 2022',desc:'India\'s national carrier. ₹400M transformation — Vistara merger complete, fleet expansion ongoing.'},
         {name:'Tata Electronics',icon:'📱',tag:'Manufacturing',stat:'iPhone assembler',desc:'Assembles iPhones for Apple. Also building a $11B semiconductor fab in Gujarat.'},
       ],
-      listed:[{sym:'TCS.NS',name:'Tata Consultancy'},{sym:'TATASTEEL.NS',name:'Tata Steel'},{sym:'TATAPOWER.NS',name:'Tata Power'},{sym:'TITAN.NS',name:'Titan'},{sym:'TATACONSUM.NS',name:'Tata Consumer'}],
+      listed:[{sym:'TCS.NS',name:'Tata Consultancy'},{sym:'TATASTEEL.NS',name:'Tata Steel'},{sym:'TATAPOWER.NS',name:'Tata Power'},{sym:'TITAN.NS',name:'Titan'},{sym:'TATACONSUM.NS',name:'Tata Consumer'},{sym:'TMCV.NS',name:'Tata Motors CV'}],
     },
     'TCS.NS': { groupName:'Tata Group', subtitle:'TCS is the Tata Group\'s IT flagship — a global leader in digital transformation and AI services.',
       divisions:[
@@ -683,7 +649,7 @@ export async function getStaticPaths() {
         {name:'Ignio (AI)',icon:'🤖',tag:'AI/ML',stat:'200M events/day',desc:'Cognitive automation platform. Competing with ServiceNow and BMC in AIOps space.'},
         {name:'TCS iON',icon:'🎓',tag:'EdTech',stat:'10M exam seats/yr',desc:'Assessment platform. Runs 10M+ exam seats annually for UPSC, Railways, and large corporates.'},
         {name:'Quartz (Blockchain)',icon:'⛓️',tag:'Blockchain',stat:'Enterprise grade',desc:'Enterprise blockchain-as-a-service for supply chain, trade finance, digital identity.'},
-      ],listed:[{sym:'TATAMOTORS.NS',name:'Tata Motors'},{sym:'TATASTEEL.NS',name:'Tata Steel'},{sym:'TATAPOWER.NS',name:'Tata Power'}],
+      ],listed:[{sym:'TMCV.NS',name:'Tata Motors CV'},{sym:'TATASTEEL.NS',name:'Tata Steel'},{sym:'TATAPOWER.NS',name:'Tata Power'}],
     },
     'HDFCBANK.NS': { groupName:'HDFC Group', subtitle:'India\'s largest private bank by assets, merged with HDFC Ltd. Full-stack financial services.',
       divisions:[
@@ -718,19 +684,21 @@ export async function getStaticPaths() {
           <div class="mkt-top"><div><div class="mkt-sym">${s.sym.replace(/\.(NS|BO)$/,'')}</div><div class="mkt-name">${s.name}</div></div><div class="mkt-badge" id="grpb-${s.sym}">—</div></div>
           <div class="mkt-price" id="grpp-${s.sym}">—</div><div class="mkt-chg" id="grpc-${s.sym}">—</div>
         </a>`).join('');
-      // Fetch prices
-      await Promise.all(g.listed.map(async s=>{
-        try{
-          const fh='NSE:'+s.sym.replace('.NS','');
-          const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${fh}&token=${FH_KEY}`,{signal:AbortSignal.timeout(7000)});
-          const d=await r.json();if(!d.c)return;
-          const chg=d.d||0,pct=d.dp||0,up=chg>=0,color=up?'#22c55e':'#ef4444';
-          const pEl=document.getElementById(`grpp-${s.sym}`),bEl=document.getElementById(`grpb-${s.sym}`),cEl=document.getElementById(`grpc-${s.sym}`);
-          if(pEl)pEl.textContent=`₹${d.c.toLocaleString('en-IN',{maximumFractionDigits:2})}`;
+      // Fetch prices from local JSON (no Finnhub)
+      try {
+        const sRes = await fetch('/data/india-sectors.json');
+        const sData = await sRes.json();
+        const quotes = sData.quotes || {};
+        g.listed.forEach((s: {sym:string,name:string}) => {
+          const q = quotes[s.sym] || {};
+          if (!q.regularMarketPrice) return;
+          const chg=q.regularMarketChange||0, pct=q.regularMarketChangePercent||0, up=chg>=0, color=up?'#22c55e':'#ef4444';
+          const pEl=document.getElementById(`grpp-${s.sym}`), bEl=document.getElementById(`grpb-${s.sym}`), cEl=document.getElementById(`grpc-${s.sym}`);
+          if(pEl) pEl.textContent=`₹${q.regularMarketPrice.toLocaleString('en-IN',{maximumFractionDigits:2})}`;
           if(bEl){bEl.textContent=`${up?'+':''}${pct.toFixed(2)}%`;bEl.classList.add(up?'badge-up':'badge-dn');}
           if(cEl){cEl.textContent=`${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)}`;cEl.style.color=color;}
-        }catch{}
-      }));
+        });
+      } catch {}
     }
   }
 

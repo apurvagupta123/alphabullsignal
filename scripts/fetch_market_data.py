@@ -12,6 +12,7 @@ Schedule: GitHub Actions runs this after Indian market close (10:00 UTC = 3:30 P
 
 import json, os, sys
 from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 try:
     import yfinance as yf
@@ -29,7 +30,7 @@ NOW = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 # ── Symbol lists ──────────────────────────────────────────────────────────────
 
-INDIA_INDICES = ['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^CNXAUTO', '^CNXPHARMA', '^CNXFMCG']
+INDIA_INDICES = ['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^CNXAUTO', '^CNXPHARMA', '^CNXFMCG', '^INDIAVIX']
 INDEX_NAMES   = {
     '^NSEI':      'NIFTY 50',
     '^BSESN':     'SENSEX',
@@ -38,6 +39,7 @@ INDEX_NAMES   = {
     '^CNXAUTO':   'NIFTY AUTO',
     '^CNXPHARMA': 'NIFTY PHARMA',
     '^CNXFMCG':   'NIFTY FMCG',
+    '^INDIAVIX':  'INDIA VIX',
 }
 
 NSE_STOCKS = [
@@ -98,6 +100,42 @@ SECTOR_STOCKS = [
     # Telecom
     'BHARTIARTL.NS','IDEA.NS','HFCL.NS','TEJASNET.NS','NETWORK18.NS','ZEEL.NS','SUNTV.NS','INDIAMART.NS','NAUKRI.NS','TATACOMM.NS',
 ]
+
+# All symbols that get a /company/ detail page — fundamentals + history fetched daily
+COMPANY_SYMBOLS = list(dict.fromkeys([
+    # Banking
+    'HDFCBANK.NS','ICICIBANK.NS','KOTAKBANK.NS','AXISBANK.NS','SBIN.NS','BANKBARODA.NS','PNB.NS',
+    'INDUSINDBK.NS','FEDERALBNK.NS','IDFCFIRSTB.NS','BANDHANBNK.NS','AUBANK.NS',
+    # IT
+    'TCS.NS','INFY.NS','WIPRO.NS','HCLTECH.NS','TECHM.NS','LTTS.NS','MPHASIS.NS',
+    'PERSISTENT.NS','COFORGE.NS','KPITTECH.NS',
+    # Finance & NBFC
+    'BAJFINANCE.NS','BAJAJFINSV.NS','HDFCAMC.NS','HDFCLIFE.NS','SBILIFE.NS',
+    'ICICIGI.NS','ICICIPRULI.NS','JIOFIN.NS','CHOLAFIN.NS','MUTHOOTFIN.NS',
+    # Auto
+    'TMCV.NS','MARUTI.NS','BAJAJ-AUTO.NS','HEROMOTOCO.NS','EICHERMOT.NS',
+    'TVSMOTOR.NS','ASHOKLEY.NS','BOSCHLTD.NS','MOTHERSON.NS',
+    # Pharma
+    'SUNPHARMA.NS','DRREDDY.NS','CIPLA.NS','DIVISLAB.NS','AUROPHARMA.NS',
+    'BIOCON.NS','LUPIN.NS','TORNTPHARM.NS','APOLLOHOSP.NS','MAXHEALTH.NS',
+    # FMCG
+    'HINDUNILVR.NS','ITC.NS','NESTLEIND.NS','BRITANNIA.NS','DABUR.NS',
+    'MARICO.NS','GODREJCP.NS','ASIANPAINT.NS','BERGEPAINT.NS','TATACONSUM.NS',
+    # Energy
+    'RELIANCE.NS','ONGC.NS','IOC.NS','BPCL.NS','HINDPETRO.NS',
+    'GAIL.NS','NTPC.NS','TATAPOWER.NS','ADANIGREEN.NS','ADANIPORTS.NS',
+    # Infra
+    'LT.NS','SIEMENS.NS','ABB.NS','BEL.NS','HAL.NS',
+    'RVNL.NS','IRFC.NS','CUMMINSIND.NS','THERMAX.NS','KEC.NS',
+    # Metals
+    'TATASTEEL.NS','JSWSTEEL.NS','HINDALCO.NS','VEDL.NS','SAIL.NS',
+    'NMDC.NS','COALINDIA.NS','MOIL.NS','JSWENERGY.NS','NATIONALUM.NS',
+    # Telecom / Media / Others
+    'BHARTIARTL.NS','IDEA.NS','HFCL.NS','NETWORK18.NS','ZEEL.NS',
+    'SUNTV.NS','INDIAMART.NS','NAUKRI.NS','TATACOMM.NS',
+    # Misc
+    'TITAN.NS','M&M.NS','ADANIENT.NS',
+]))
 
 US_INDICES = ['^GSPC', '^DJI', '^IXIC', '^RUT']
 US_INDEX_NAMES = {'^GSPC': 'S&P 500', '^DJI': 'Dow Jones', '^IXIC': 'NASDAQ', '^RUT': 'Russell 2000'}
@@ -180,6 +218,73 @@ def save(filename, data):
     size = os.path.getsize(path)
     print(f"  Saved {filename} ({size/1024:.1f} KB)")
 
+def fetch_company_history_batch(symbols):
+    """Batch-download 1Y of daily closes for all company symbols (single HTTP request)."""
+    print(f"  Batch downloading 1Y history for {len(symbols)} symbols...")
+    try:
+        raw = yf.download(
+            symbols if len(symbols) > 1 else symbols[0],
+            period='1y', interval='1d', progress=False, auto_adjust=True,
+        )
+        close = raw['Close'] if len(symbols) > 1 else raw['Close'].rename(symbols[0]).to_frame()
+        if hasattr(close, 'to_frame'):
+            close = close.to_frame()
+        result = {}
+        for sym in symbols:
+            col = sym if sym in close.columns else (close.columns[0] if len(symbols)==1 else None)
+            if col is None:
+                result[sym] = []
+                continue
+            series = close[col].dropna()
+            result[sym] = [
+                {'t': int(ts.timestamp()), 'c': round(float(v), 2)}
+                for ts, v in series.items()
+            ]
+        return result
+    except Exception as e:
+        print(f"  History batch failed: {e}")
+        return {sym: [] for sym in symbols}
+
+def fetch_one_info(sym):
+    """Fetch fundamentals for one symbol via yfinance.Ticker.info."""
+    try:
+        info = yf.Ticker(sym).info
+        return sym, {
+            'longName':           info.get('longName') or info.get('shortName') or sym,
+            'sector':             info.get('sector') or '',
+            'industry':           info.get('industry') or '',
+            'website':            info.get('website') or '',
+            'marketCap':          info.get('marketCap'),
+            'trailingPE':         info.get('trailingPE'),
+            'priceToBook':        info.get('priceToBook'),
+            'trailingEps':        info.get('trailingEps'),
+            'returnOnEquity':     info.get('returnOnEquity'),
+            'dividendYield':      info.get('dividendYield'),
+            'beta':               info.get('beta'),
+            'fiftyTwoWeekHigh':   info.get('fiftyTwoWeekHigh'),
+            'fiftyTwoWeekLow':    info.get('fiftyTwoWeekLow'),
+            'averageVolume':      info.get('averageVolume'),
+            'regularMarketPrice': info.get('regularMarketPrice') or info.get('currentPrice'),
+        }
+    except Exception as e:
+        print(f"  Info failed for {sym}: {e}")
+        return sym, {}
+
+def fetch_all_info_parallel(symbols, workers=12):
+    """Fetch .info for all symbols in parallel."""
+    print(f"  Fetching fundamentals for {len(symbols)} symbols ({workers} workers)...")
+    results = {}
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futures = {ex.submit(fetch_one_info, sym): sym for sym in symbols}
+        done = 0
+        for future in as_completed(futures):
+            sym, info = future.result()
+            results[sym] = info
+            done += 1
+            if done % 10 == 0:
+                print(f"    {done}/{len(symbols)} done...")
+    return results
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -255,6 +360,64 @@ def main():
             for s in US_INDICES
         ],
     })
+
+    # 6. Per-company detail pages (price + fundamentals + 1Y history)
+    print("\n[6/6] Company Detail Data (fundamentals + history)")
+    company_dir = os.path.join(OUT, 'company')
+    os.makedirs(company_dir, exist_ok=True)
+
+    # 1Y history for all company symbols (one batch request)
+    history_map = fetch_company_history_batch(COMPANY_SYMBOLS)
+
+    # Fundamentals in parallel (uses Ticker.info — one call per symbol, parallelised)
+    info_map = fetch_all_info_parallel(COMPANY_SYMBOLS, workers=12)
+
+    # Merge price/change from already-fetched sector data where available
+    # (sector_q already has today's price+change from the earlier batch)
+    saved_count = 0
+    for sym in COMPANY_SYMBOLS:
+        info  = info_map.get(sym, {})
+        hist  = history_map.get(sym, [])
+        sq    = sector_q.get(sym, {})   # from earlier india-sectors fetch
+
+        # Prefer sector_q price (fresher batch download) over info price
+        price  = sq.get('regularMarketPrice') or info.get('regularMarketPrice') or 0
+        change = sq.get('regularMarketChange', 0)
+        pct    = sq.get('regularMarketChangePercent', 0)
+
+        record = {
+            'lastUpdated':           NOW,
+            'symbol':                sym,
+            'longName':              info.get('longName') or sym,
+            'shortName':             info.get('longName') or sym,
+            'sector':                info.get('sector', ''),
+            'industry':              info.get('industry', ''),
+            'website':               info.get('website', ''),
+            'country':               'India',
+            'regularMarketPrice':    round(price,  2) if price  else None,
+            'regularMarketChange':   round(change, 2) if change else None,
+            'regularMarketChangePercent': round(pct, 2) if pct else None,
+            'marketCap':             info.get('marketCap'),
+            'trailingPE':            info.get('trailingPE'),
+            'priceToBook':           info.get('priceToBook'),
+            'trailingEps':           info.get('trailingEps'),
+            'returnOnEquity':        info.get('returnOnEquity'),
+            'dividendYield':         info.get('dividendYield'),
+            'beta':                  info.get('beta'),
+            'fiftyTwoWeekHigh':      info.get('fiftyTwoWeekHigh'),
+            'fiftyTwoWeekLow':       info.get('fiftyTwoWeekLow'),
+            'averageVolume':         info.get('averageVolume'),
+            'history':               hist,
+        }
+
+        fname = sym.replace('.', '-') + '.json'
+        path  = os.path.join(company_dir, fname)
+        with open(path, 'w') as f:
+            json.dump(record, f, separators=(',', ':'))
+        saved_count += 1
+
+    total_kb = sum(os.path.getsize(os.path.join(company_dir, f)) for f in os.listdir(company_dir)) / 1024
+    print(f"  Saved {saved_count} company files ({total_kb:.0f} KB total) → public/data/company/")
 
     # Meta file (for "last updated" display on site)
     save('meta.json', {'lastUpdated': NOW, 'status': 'ok'})
