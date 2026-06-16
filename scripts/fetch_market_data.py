@@ -30,11 +30,12 @@ NOW = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 # ── Symbol lists ──────────────────────────────────────────────────────────────
 
-INDIA_INDICES = ['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^CNXAUTO', '^CNXPHARMA', '^CNXFMCG', '^INDIAVIX']
+INDIA_INDICES = ['^NSEI', '^BSESN', '^NSEBANK', '^CNXSC', '^CNXIT', '^CNXAUTO', '^CNXPHARMA', '^CNXFMCG', '^INDIAVIX']
 INDEX_NAMES   = {
     '^NSEI':      'NIFTY 50',
     '^BSESN':     'SENSEX',
     '^NSEBANK':   'NIFTY BANK',
+    '^CNXSC':     'NIFTY SMALLCAP',
     '^CNXIT':     'NIFTY IT',
     '^CNXAUTO':   'NIFTY AUTO',
     '^CNXPHARMA': 'NIFTY PHARMA',
