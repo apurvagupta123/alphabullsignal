@@ -212,12 +212,46 @@ def fetch_batch(symbols: list) -> dict:
 def _empty(sym):
     return {'symbol': sym, 'regularMarketPrice': 0, 'regularMarketChange': 0, 'regularMarketChangePercent': 0}
 
+ARCHIVE_DAYS = 90   # how many days of snapshots to keep
+
 def save(filename, data):
+    # 1. Always write the live file (current behaviour)
     path = os.path.join(OUT, filename)
     with open(path, 'w') as f:
         json.dump(data, f, separators=(',', ':'))
     size = os.path.getsize(path)
+
+    # 2. Also write a dated copy: public/data/archive/YYYY-MM-DD/<filename>
+    #    Skip per-company files — they already carry 1Y history inside them
+    if not filename.startswith('company/'):
+        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+        archive_dir = os.path.join(OUT, 'archive', today)
+        os.makedirs(archive_dir, exist_ok=True)
+        archive_path = os.path.join(archive_dir, filename)
+        with open(archive_path, 'w') as f:
+            json.dump(data, f, separators=(',', ':'))
+
     print(f"  Saved {filename} ({size/1024:.1f} KB)")
+
+def prune_archive():
+    """Delete archive folders older than ARCHIVE_DAYS days."""
+    from datetime import timedelta, date
+    archive_root = os.path.join(OUT, 'archive')
+    if not os.path.isdir(archive_root):
+        return
+    cutoff = date.today() - timedelta(days=ARCHIVE_DAYS)
+    removed = 0
+    for folder in os.listdir(archive_root):
+        try:
+            folder_date = date.fromisoformat(folder)
+            if folder_date < cutoff:
+                import shutil
+                shutil.rmtree(os.path.join(archive_root, folder))
+                removed += 1
+        except ValueError:
+            pass  # skip non-date folders
+    if removed:
+        print(f"  Pruned {removed} archive folder(s) older than {ARCHIVE_DAYS} days")
 
 def fetch_company_history_batch(symbols):
     """Batch-download 1Y of daily closes for all company symbols (single HTTP request)."""
@@ -453,8 +487,17 @@ def main():
     # Meta file (for "last updated" display on site)
     save('meta.json', {'lastUpdated': NOW, 'status': 'ok'})
 
+    # Archive housekeeping — remove snapshots older than 90 days
+    print("\n[Archive] Pruning old snapshots…")
+    prune_archive()
+
     print(f"\n✓ All data saved to public/data/")
-    print(f"  Files: {', '.join(os.listdir(OUT))}\n")
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    archive_dir = os.path.join(OUT, 'archive', today)
+    if os.path.isdir(archive_dir):
+        archived = os.listdir(archive_dir)
+        print(f"  Archive for today ({today}): {', '.join(archived)}")
+    print(f"  Live files: {', '.join(f for f in os.listdir(OUT) if not os.path.isdir(os.path.join(OUT, f)))}\n")
 
 if __name__ == '__main__':
     main()
