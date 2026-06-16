@@ -105,7 +105,7 @@ input  { outline: none; font-family: inherit; border: none; }
   height: 56px;
   background: rgba(13, 17, 23, 0.97);
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(201,168,76,0.2);
 }
 
 .nav-inner {
@@ -169,7 +169,7 @@ input  { outline: none; font-family: inherit; border: none; }
   transition: color 0.2s, background 0.2s;
 }
 .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-.nav-link.active { color: var(--text); background: rgba(255,255,255,0.07); }
+.nav-link.active { color: var(--gold); background: rgba(201,168,76,0.08); }
 
 /* Search */
 .nav-search {
@@ -266,7 +266,7 @@ input  { outline: none; font-family: inherit; border: none; }
 .hs-num {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--gold);
   line-height: 1;
   margin-bottom: 4px;
 }
@@ -361,7 +361,19 @@ input  { outline: none; font-family: inherit; border: none; }
   font-weight: 700;
   color: #fff;
   padding-left: 14px;
-  border-left: 3px solid var(--gold);
+  border-left: 4px solid var(--gold);
+}
+/* Gold badge next to section headers */
+.section-live {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.3);
+  padding: 3px 10px;
+  border-radius: 20px;
 }
 
 /* Market Sentiment styled heading */
@@ -590,7 +602,7 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
 .site-footer {
   margin-top: 80px;
   background: var(--navy-2);
-  border-top: 1px solid var(--border);
+  border-top: 2px solid rgba(201,168,76,0.25);
   padding: 40px 28px;
 }
 
