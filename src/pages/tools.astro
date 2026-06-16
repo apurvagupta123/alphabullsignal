@@ -162,47 +162,75 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   loadFX('USD');
 
-  // ── 52-Week Tracker (Yahoo Finance) ─────────────────────────
-  const WATCHSYMS = ['AAPL','MSFT','GOOGL','AMZN','TSLA','META','NVDA','JPM','GS','NFLX','AMD','V','MA','DIS','PYPL'];
+  // ── 52-Week Tracker (local company JSON) ─────────────────────
+  const WATCHSYMS = [
+    'RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS',
+    'BAJFINANCE.NS','WIPRO.NS','BHARTIARTL.NS','LT.NS','SBIN.NS',
+    'MARUTI.NS','TITAN.NS','ADANIENT.NS','HCLTECH.NS','KOTAKBANK.NS',
+    'SUNPHARMA.NS','ITC.NS','AXISBANK.NS','TECHM.NS','NTPC.NS'
+  ];
 
   async function load52Week() {
     try {
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${WATCHSYMS.join(',')}&fields=symbol,regularMarketPrice,fiftyTwoWeekHigh,fiftyTwoWeekLow,regularMarketChangePercent`;
-      const r = await fetch(P + encodeURIComponent(url));
-      const w = await r.json();
-      const quotes = w?.quoteResponse?.result || [];
+      const results = await Promise.all(
+        WATCHSYMS.map(sym =>
+          fetch('/data/company/' + sym.replace('.', '-') + '.json')
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null)
+        )
+      );
+
+      const quotes = results
+        .filter(d => d && d.regularMarketPrice && d.fiftyTwoWeekHigh && d.fiftyTwoWeekLow)
+        .map(d => ({
+          symbol: d.symbol,
+          name: d.shortName || d.longName || d.symbol,
+          price: d.regularMarketPrice,
+          high52: d.fiftyTwoWeekHigh,
+          low52: d.fiftyTwoWeekLow,
+          pctFrom52H: (d.regularMarketPrice / d.fiftyTwoWeekHigh - 1) * 100,
+          pctFrom52L: (d.regularMarketPrice / d.fiftyTwoWeekLow - 1) * 100,
+        }));
 
       const highs = quotes
-        .filter(q => q.regularMarketPrice && q.fiftyTwoWeekHigh)
-        .map(q => ({ ...q, pctFrom52H: (q.regularMarketPrice / q.fiftyTwoWeekHigh - 1) * 100 }))
-        .sort((a, b) => b.pctFrom52H - a.pctFrom52H)
-        .filter(q => q.pctFrom52H > -10);
+        .filter(q => q.pctFrom52H > -15)
+        .sort((a, b) => b.pctFrom52H - a.pctFrom52H);
 
       const lows = quotes
-        .filter(q => q.regularMarketPrice && q.fiftyTwoWeekLow)
-        .map(q => ({ ...q, pctFrom52L: (q.regularMarketPrice / q.fiftyTwoWeekLow - 1) * 100 }))
-        .sort((a, b) => a.pctFrom52L - b.pctFrom52L)
-        .filter(q => q.pctFrom52L < 20);
+        .filter(q => q.pctFrom52L < 25)
+        .sort((a, b) => a.pctFrom52L - b.pctFrom52L);
+
+      const fmt = (n) => n >= 100 ? Math.round(n).toLocaleString('en-IN') : n.toFixed(2);
 
       const render52 = (items, type) => items.slice(0,8).map(q => {
         const pct   = type === 'high' ? q.pctFrom52H : q.pctFrom52L;
-        const ref   = type === 'high' ? q.fiftyTwoWeekHigh : q.fiftyTwoWeekLow;
-        const lbl   = type === 'high' ? 'From 52W High' : 'Above 52W Low';
-        const color = type === 'high' ? '#22c55e' : '#ef4444';
-        const barW  = type === 'high' ? Math.max(0, 100+pct) : Math.min(100, pct);
+        const ref   = type === 'high' ? q.high52 : q.low52;
+        const lbl   = type === 'high' ? 'from 52W High' : 'above 52W Low';
+        const color = type === 'high' ? '#10ef62' : '#ff4757';
+        const barW  = type === 'high' ? Math.max(0, 100 + pct) : Math.min(100, pct);
+        const shortSym = q.symbol.replace('.NS','').replace('.BO','');
         return `<div class="w52-item">
-          <a href="/company/${q.symbol.toLowerCase()}" class="w52-sym">${q.symbol}</a>
-          <span class="w52-price">$${q.regularMarketPrice?.toFixed(2)}</span>
+          <div class="w52-row">
+            <span class="w52-sym">${shortSym}</span>
+            <span class="w52-name">${q.name}</span>
+            <span class="w52-price">₹${fmt(q.price)}</span>
+          </div>
           <div class="w52-bar-wrap">
             <div class="w52-bar" style="width:${barW}%;background:${color}"></div>
           </div>
-          <span style="font-size:11px;color:${color}">${pct.toFixed(1)}% ${lbl}</span>
-          <span style="font-size:11px;color:var(--text-muted)">52W: $${ref?.toFixed(2)}</span>
+          <div class="w52-meta">
+            <span style="color:${color};font-weight:600">${pct.toFixed(1)}% ${lbl}</span>
+            <span style="color:var(--text-muted)">52W ref: ₹${fmt(ref)}</span>
+          </div>
         </div>`;
       }).join('');
 
-      document.getElementById('list52High').innerHTML = highs.length ? render52(highs,'high') : '<div class="ec-loading">No stocks near 52W highs.</div>';
-      document.getElementById('list52Low').innerHTML  = lows.length  ? render52(lows,'low')  : '<div class="ec-loading">No stocks near 52W lows.</div>';
+      document.getElementById('list52High').innerHTML = highs.length
+        ? render52(highs,'high')
+        : '<div class="ec-loading">No stocks near 52W highs.</div>';
+      document.getElementById('list52Low').innerHTML = lows.length
+        ? render52(lows,'low')
+        : '<div class="ec-loading">No stocks near 52W lows.</div>';
     } catch {
       document.getElementById('list52High').innerHTML = '<div class="ec-loading">Could not load data.</div>';
       document.getElementById('list52Low').innerHTML  = '<div class="ec-loading">Could not load data.</div>';

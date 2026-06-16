@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280" viewBox="0 0 280 280">
+  <rect width="280" height="280" fill="#07061a" rx="24"/>
+  <g transform="translate(118, 140)">
+    <polygon points="0,-58 -42,-20 -42,24 0,42 42,24 42,-20" fill="#d4a940" opacity="0.12"/>
+    <polygon points="0,-58 -42,-20 -42,24 0,42 42,24 42,-20" fill="none" stroke="#d4a940" stroke-width="1.8"/>
+    <path d="M-36,-24 Q-70,-68 -54,-86 Q-30,-64 -24,-38" fill="#d4a940" opacity="0.9"/>
+    <path d="M36,-24 Q70,-68 54,-86 Q30,-64 24,-38" fill="#d4a940" opacity="0.9"/>
+    <ellipse cx="0" cy="30" rx="20" ry="11" fill="#d4a940" opacity="0.15"/>
+    <ellipse cx="0" cy="30" rx="20" ry="11" fill="none" stroke="#d4a940" stroke-width="1.4"/>
+    <ellipse cx="-7" cy="31" rx="4.5" ry="3.5" fill="#d4a940" opacity="0.6"/>
+    <ellipse cx="7" cy="31" rx="4.5" ry="3.5" fill="#d4a940" opacity="0.6"/>
+    <circle cx="-18" cy="-4" r="6" fill="#07061a"/>
+    <circle cx="-18" cy="-4" r="6" fill="none" stroke="#d4a940" stroke-width="1.4"/>
+    <circle cx="-16" cy="-4" r="2.5" fill="#d4a940"/>
+    <circle cx="18" cy="-4" r="6" fill="#07061a"/>
+    <circle cx="18" cy="-4" r="6" fill="none" stroke="#d4a940" stroke-width="1.4"/>
+    <circle cx="16" cy="-4" r="2.5" fill="#d4a940"/>
+    <rect x="54" y="10"  width="9" height="16" rx="2.5" fill="#d4a940" opacity="0.35"/>
+    <rect x="67" y="0"   width="9" height="26" rx="2.5" fill="#d4a940" opacity="0.65"/>
+    <rect x="80" y="-12" width="9" height="38" rx="2.5" fill="#d4a940" opacity="1"/>
+  </g>
+</svg>

@@ -1,0 +1,538 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Day-over-Day Comparison">
+
+<section class="content-section" style="margin-top:48px">
+  <div class="section-head">
+    <h2 class="section-title">📊 Day-over-Day Comparison</h2>
+    <span class="section-live">NSE</span>
+  </div>
+  <p style="color:var(--text-muted);font-size:13px;margin-bottom:8px">
+    Compare today's stock prices with the previous data snapshot. Refreshes twice daily — 4 PM & 2 AM IST.
+  </p>
+  <div id="cmpDates" style="font-size:12px;color:var(--gold);margin-bottom:20px"></div>
+
+  <!-- Summary cards -->
+  <div class="cmp-summary" id="cmpSummary" style="display:none">
+    <div class="cmp-stat" id="statGainers">
+      <div class="cmp-stat-num" style="color:#22c55e">—</div>
+      <div class="cmp-stat-lbl">Stocks Up</div>
+    </div>
+    <div class="cmp-stat" id="statLosers">
+      <div class="cmp-stat-num" style="color:#ef4444">—</div>
+      <div class="cmp-stat-lbl">Stocks Down</div>
+    </div>
+    <div class="cmp-stat" id="statFlipped">
+      <div class="cmp-stat-num" style="color:#f59e0b">—</div>
+      <div class="cmp-stat-lbl">Sentiment Flip</div>
+    </div>
+    <div class="cmp-stat" id="statTopMover">
+      <div class="cmp-stat-num" style="font-size:14px;color:#fff">—</div>
+      <div class="cmp-stat-lbl">Top Mover</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="cmp-tabs">
+    <button class="cmp-tab active" id="tabChart">📈 Chart View</button>
+    <button class="cmp-tab" id="tabTable">📋 Table View</button>
+    <button class="cmp-tab" id="tabFlips">🔄 Sentiment Flips</button>
+  </div>
+
+  <!-- Loading -->
+  <div id="cmpLoading" class="cmp-loading">Loading comparison data…</div>
+
+  <!-- Chart view -->
+  <div id="panelChart" style="display:none">
+    <div class="cmp-chart-controls">
+      <label class="cmp-ctrl-label">Show:</label>
+      <select id="chartMetric" class="cmp-select">
+        <option value="priceDelta">Price Change (₹)</option>
+        <option value="pctDelta">% Change Delta</option>
+        <option value="todayPct">Today's % Change</option>
+      </select>
+      <label class="cmp-ctrl-label" style="margin-left:16px">Top:</label>
+      <select id="chartCount" class="cmp-select">
+        <option value="10">10 stocks</option>
+        <option value="20" selected>20 stocks</option>
+        <option value="50">All stocks</option>
+      </select>
+    </div>
+    <div class="cmp-chart-wrap">
+      <canvas id="cmpChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Table view -->
+  <div id="panelTable" style="display:none">
+    <div class="cmp-table-controls">
+      <input type="text" id="tableSearch" class="cmp-search" placeholder="🔍 Filter by name or symbol…" />
+      <select id="tableSort" class="cmp-select">
+        <option value="priceDelta_desc">Biggest Gainers ↓</option>
+        <option value="priceDelta_asc">Biggest Losers ↓</option>
+        <option value="name_asc">Name A–Z</option>
+        <option value="todayPct_desc">Today's % ↓</option>
+      </select>
+    </div>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table" id="cmpTable">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Symbol</th>
+            <th>Prev Price</th>
+            <th>Today Price</th>
+            <th>Δ Price</th>
+            <th>Δ %</th>
+            <th>Today's Move</th>
+            <th>Trend</th>
+          </tr>
+        </thead>
+        <tbody id="cmpTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Sentiment flips -->
+  <div id="panelFlips" style="display:none">
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">
+      Stocks that switched direction since the last data snapshot — previously rising stocks now falling (or vice versa).
+    </p>
+    <div id="flipsContent"></div>
+  </div>
+
+  <!-- No-archive state -->
+  <div id="cmpNoArchive" style="display:none">
+    <div style="background:var(--navy-2);border:1px solid var(--border);border-radius:12px;padding:32px;text-align:center;max-width:540px;margin:0 auto">
+      <div style="font-size:36px;margin-bottom:12px">📅</div>
+      <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">No previous snapshot yet</div>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:16px">
+        The comparison archive builds automatically each time GitHub Actions runs the data fetch.<br>
+        Today's data is being shown below as the baseline — comparison will be available from tomorrow.
+      </div>
+      <div style="font-size:12px;color:var(--gold)">Next snapshot: today at 2 AM IST (21:30 UTC)</div>
+    </div>
+    <!-- Still show today's data as single-day view -->
+    <div style="margin-top:24px">
+      <div class="cmp-chart-wrap">
+        <canvas id="cmpChartSingle"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+</BaseLayout>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+let compData = [];    // [{symbol, name, prevPrice, todayPrice, priceDelta, prevPct, todayPct, pctDelta, flipped}]
+let chartInst = null;
+
+function fmt(n, dp=2) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return Number(n).toLocaleString('en-IN', { maximumFractionDigits: dp, minimumFractionDigits: dp });
+}
+function sign(n)  { return n >= 0 ? '+' : ''; }
+function color(n) { return n > 0 ? '#22c55e' : n < 0 ? '#ef4444' : '#7a8899'; }
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+const tabs = [
+  { btn:'tabChart',  panel:'panelChart' },
+  { btn:'tabTable',  panel:'panelTable' },
+  { btn:'tabFlips',  panel:'panelFlips' },
+];
+tabs.forEach(({ btn, panel }) => {
+  document.getElementById(btn)?.addEventListener('click', () => {
+    tabs.forEach(t => {
+      document.getElementById(t.btn)?.classList.remove('active');
+      const p = document.getElementById(t.panel);
+      if (p) p.style.display = 'none';
+    });
+    document.getElementById(btn)?.classList.add('active');
+    const p = document.getElementById(panel);
+    if (p) p.style.display = 'block';
+    if (panel === 'panelChart') renderChart();
+    if (panel === 'panelTable') renderTable();
+    if (panel === 'panelFlips') renderFlips();
+  });
+});
+
+// ── Chart ─────────────────────────────────────────────────────────────────────
+function renderChart(canvasId = 'cmpChart') {
+  const metric = (document.getElementById('chartMetric') as HTMLSelectElement)?.value || 'priceDelta';
+  const count  = parseInt((document.getElementById('chartCount') as HTMLSelectElement)?.value || '20');
+
+  const sorted = [...compData].sort((a,b) => {
+    const va = (a as any)[metric] ?? 0;
+    const vb = (b as any)[metric] ?? 0;
+    return Math.abs(vb) - Math.abs(va);
+  }).slice(0, count);
+
+  const labels = sorted.map(d => d.symbol.replace('.NS','').replace('.BO',''));
+  const values = sorted.map(d => Number(((d as any)[metric] ?? 0).toFixed(2)));
+  const colors = values.map(v => v >= 0 ? 'rgba(34,197,94,0.75)' : 'rgba(239,68,68,0.75)');
+  const borders = values.map(v => v >= 0 ? '#22c55e' : '#ef4444');
+
+  const metricLabels: Record<string,string> = {
+    priceDelta: 'Price Change (₹)',
+    pctDelta:   '% Change Delta (pp)',
+    todayPct:   "Today's % Change",
+  };
+
+  const ctx = (document.getElementById(canvasId) as HTMLCanvasElement)?.getContext('2d');
+  if (!ctx) return;
+
+  if (chartInst) { chartInst.destroy(); chartInst = null; }
+
+  (chartInst as any) = new (window as any).Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: metricLabels[metric] || metric,
+        data: values,
+        backgroundColor: colors,
+        borderColor: borders,
+        borderWidth: 1,
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx: any) => {
+              const v = ctx.parsed.y;
+              const sym = sorted[ctx.dataIndex];
+              const prefix = metric === 'priceDelta' ? '₹' : '';
+              const suffix = metric !== 'priceDelta' ? '%' : '';
+              return `${sym.name}: ${sign(v)}${prefix}${fmt(v)}${suffix}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color:'#7a8899', font:{ size:10 } },
+          grid:  { color:'rgba(255,255,255,0.05)' },
+        },
+        y: {
+          ticks: { color:'#7a8899', font:{ size:10 },
+            callback: (v: any) => metric === 'priceDelta' ? `₹${v}` : `${v}%` },
+          grid:  { color:'rgba(255,255,255,0.08)' },
+        }
+      }
+    }
+  });
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+function renderTable() {
+  const search = (document.getElementById('tableSearch') as HTMLInputElement)?.value?.toLowerCase() || '';
+  const sort   = (document.getElementById('tableSort') as HTMLSelectElement)?.value || 'priceDelta_desc';
+
+  let rows = compData.filter(d => {
+    if (!search) return true;
+    return d.name.toLowerCase().includes(search) || d.symbol.toLowerCase().includes(search);
+  });
+
+  const [key, dir] = sort.split('_');
+  rows.sort((a, b) => {
+    const va = (a as any)[key] ?? 0;
+    const vb = (b as any)[key] ?? 0;
+    if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    return dir === 'desc' ? vb - va : va - vb;
+  });
+
+  const tbody = document.getElementById('cmpTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = rows.map(d => {
+    const sym     = d.symbol.replace('.NS','').replace('.BO','');
+    const dColor  = color(d.priceDelta);
+    const tColor  = color(d.todayPct);
+    const prevPct = d.prevPct;
+    const todayPct = d.todayPct;
+
+    let trendIcon = '→';
+    let trendColor = '#7a8899';
+    if (d.flipped) {
+      trendIcon  = d.todayPct > 0 ? '🔄↗' : '🔄↘';
+      trendColor = d.todayPct > 0 ? '#22c55e' : '#ef4444';
+    } else if (d.priceDelta > 0) {
+      trendIcon = '▲'; trendColor = '#22c55e';
+    } else if (d.priceDelta < 0) {
+      trendIcon = '▼'; trendColor = '#ef4444';
+    }
+
+    return `<tr>
+      <td class="cmp-td-name">${d.name}</td>
+      <td><span class="cmp-sym">${sym}</span></td>
+      <td class="cmp-td-num">${d.prevPrice !== null ? `₹${fmt(d.prevPrice)}` : '—'}</td>
+      <td class="cmp-td-num" style="color:#fff;font-weight:700">₹${fmt(d.todayPrice)}</td>
+      <td class="cmp-td-num" style="color:${dColor};font-weight:700">${d.prevPrice !== null ? `${sign(d.priceDelta)}₹${fmt(d.priceDelta)}` : '—'}</td>
+      <td class="cmp-td-num" style="color:${dColor};font-weight:700">${d.prevPrice !== null ? `${sign(d.priceDelta)}${fmt(d.priceDelta / (d.prevPrice||1) * 100)}%` : '—'}</td>
+      <td class="cmp-td-num" style="color:${tColor}">${sign(todayPct)}${fmt(todayPct)}%</td>
+      <td style="color:${trendColor};font-size:14px;text-align:center">${trendIcon}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Sentiment Flips ───────────────────────────────────────────────────────────
+function renderFlips() {
+  const flips = compData.filter(d => d.flipped);
+  const el    = document.getElementById('flipsContent');
+  if (!el) return;
+
+  if (!flips.length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted)">
+      <div style="font-size:32px;margin-bottom:12px">✅</div>
+      <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px">No sentiment flips</div>
+      <div style="font-size:12px">All stocks maintained the same direction as the previous snapshot.</div>
+    </div>`;
+    return;
+  }
+
+  const toGreen = flips.filter(d => d.todayPct > 0);
+  const toRed   = flips.filter(d => d.todayPct <= 0);
+
+  function flipCard(d: any) {
+    const sym = d.symbol.replace('.NS','').replace('.BO','');
+    const wasUp = d.prevPct >= 0;
+    const arrow = wasUp ? '🔻' : '🔺';
+    return `<div class="flip-card">
+      <div class="flip-sym">${sym}</div>
+      <div class="flip-name">${d.name}</div>
+      <div class="flip-change">
+        <span style="color:${color(d.prevPct)}">${sign(d.prevPct)}${fmt(d.prevPct)}%</span>
+        <span style="font-size:18px;color:var(--gold)"> → </span>
+        <span style="color:${color(d.todayPct)}">${sign(d.todayPct)}${fmt(d.todayPct)}%</span>
+      </div>
+      <div class="flip-price">₹${fmt(d.prevPrice)} → ₹${fmt(d.todayPrice)}</div>
+    </div>`;
+  }
+
+  el.innerHTML = `
+    ${toRed.length ? `
+      <div class="flip-section">
+        <div class="flip-section-title" style="color:#ef4444">🔻 Turned Negative (${toRed.length})</div>
+        <div class="flip-grid">${toRed.map(flipCard).join('')}</div>
+      </div>` : ''}
+    ${toGreen.length ? `
+      <div class="flip-section" style="margin-top:20px">
+        <div class="flip-section-title" style="color:#22c55e">🔺 Turned Positive (${toGreen.length})</div>
+        <div class="flip-grid">${toGreen.map(flipCard).join('')}</div>
+      </div>` : ''}
+  `;
+}
+
+// ── Single-day chart (no archive) ─────────────────────────────────────────────
+function renderSingleChart(stocks: any[]) {
+  const sorted = [...stocks].sort((a,b) =>
+    Math.abs(b.regularMarketChangePercent) - Math.abs(a.regularMarketChangePercent)
+  ).slice(0,20);
+
+  const labels = sorted.map(s => s.symbol.replace('.NS','').replace('.BO',''));
+  const values = sorted.map(s => parseFloat(s.regularMarketChangePercent)||0);
+  const colors = values.map(v => v >= 0 ? 'rgba(34,197,94,0.75)' : 'rgba(239,68,68,0.75)');
+
+  const ctx = (document.getElementById('cmpChartSingle') as HTMLCanvasElement)?.getContext('2d');
+  if (!ctx) return;
+  new (window as any).Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ label:"Today's % Change", data:values, backgroundColor:colors, borderRadius:4 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{ color:'#7a8899', font:{size:10} }, grid:{ color:'rgba(255,255,255,0.05)' } },
+        y:{ ticks:{ color:'#7a8899', callback:(v:any) => `${v}%` }, grid:{ color:'rgba(255,255,255,0.08)' } }
+      }
+    }
+  });
+}
+
+// ── Main loader ───────────────────────────────────────────────────────────────
+async function load() {
+  const loading     = document.getElementById('cmpLoading');
+  const noArchive   = document.getElementById('cmpNoArchive');
+  const summary     = document.getElementById('cmpSummary');
+  const datesEl     = document.getElementById('cmpDates');
+  const tabsEl      = document.querySelector('.cmp-tabs') as HTMLElement;
+  const panelChart  = document.getElementById('panelChart');
+
+  try {
+    // 1. Today's data
+    const todayR    = await fetch('/data/india-stocks.json');
+    const todayData = await todayR.json();
+    const todayStocks: any[] = todayData.nse || [];
+    const todayDate = todayData.lastUpdated?.split('T')[0] || 'today';
+
+    // 2. Try yesterday's archive
+    const yest = new Date();
+    yest.setDate(yest.getDate() - 1);
+    const yestStr = yest.toISOString().split('T')[0];
+    let prevStocks: any[] = [];
+    let prevDate = '';
+
+    try {
+      const prevR    = await fetch(`/data/archive/${yestStr}/india-stocks.json`);
+      if (prevR.ok) {
+        const prevData = await prevR.json();
+        prevStocks = prevData.nse || [];
+        prevDate   = prevData.lastUpdated?.split('T')[0] || yestStr;
+      }
+    } catch {}
+
+    // 3. No archive — show single day
+    if (!prevStocks.length) {
+      if (loading)   loading.style.display  = 'none';
+      if (noArchive) noArchive.style.display = 'block';
+      if (tabsEl)    tabsEl.style.display    = 'none';
+      if (datesEl)   datesEl.textContent     = `Showing today's data (${todayDate}) — archive comparison available from tomorrow`;
+      renderSingleChart(todayStocks);
+      return;
+    }
+
+    // 4. Build comparison
+    const prevMap: Record<string,any> = {};
+    prevStocks.forEach(s => { prevMap[s.symbol] = s; });
+
+    compData = todayStocks.map(today => {
+      const prev      = prevMap[today.symbol] || null;
+      const todayPrice = parseFloat(today.regularMarketPrice) || 0;
+      const prevPrice  = prev ? parseFloat(prev.regularMarketPrice) || 0 : null;
+      const priceDelta = prevPrice !== null ? todayPrice - prevPrice : 0;
+      const todayPct   = parseFloat(today.regularMarketChangePercent) || 0;
+      const prevPct    = prev ? parseFloat(prev.regularMarketChangePercent) || 0 : 0;
+      const flipped    = prevPrice !== null && ((prevPct >= 0 && todayPct < 0) || (prevPct < 0 && todayPct >= 0));
+      return {
+        symbol: today.symbol, name: today.name || today.symbol,
+        prevPrice, todayPrice, priceDelta,
+        prevPct, todayPct, pctDelta: todayPct - prevPct,
+        flipped,
+      };
+    });
+
+    // 5. Summary stats
+    const gainers = compData.filter(d => d.priceDelta > 0).length;
+    const losers  = compData.filter(d => d.priceDelta < 0).length;
+    const flips   = compData.filter(d => d.flipped).length;
+    const topMover = [...compData].sort((a,b) => Math.abs(b.priceDelta) - Math.abs(a.priceDelta))[0];
+
+    const el = (id: string) => document.getElementById(id);
+    el('statGainers')!.querySelector('.cmp-stat-num')!.textContent = String(gainers);
+    el('statLosers')!.querySelector('.cmp-stat-num')!.textContent  = String(losers);
+    el('statFlipped')!.querySelector('.cmp-stat-num')!.textContent = String(flips);
+    if (topMover) {
+      const sym = topMover.symbol.replace('.NS','').replace('.BO','');
+      el('statTopMover')!.querySelector('.cmp-stat-num')!.innerHTML =
+        `<span style="color:${color(topMover.priceDelta)}">${sym} ${sign(topMover.priceDelta)}₹${fmt(topMover.priceDelta)}</span>`;
+    }
+
+    if (datesEl) datesEl.textContent = `Comparing: ${prevDate} → ${todayDate}`;
+    if (loading) loading.style.display = 'none';
+    if (summary) summary.style.display = 'grid';
+    if (panelChart) panelChart.style.display = 'block';
+
+    renderChart();
+
+    // Wire controls
+    document.getElementById('chartMetric')?.addEventListener('change', () => renderChart());
+    document.getElementById('chartCount')?.addEventListener('change',  () => renderChart());
+    document.getElementById('tableSearch')?.addEventListener('input',  () => renderTable());
+    document.getElementById('tableSort')?.addEventListener('change',   () => renderTable());
+
+  } catch (err) {
+    const loading = document.getElementById('cmpLoading');
+    if (loading) loading.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted)">
+      Could not load data. Try refreshing the page.
+    </div>`;
+  }
+}
+
+load();
+</script>
+
+<style>
+.cmp-summary {
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:24px;
+}
+.cmp-stat {
+  background:var(--navy-2); border:1px solid var(--border); border-radius:10px;
+  padding:16px; text-align:center;
+}
+.cmp-stat-num { font-size:22px; font-weight:800; margin-bottom:4px; }
+.cmp-stat-lbl { font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:0.5px; }
+
+.cmp-tabs  { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+.cmp-tab   {
+  padding:7px 18px; border-radius:8px; border:1px solid var(--border);
+  background:transparent; color:var(--text-muted); font-size:13px; font-weight:600;
+  cursor:pointer; transition:all 0.2s;
+}
+.cmp-tab.active, .cmp-tab:hover {
+  background:var(--gold); color:#000; border-color:var(--gold);
+}
+
+.cmp-loading { text-align:center; padding:48px; color:var(--text-muted); font-size:13px; }
+
+/* Chart */
+.cmp-chart-controls {
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;
+}
+.cmp-ctrl-label { font-size:12px; color:var(--text-muted); }
+.cmp-select {
+  background:var(--navy-2); border:1px solid var(--border); color:var(--text);
+  font-size:12px; padding:5px 10px; border-radius:8px; cursor:pointer;
+}
+.cmp-chart-wrap { height:340px; position:relative; }
+
+/* Table */
+.cmp-table-controls {
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px;
+}
+.cmp-search {
+  flex:1; min-width:180px; max-width:320px;
+  background:var(--navy-2); border:1px solid var(--border); color:var(--text);
+  font-size:12px; padding:6px 12px; border-radius:8px; outline:none;
+}
+.cmp-search:focus { border-color:rgba(212,169,64,0.4); }
+.cmp-table-wrap { overflow-x:auto; }
+.cmp-table {
+  width:100%; border-collapse:collapse; font-size:12px;
+}
+.cmp-table th {
+  background:rgba(212,169,64,0.06); color:var(--gold); font-size:10px; font-weight:700;
+  letter-spacing:0.5px; padding:10px 12px; text-align:left; border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.cmp-table tr:not(:last-child) td { border-bottom:1px solid rgba(255,255,255,0.04); }
+.cmp-table tr:hover td { background:rgba(255,255,255,0.02); }
+.cmp-td-name { color:var(--text); padding:10px 12px; min-width:160px; }
+.cmp-td-num  { padding:10px 12px; white-space:nowrap; }
+.cmp-sym     { color:var(--gold); font-weight:700; font-size:11px; padding:10px 12px; display:block; }
+
+/* Flips */
+.flip-section-title { font-size:13px; font-weight:700; margin-bottom:12px; }
+.flip-grid {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:10px;
+}
+.flip-card {
+  background:var(--navy-2); border:1px solid var(--border); border-radius:10px;
+  padding:14px; text-align:center;
+}
+.flip-sym    { font-size:14px; font-weight:800; color:var(--gold); margin-bottom:2px; }
+.flip-name   { font-size:10px; color:var(--text-muted); margin-bottom:8px; }
+.flip-change { font-size:13px; font-weight:700; margin-bottom:4px; }
+.flip-price  { font-size:10px; color:var(--text-muted); }
+
+@media (max-width:640px) {
+  .cmp-summary { grid-template-columns:1fr 1fr; }
+  .cmp-chart-wrap { height:240px; }
+}
+</style>

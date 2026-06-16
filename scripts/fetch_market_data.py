@@ -87,7 +87,7 @@ SECTOR_STOCKS = [
     # Finance & NBFC
     'BAJFINANCE.NS','BAJAJFINSV.NS','HDFCAMC.NS','HDFCLIFE.NS','SBILIFE.NS','ICICIGI.NS','ICICIPRULI.NS','JIOFIN.NS','CHOLAFIN.NS','MUTHOOTFIN.NS',
     # Auto
-    'TMCV.NS','MARUTI.NS','BAJAJ-AUTO.NS','HEROMOTOCO.NS','EICHERMOT.NS','TVSMOTOR.NS','ASHOKLEY.NS','BOSCHLTD.NS','MOTHERSON.NS',
+    'TMCV.NS','MARUTI.NS','M&M.NS','BAJAJ-AUTO.NS','HEROMOTOCO.NS','EICHERMOT.NS','TVSMOTOR.NS','ASHOKLEY.NS','BOSCHLTD.NS','MOTHERSON.NS',
     # Pharma
     'SUNPHARMA.NS','DRREDDY.NS','CIPLA.NS','DIVISLAB.NS','AUROPHARMA.NS','BIOCON.NS','LUPIN.NS','TORNTPHARM.NS','APOLLOHOSP.NS','MAXHEALTH.NS',
     # FMCG
@@ -212,12 +212,46 @@ def fetch_batch(symbols: list) -> dict:
 def _empty(sym):
     return {'symbol': sym, 'regularMarketPrice': 0, 'regularMarketChange': 0, 'regularMarketChangePercent': 0}
 
+ARCHIVE_DAYS = 90   # how many days of snapshots to keep
+
 def save(filename, data):
+    # 1. Always write the live file (current behaviour)
     path = os.path.join(OUT, filename)
     with open(path, 'w') as f:
         json.dump(data, f, separators=(',', ':'))
     size = os.path.getsize(path)
+
+    # 2. Also write a dated copy: public/data/archive/YYYY-MM-DD/<filename>
+    #    Skip per-company files — they already carry 1Y history inside them
+    if not filename.startswith('company/'):
+        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+        archive_dir = os.path.join(OUT, 'archive', today)
+        os.makedirs(archive_dir, exist_ok=True)
+        archive_path = os.path.join(archive_dir, filename)
+        with open(archive_path, 'w') as f:
+            json.dump(data, f, separators=(',', ':'))
+
     print(f"  Saved {filename} ({size/1024:.1f} KB)")
+
+def prune_archive():
+    """Delete archive folders older than ARCHIVE_DAYS days."""
+    from datetime import timedelta, date
+    archive_root = os.path.join(OUT, 'archive')
+    if not os.path.isdir(archive_root):
+        return
+    cutoff = date.today() - timedelta(days=ARCHIVE_DAYS)
+    removed = 0
+    for folder in os.listdir(archive_root):
+        try:
+            folder_date = date.fromisoformat(folder)
+            if folder_date < cutoff:
+                import shutil
+                shutil.rmtree(os.path.join(archive_root, folder))
+                removed += 1
+        except ValueError:
+            pass  # skip non-date folders
+    if removed:
+        print(f"  Pruned {removed} archive folder(s) older than {ARCHIVE_DAYS} days")
 
 def fetch_company_history_batch(symbols):
     """Batch-download 1Y of daily closes for all company symbols (single HTTP request)."""
@@ -420,11 +454,135 @@ def main():
     total_kb = sum(os.path.getsize(os.path.join(company_dir, f)) for f in os.listdir(company_dir)) / 1024
     print(f"  Saved {saved_count} company files ({total_kb:.0f} KB total) → public/data/company/")
 
+    # 7. FII / DII flow from NSE India
+    print("\n[7/7] FII / DII Flow")
+    try:
+        import urllib.request
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://www.nseindia.com/',
+        }
+        req = urllib.request.Request('https://www.nseindia.com/api/fiidiiTradeReact', headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            import json as _json
+            raw = _json.loads(resp.read().decode())
+        if raw and isinstance(raw, list) and len(raw) > 0:
+            rows = []
+            for row in raw[:10]:  # last 10 trading days
+                rows.append({
+                    'date':   row.get('date', ''),
+                    'fiiNet': float(row.get('fiiNet', row.get('fii_net', 0)) or 0),
+                    'diiNet': float(row.get('diiNet', row.get('dii_net', 0)) or 0),
+                })
+            save('fii-dii.json', {'lastUpdated': NOW, 'data': rows})
+            print(f"  Saved fii-dii.json — latest: FII={rows[0]['fiiNet']:.0f}Cr DII={rows[0]['diiNet']:.0f}Cr")
+        else:
+            raise ValueError('empty response')
+    except Exception as e:
+        print(f"  FII/DII fetch failed: {e} — saving empty fallback")
+        save('fii-dii.json', {'lastUpdated': NOW, 'data': [], 'error': str(e)})
+
+    # 8. India IPO data from NSE
+    print("\n[8/9] India IPO Data (NSE)")
+    try:
+        import urllib.request as _ur, json as _j
+        _h = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json',
+            'Referer': 'https://www.nseindia.com/',
+            'Accept-Language': 'en-US,en;q=0.9',
+        }
+        req = _ur.Request('https://www.nseindia.com/api/allIpo', headers=_h)
+        with _ur.urlopen(req, timeout=15) as resp:
+            raw = _j.loads(resp.read().decode())
+        upcoming = raw.get('upcoming', [])
+        ongoing  = raw.get('ongoing', [])
+        listed   = raw.get('listed', [])[:20]  # last 20 listed
+
+        def parse_ipo(item, status):
+            return {
+                'company':     item.get('companyName', item.get('symbol', '')),
+                'symbol':      item.get('symbol', ''),
+                'openDate':    item.get('ipoOpenDate', item.get('openDate', '')),
+                'closeDate':   item.get('ipoCloseDate', item.get('closeDate', '')),
+                'listingDate': item.get('listingDate', ''),
+                'priceMin':    item.get('issuePrice', item.get('minPrice', '')),
+                'priceMax':    item.get('issuePrice', item.get('maxPrice', '')),
+                'lotSize':     item.get('lotSize', ''),
+                'issueSize':   item.get('issueSize', ''),
+                'status':      status,
+            }
+
+        ipo_data = {
+            'lastUpdated': NOW,
+            'upcoming': [parse_ipo(i, 'upcoming') for i in upcoming],
+            'ongoing':  [parse_ipo(i, 'ongoing')  for i in ongoing],
+            'listed':   [parse_ipo(i, 'listed')   for i in listed],
+        }
+        save('ipo.json', ipo_data)
+        print(f"  Saved ipo.json — {len(upcoming)} upcoming, {len(ongoing)} ongoing, {len(listed)} listed")
+    except Exception as e:
+        print(f"  IPO fetch failed: {e} — saving empty fallback")
+        save('ipo.json', {'lastUpdated': NOW, 'upcoming': [], 'ongoing': [], 'listed': [], 'error': str(e)})
+
+    # 9. India Earnings Calendar (next earnings date per company via yfinance)
+    print("\n[9/9] India Earnings Calendar (yfinance)")
+    EARNINGS_STOCKS = [
+        'TCS.NS','INFY.NS','WIPRO.NS','HCLTECH.NS','TECHM.NS',
+        'RELIANCE.NS','HDFCBANK.NS','ICICIBANK.NS','KOTAKBANK.NS','SBIN.NS','AXISBANK.NS',
+        'BAJFINANCE.NS','BAJAJFINSV.NS','LT.NS','BHARTIARTL.NS',
+        'SUNPHARMA.NS','DRREDDY.NS','CIPLA.NS','DIVISLAB.NS',
+        'HINDUNILVR.NS','ITC.NS','NESTLEIND.NS','BRITANNIA.NS',
+        'MARUTI.NS','TMCV.NS','TITAN.NS','ADANIENT.NS','ASIANPAINT.NS',
+        'NTPC.NS','ONGC.NS','COALINDIA.NS','TATASTEEL.NS',
+    ]
+    earnings_entries = []
+    def fetch_earnings_date(sym):
+        try:
+            cal = yf.Ticker(sym).calendar
+            if cal is None or cal.empty:
+                return None
+            ed = cal.get('Earnings Date')
+            if ed is not None and len(ed) > 0:
+                date_val = ed[0]
+                date_str = str(date_val)[:10] if date_val else None
+                if date_str:
+                    return {
+                        'symbol': sym,
+                        'name': sym.replace('.NS','').replace('.BO',''),
+                        'earningsDate': date_str,
+                    }
+        except Exception:
+            pass
+        return None
+
+    with ThreadPoolExecutor(max_workers=10) as ex:
+        futures = {ex.submit(fetch_earnings_date, sym): sym for sym in EARNINGS_STOCKS}
+        for future in as_completed(futures):
+            result = future.result()
+            if result:
+                earnings_entries.append(result)
+
+    earnings_entries.sort(key=lambda x: x['earningsDate'])
+    save('earnings.json', {'lastUpdated': NOW, 'earnings': earnings_entries})
+    print(f"  Saved earnings.json — {len(earnings_entries)} companies with upcoming dates")
+
     # Meta file (for "last updated" display on site)
     save('meta.json', {'lastUpdated': NOW, 'status': 'ok'})
 
+    # Archive housekeeping — remove snapshots older than 90 days
+    print("\n[Archive] Pruning old snapshots…")
+    prune_archive()
+
     print(f"\n✓ All data saved to public/data/")
-    print(f"  Files: {', '.join(os.listdir(OUT))}\n")
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    archive_dir = os.path.join(OUT, 'archive', today)
+    if os.path.isdir(archive_dir):
+        archived = os.listdir(archive_dir)
+        print(f"  Archive for today ({today}): {', '.join(archived)}")
+    print(f"  Live files: {', '.join(f for f in os.listdir(OUT) if not os.path.isdir(os.path.join(OUT, f)))}\n")
 
 if __name__ == '__main__':
     main()

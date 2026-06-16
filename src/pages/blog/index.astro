@@ -1,0 +1,239 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = await Astro.glob('./*.md').catch(() => []);
+const sorted = posts.sort((a: any, b: any) =>
+  new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
+);
+
+const INDIA_TAGS = ['india-market-briefing', 'market-briefing', 'today-indian-market'];
+const indiaPosts  = sorted.filter((p: any) =>
+  (p.frontmatter.tags || []).some((t: string) => INDIA_TAGS.includes(t))
+);
+const ledgerPosts = sorted.filter((p: any) =>
+  !(p.frontmatter.tags || []).some((t: string) => INDIA_TAGS.includes(t))
+);
+---
+<BaseLayout title="All Posts">
+  <section class="blog-archive content-section">
+    <div class="arch-hero">
+      <h1 class="arch-title">BullSignal <span class="arch-accent">Archive</span></h1>
+      <p class="arch-sub">All market summaries and India briefings in one place.</p>
+    </div>
+
+    <!-- From the Ledger -->
+    {ledgerPosts.length > 0 && (
+      <div class="arch-section" id="ledger">
+        <div class="section-head">
+          <h2 class="section-title">From the Ledger</h2>
+          <span class="section-live">MARKET SUMMARIES</span>
+        </div>
+        <div class="tl-list">
+          {ledgerPosts.map((post: any) => {
+            const d   = new Date(post.frontmatter.date);
+            const day   = d.toLocaleDateString('en-IN', { day: 'numeric' });
+            const month = d.toLocaleDateString('en-IN', { month: 'short' });
+            const year  = d.getFullYear();
+            return (
+              <a href={post.url} class="tl-item">
+                <div class="tl-date-col">
+                  <span class="tl-day">{day}</span>
+                  <span class="tl-mon">{month} {year}</span>
+                </div>
+                <div class="tl-dot-col">
+                  <div class="tl-dot"></div>
+                  <div class="tl-line"></div>
+                </div>
+                <div class="tl-body">
+                  <h3 class="tl-title">{post.frontmatter.title}</h3>
+                  {post.frontmatter.description && <p class="tl-desc">{post.frontmatter.description}</p>}
+                  <span class="tl-read">Read more →</span>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    )}
+
+    <!-- Daily India Insights -->
+    {indiaPosts.length > 0 && (
+      <div class="arch-section" id="india">
+        <div class="section-head">
+          <h2 class="section-title">Daily India Insights</h2>
+          <span class="section-live">INDIA BRIEFINGS</span>
+        </div>
+        <div class="tl-list">
+          {indiaPosts.map((post: any) => {
+            const d   = new Date(post.frontmatter.date);
+            const day   = d.toLocaleDateString('en-IN', { day: 'numeric' });
+            const month = d.toLocaleDateString('en-IN', { month: 'short' });
+            const year  = d.getFullYear();
+            return (
+              <a href={post.url} class="tl-item">
+                <div class="tl-date-col">
+                  <span class="tl-day">{day}</span>
+                  <span class="tl-mon">{month} {year}</span>
+                </div>
+                <div class="tl-dot-col">
+                  <div class="tl-dot"></div>
+                  <div class="tl-line"></div>
+                </div>
+                <div class="tl-body">
+                  <h3 class="tl-title">{post.frontmatter.title}</h3>
+                  {post.frontmatter.description && <p class="tl-desc">{post.frontmatter.description}</p>}
+                  <span class="tl-read">Read more →</span>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    )}
+
+    <div class="arch-back">
+      <a href="/" class="arch-back-link">← Back to Dashboard</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+.blog-archive {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+.arch-hero {
+  margin-bottom: 48px;
+}
+.arch-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 8px;
+}
+.arch-accent { color: var(--gold); }
+.arch-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin: 0;
+}
+.arch-section { margin-bottom: 56px; }
+
+/* ── Timeline (shared with index.astro) ── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+.section-live {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--gold);
+  background: rgba(212,169,64,.1);
+  border: 1px solid rgba(212,169,64,.25);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+.tl-list { display: flex; flex-direction: column; }
+.tl-item {
+  display: grid;
+  grid-template-columns: 72px 28px 1fr;
+  gap: 0 12px;
+  text-decoration: none;
+  color: inherit;
+  padding: 4px 0;
+}
+.tl-item:hover .tl-body { background: rgba(212,169,64,.05); }
+.tl-item:hover .tl-dot  { background: var(--gold); box-shadow: 0 0 8px rgba(212,169,64,.6); }
+.tl-item:hover .tl-title { color: var(--gold); }
+.tl-date-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-top: 14px;
+}
+.tl-day  { font-size: 22px; font-weight: 800; color: #fff; line-height: 1; }
+.tl-mon  { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.tl-dot-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 18px;
+}
+.tl-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.tl-line {
+  flex: 1;
+  width: 1px;
+  background: var(--border);
+  margin-top: 4px;
+  min-height: 24px;
+}
+.tl-item:last-child .tl-line { display: none; }
+.tl-body {
+  padding: 12px 14px;
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: background 0.15s;
+}
+.tl-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px;
+  transition: color 0.2s;
+}
+.tl-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 8px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tl-read {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.arch-back { margin-top: 16px; }
+.arch-back-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.arch-back-link:hover { color: var(--gold); }
+</style>
+
+<script>
+  // Auto-scroll to section if ?section= param is in URL
+  const params = new URLSearchParams(window.location.search);
+  const section = params.get('section');
+  if (section) {
+    const el = document.getElementById(section === 'india' ? 'india' : 'ledger');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+</script>

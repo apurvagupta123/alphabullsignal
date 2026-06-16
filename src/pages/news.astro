@@ -10,7 +10,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="news-tabs">
       <button class="ntab active" data-tab="market">📰 Market News</button>
       <button class="ntab" data-tab="pulse">📊 Market Pulse</button>
-      <button class="ntab" data-tab="stocks">📈 Stocks</button>
       <button class="ntab" data-tab="etf">🏦 ETFs</button>
       <button class="ntab" data-tab="crypto">₿ Crypto</button>
     </div>
@@ -66,7 +65,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       ],
       blogs: [
         { url: 'https://abnormalreturns.com/feed/',          source: 'Abnormal Returns',    color: '#22c55e' },
-        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#a78bfa' },
+        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#f0c040' },
         { url: 'https://mishtalk.com/feed/',                 source: 'Mish Talk',           color: '#ef4444' },
         { url: 'https://ritholtz.com/feed/',                 source: 'Ritholtz',            color: '#c9a84c' },
       ],
@@ -76,23 +75,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       news: [
         { url: 'https://realinvestmentadvice.com/feed/',     source: 'Real Inv. Advice',    color: '#22c55e' },
         { url: 'https://mishtalk.com/feed/',                 source: 'Mish Talk',           color: '#ef4444' },
-        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#a78bfa' },
+        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#f0c040' },
       ],
       blogs: [
         { url: 'https://ritholtz.com/feed/',                 source: 'Ritholtz',            color: '#c9a84c' },
         { url: 'https://abnormalreturns.com/feed/',          source: 'Abnormal Returns',    color: '#22c55e' },
-      ],
-    },
-    stocks: {
-      label: 'Stocks News',
-      news: [
-        { url: 'https://www.cnbc.com/id/10001147/device/rss/rss.html', source: 'CNBC',           color: '#00a3e0' },
-        { url: 'https://feeds.bbci.co.uk/news/business/rss.xml',       source: 'BBC Business',   color: '#bb1919' },
-        { url: 'https://feeds.foxbusiness.com/foxbusiness/latest',      source: 'Fox Business',   color: '#003366' },
-      ],
-      blogs: [
-        { url: 'https://realinvestmentadvice.com/feed/',     source: 'Real Inv. Advice',    color: '#22c55e' },
-        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#a78bfa' },
       ],
     },
     etf: {
@@ -114,7 +101,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       ],
       blogs: [
         { url: 'https://mishtalk.com/feed/',                 source: 'Mish Talk',           color: '#ef4444' },
-        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#a78bfa' },
+        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#f0c040' },
       ],
     },
   };
@@ -391,14 +378,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     cursor: pointer;
     transition: all .15s;
   }
-  .nvt-btn:hover  { border-color: rgba(201,168,76,.4); color: var(--gold); }
+  .nvt-btn:hover  { border-color: rgba(212,169,64,.4); color: var(--gold); }
   .nvt-btn.active { background: var(--gold); color: #0b0f1a; border-color: var(--gold); }
 
   /* ── Loading bar ── */
   .news-loading-bar {
     display: none;
     height: 2px;
-    background: rgba(201,168,76,.1);
+    background: rgba(212,169,64,.1);
     overflow: hidden;
   }
   .news-loading-inner {
@@ -454,10 +441,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   /* ── News Feed ── */
   .news-feed { padding: 0; }
 
-  /* Single news item */
+  /* Single news item — row layout */
   .ni {
-    display: block;
-    padding: 11px 20px;
+    display: grid;
+    grid-template-columns: 110px 48px 1fr;
+    align-items: center;
+    gap: 0 12px;
+    padding: 10px 20px;
     border-bottom: 1px solid rgba(255,255,255,.04);
     text-decoration: none;
     transition: background .1s;
@@ -468,30 +458,38 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   .ni-src {
     display: inline-block;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
     letter-spacing: .5px;
     text-transform: uppercase;
     padding: 2px 7px;
     border-radius: 4px;
     border: 1px solid;
-    margin-right: 8px;
-    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .ni-time {
     font-size: 11px;
     color: var(--text-dim);
-    vertical-align: middle;
+    text-align: right;
+    white-space: nowrap;
   }
   .ni-title {
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--text);
-    margin-top: 5px;
-    line-height: 1.45;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     transition: color .1s;
   }
   .ni:hover .ni-title { color: #fff; }
+  @media (max-width: 600px) {
+    .ni { grid-template-columns: 90px 1fr; }
+    .ni-time { display: none; }
+  }
 
   /* By Source grouping */
   .ns-group { margin-bottom: 0; border-bottom: 1px solid var(--border); }
@@ -544,6 +542,41 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     text-align: center;
   }
   .news-load-more:hover { background: var(--navy-2); }
+
+  /* ── India Stock Rows (Stocks tab) ── */
+  .ns-stock-head {
+    display: grid;
+    grid-template-columns: 2fr 100px 130px 80px;
+    gap: 0 12px;
+    padding: 6px 20px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .ns-stock-table { display: flex; flex-direction: column; gap: 4px; padding: 0 8px; }
+  .ns-stock-row {
+    display: grid;
+    grid-template-columns: 2fr 100px 130px 80px;
+    gap: 0 12px;
+    align-items: center;
+    padding: 11px 16px;
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background .1s, border-color .1s;
+  }
+  .ns-stock-row:hover { background: var(--navy-3); border-color: rgba(201,168,76,.3); }
+  .ns-stock-sym { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+  .ns-sym { font-size: 13px; font-weight: 800; color: #fff; flex-shrink: 0; }
+  .ns-name { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ns-price { font-size: 13px; font-weight: 700; text-align: right; }
+  .ns-chg { font-size: 11px; font-weight: 600; text-align: right; }
+  .ns-pct { text-align: right; }
+  .ns-badge { font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 5px; display: inline-block; }
 
   /* ── Responsive ── */
   @media (max-width: 860px) {

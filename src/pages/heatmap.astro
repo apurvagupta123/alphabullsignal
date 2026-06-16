@@ -257,29 +257,47 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   function renderSectors() {
     const map = document.getElementById('hmMap');
     map.innerHTML = '';
-    map.className = 'hm-map hm-sectors-grid';
+    map.className = 'hm-map hm-stocks-wrap';
+    map.style.position = 'relative';
 
-    const total = SECTOR_ETFS.reduce((s, e) => s + e.weight, 0);
+    const containerW = map.clientWidth || 1100;
+    const containerH = Math.max(400, Math.round(containerW * 0.42));
+    map.style.height = containerH + 'px';
 
-    SECTOR_ETFS.forEach(sec => {
+    const GAP = 4;
+    const items = SECTOR_ETFS.map(sec => ({ ...sec, value: sec.weight }));
+    const rects = squarify(items, GAP, GAP, containerW - GAP * 2, containerH - GAP * 2);
+
+    rects.forEach(({ item: sec, x, y, w, h }) => {
       const pct = changeMap[sec.etf] ?? 0;
       const bg  = pctColor(pct);
       const tc  = textColor(pct);
-      const flexVal = (sec.weight / total * 100).toFixed(1);
+      const showLabel = w > 70 && h > 40;
 
       const div = document.createElement('div');
       div.className = 'hm-sector-cell';
-      div.style.cssText = `background:${bg};flex:${flexVal} 1 0%;color:${tc}`;
-      div.innerHTML = `
-        <div class="hm-sec-name">${sec.name}</div>
-        <div class="hm-sec-pct" style="color:${pct >= 0 ? '#86efac' : '#fca5a5'}">${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%</div>
-        <div class="hm-sec-etf">${sec.etf}</div>
+      div.style.cssText = `
+        position:absolute;
+        left:${x}px;top:${y}px;width:${w - GAP}px;height:${h - GAP}px;
+        background:${bg};color:${tc};
+        border:1px solid rgba(0,0,0,.25);border-radius:6px;
+        overflow:hidden;cursor:pointer;
+        transition:filter .15s;
       `;
-      div.addEventListener('mouseenter', (e) => showTip(e, null, sec.name, priceMap[sec.etf], pct));
-      div.addEventListener('mouseleave', hideTip);
-      div.addEventListener('click', () => {
-        window.location.href = `/company/${sec.etf.toLowerCase()}`;
-      });
+      if (showLabel) {
+        const fontSize = w > 140 ? '13px' : '11px';
+        const pctSize  = w > 140 ? '20px' : '15px';
+        div.innerHTML = `
+          <div class="hm-sec-name" style="font-size:${fontSize}">${sec.name}</div>
+          <div class="hm-sec-pct" style="font-size:${pctSize};color:${pct >= 0 ? '#86efac' : '#fca5a5'}">${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%</div>
+          <div class="hm-sec-etf">${sec.etf}</div>
+        `;
+      } else {
+        div.title = `${sec.name} ${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+      }
+      div.addEventListener('mouseenter', (e) => { div.style.filter='brightness(1.18)'; showTip(e, null, sec.name, priceMap[sec.etf], pct); });
+      div.addEventListener('mouseleave', () => { div.style.filter=''; hideTip(); });
+      div.addEventListener('click', () => { window.location.href = `/company/${sec.etf.toLowerCase()}`; });
       map.appendChild(div);
     });
   }
@@ -561,7 +579,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     transition: all .15s;
     letter-spacing: .5px;
   }
-  .hm-period:hover  { border-color: rgba(201,168,76,.4); color: var(--gold); }
+  .hm-period:hover  { border-color: rgba(212,169,64,.4); color: var(--gold); }
   .hm-period.active { background: var(--gold); color: #0b0f1a; border-color: var(--gold); }
 
   /* Legend */
@@ -599,7 +617,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
   .hm-spinner {
     width: 22px; height: 22px;
-    border: 2px solid rgba(201,168,76,.2);
+    border: 2px solid rgba(212,169,64,.2);
     border-top-color: var(--gold);
     border-radius: 50%;
     animation: spin .8s linear infinite;
