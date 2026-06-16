@@ -7,12 +7,14 @@ const sorted = posts.sort((a: any, b: any) =>
 );
 
 const INDIA_TAGS = ['india-market-briefing', 'market-briefing', 'today-indian-market'];
-const indiaPosts = sorted.filter((p: any) =>
+const allIndiaPosts = sorted.filter((p: any) =>
   (p.frontmatter.tags || []).some((t: string) => INDIA_TAGS.includes(t))
 );
-const ledgerPosts = sorted.filter((p: any) =>
+const allLedgerPosts = sorted.filter((p: any) =>
   !(p.frontmatter.tags || []).some((t: string) => INDIA_TAGS.includes(t))
 );
+const indiaPosts  = allIndiaPosts.slice(0, 5);
+const ledgerPosts = allLedgerPosts.slice(0, 5);
 
 const SECTOR_TAGS: Record<string, string> = {
   'RELIANCE.NS':   '⚡ Energy',
@@ -327,6 +329,11 @@ const SECTOR_TAGS: Record<string, string> = {
           );
         })}
       </div>
+      {allLedgerPosts.length > 5 && (
+        <div class="tl-viewall-wrap">
+          <a href="/blog/?section=ledger" class="tl-viewall">View all market summaries →</a>
+        </div>
+      )}
     </section>
   )}
 
@@ -362,6 +369,11 @@ const SECTOR_TAGS: Record<string, string> = {
           );
         })}
       </div>
+      {allIndiaPosts.length > 5 && (
+        <div class="tl-viewall-wrap">
+          <a href="/blog/?section=india" class="tl-viewall">View all India briefings →</a>
+        </div>
+      )}
     </section>
   )}
 
@@ -640,6 +652,20 @@ const SECTOR_TAGS: Record<string, string> = {
 
 /* ── Timeline Blog Layout ────────────────────────────── */
 .tl-list { display: flex; flex-direction: column; }
+.tl-viewall-wrap {
+  text-align: right;
+  margin-top: 12px;
+}
+.tl-viewall {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold);
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: opacity 0.2s;
+}
+.tl-viewall:hover { opacity: 0.75; }
+
 .tl-item {
   display: grid;
   grid-template-columns: 64px 28px 1fr;
