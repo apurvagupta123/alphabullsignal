@@ -1,5 +1,6 @@
 ---
 const { title } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -32,8 +33,8 @@ const { title } = Astro.props;
       .news-bar {
         top: 0 !important;
         z-index: 999 !important;
-        background: #0d1420 !important;
-        border-bottom: 1px solid rgba(201,168,76,0.15) !important;
+        background: #060414 !important;
+        border-bottom: 1px solid rgba(212,169,64,0.12) !important;
       }
       .ticker-bar:not(.news-bar) {
         top: 36px !important;
@@ -41,12 +42,12 @@ const { title } = Astro.props;
       }
       body { padding-top: 128px !important; }
       .site-nav { top: 72px !important; }
-      body { background: #0d1117 !important; }
+      body { background: #07061a !important; }
       body::before { display: none !important; }
-      /* News ticker text — gold to match site accent */
-      .news-bar .ti { color: #c9a84c !important; }
-      .news-bar .ti strong { color: #e8c97a !important; }
-      .news-bar .ti-sep { color: rgba(201,168,76,0.35) !important; }
+      /* News ticker text — cyan to match new accent */
+      .news-bar .ti { color: #d4a940 !important; }
+      .news-bar .ti strong { color: #fde68a !important; }
+      .news-bar .ti-sep { color: rgba(212,169,64,0.3) !important; }
     </style>
   </head>
   <body>
@@ -69,23 +70,22 @@ const { title } = Astro.props;
     <nav class="site-nav">
       <div class="nav-inner">
         <a href="/" class="nav-brand">
-          <div class="nav-logo-box"><img src="/bull-logo.svg" alt="BullSignal" style="width:100%;height:100%;object-fit:contain;display:block;" /></div>
+          <div class="nav-logo-box"><img src="/bull-hero.jpg" alt="BullSignal" style="width:100%;height:100%;object-fit:cover;object-position:center 25%;display:block;border-radius:7px;" /></div>
           <div class="nav-brand-text">
             <span class="nav-brand-name">BullSignal</span>
             <span class="nav-brand-sub">LIVE MARKET INTELLIGENCE</span>
           </div>
         </a>
         <div class="nav-links">
-          <a href="/" class="nav-link active">Home</a>
-          <a href="/markets" class="nav-link">Markets</a>
-          <a href="/news" class="nav-link">News</a>
-          <a href="/screener" class="nav-link">Screener</a>
-          <a href="/heatmap" class="nav-link">Heat Map</a>
-          <a href="/earnings-calendar" class="nav-link">Earnings</a>
-          <a href="/economic-calendar" class="nav-link">Economy</a>
-          <a href="/ipo-tracker" class="nav-link">IPOs</a>
-          <a href="/tools" class="nav-link">Tools</a>
-          <a href="/about" class="nav-link">About</a>
+          <a href="/" class={`nav-link${path === '/' ? ' active' : ''}`}>Home</a>
+          <a href="/markets" class={`nav-link${path.startsWith('/markets') ? ' active' : ''}`}>Markets</a>
+          <a href="/news" class={`nav-link${path.startsWith('/news') ? ' active' : ''}`}>News</a>
+          <a href="/screener" class={`nav-link${path.startsWith('/screener') ? ' active' : ''}`}>Screener</a>
+          <a href="/earnings-calendar" class={`nav-link${path.startsWith('/earnings') ? ' active' : ''}`}>Earnings</a>
+          <a href="/economic-calendar" class={`nav-link${path.startsWith('/economic') ? ' active' : ''}`}>Economy</a>
+          <a href="/ipo-tracker" class={`nav-link${path.startsWith('/ipo') ? ' active' : ''}`}>IPOs</a>
+          <a href="/tools" class={`nav-link${path.startsWith('/tools') ? ' active' : ''}`}>Tools</a>
+          <a href="/about" class={`nav-link${path.startsWith('/about') ? ' active' : ''}`}>About</a>
         </div>
         <div class="nav-search">
           <span class="nav-search-icon">🔍</span>
@@ -102,7 +102,7 @@ const { title } = Astro.props;
       <div class="footer-inner">
         <div class="footer-top">
           <div class="footer-brand">
-            <div class="nav-logo-box"><img src="/bull-logo.svg" alt="BullSignal" style="width:100%;height:100%;object-fit:contain;display:block;" /></div>
+            <div class="nav-logo-box"><img src="/bull-hero.jpg" alt="BullSignal" style="width:100%;height:100%;object-fit:cover;object-position:center 25%;display:block;border-radius:7px;" /></div>
             <div class="nav-brand-text">
               <span class="nav-brand-name">BullSignal</span>
               <span class="nav-brand-sub">LIVE MARKET INTELLIGENCE</span>
@@ -187,6 +187,17 @@ const { title } = Astro.props;
       loadTicker();
       setInterval(loadTicker, 60000);
 
+      // ── Scroll-reveal IntersectionObserver ──────────────────────
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
       // ── News Ticker ───────────────────────────────────────────────────
       async function loadNewsTicker() {
         const track = document.getElementById('newsTickerTrack');
@@ -202,8 +213,8 @@ const { title } = Astro.props;
             const items = (d?.items || []).filter((i: any) => i.title);
             if (!items.length) continue;
             const html = items.map((item: any) =>
-              `<a class="ti" style="text-decoration:none;cursor:pointer;color:#c9a84c;" href="${item.link}" target="_blank" rel="noopener noreferrer"><strong style="color:#e8c97a;">◆</strong> ${item.title}</a>`
-            ).join('<span class="ti-sep" style="color:rgba(201,168,76,0.35);">·</span>');
+              `<a class="ti" style="text-decoration:none;cursor:pointer;color:#f0c040;" href="${item.link}" target="_blank" rel="noopener noreferrer"><strong style="color:#fde68a;">◆</strong> ${item.title}</a>`
+            ).join('<span class="ti-sep" style="color:rgba(212,169,64,0.35);">·</span>');
             track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
             return;
           } catch { continue; }
@@ -217,8 +228,8 @@ const { title } = Astro.props;
           ['Goldman Sachs raises S&P 500 year-end target','https://www.ft.com/markets'],
         ];
         const html = fallback.map(([t,u]) =>
-          `<a class="ti" style="text-decoration:none;cursor:pointer;color:#c9a84c;" href="${u}" target="_blank" rel="noopener noreferrer"><strong style="color:#e8c97a;">◆</strong> ${t}</a>`
-        ).join('<span class="ti-sep" style="color:rgba(201,168,76,0.35);">·</span>');
+          `<a class="ti" style="text-decoration:none;cursor:pointer;color:#f0c040;" href="${u}" target="_blank" rel="noopener noreferrer"><strong style="color:#fde68a;">◆</strong> ${t}</a>`
+        ).join('<span class="ti-sep" style="color:rgba(212,169,64,0.35);">·</span>');
         track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
       }
 

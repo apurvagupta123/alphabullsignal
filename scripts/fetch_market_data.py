@@ -420,6 +420,36 @@ def main():
     total_kb = sum(os.path.getsize(os.path.join(company_dir, f)) for f in os.listdir(company_dir)) / 1024
     print(f"  Saved {saved_count} company files ({total_kb:.0f} KB total) → public/data/company/")
 
+    # 7. FII / DII flow from NSE India
+    print("\n[7/7] FII / DII Flow")
+    try:
+        import urllib.request
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://www.nseindia.com/',
+        }
+        req = urllib.request.Request('https://www.nseindia.com/api/fiidiiTradeReact', headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            import json as _json
+            raw = _json.loads(resp.read().decode())
+        if raw and isinstance(raw, list) and len(raw) > 0:
+            rows = []
+            for row in raw[:10]:  # last 10 trading days
+                rows.append({
+                    'date':   row.get('date', ''),
+                    'fiiNet': float(row.get('fiiNet', row.get('fii_net', 0)) or 0),
+                    'diiNet': float(row.get('diiNet', row.get('dii_net', 0)) or 0),
+                })
+            save('fii-dii.json', {'lastUpdated': NOW, 'data': rows})
+            print(f"  Saved fii-dii.json — latest: FII={rows[0]['fiiNet']:.0f}Cr DII={rows[0]['diiNet']:.0f}Cr")
+        else:
+            raise ValueError('empty response')
+    except Exception as e:
+        print(f"  FII/DII fetch failed: {e} — saving empty fallback")
+        save('fii-dii.json', {'lastUpdated': NOW, 'data': [], 'error': str(e)})
+
     # Meta file (for "last updated" display on site)
     save('meta.json', {'lastUpdated': NOW, 'status': 'ok'})
 

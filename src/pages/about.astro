@@ -1,10 +1,108 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="About">
-  <h1>About</h1>
-  <p style="margin-top: 1rem;">
-    The Business Ledger is a publication covering business strategy, finance, and entrepreneurship.
-    We write for founders, operators, and curious minds who want to understand how businesses really work.
-  </p>
+<BaseLayout title="About BullSignal">
+
+  <div class="content-section" style="margin-top:48px;max-width:760px;margin-left:auto;margin-right:auto">
+
+    <!-- Hero -->
+    <div style="margin-bottom:40px">
+      <h2 class="section-title">About BullSignal</h2>
+      <p style="font-size:16px;color:var(--text-muted);line-height:1.7;margin-top:14px">
+        BullSignal is a live market intelligence platform covering Indian and global markets —
+        built for investors and curious minds who want to understand what's actually happening,
+        not just watch numbers move.
+      </p>
+    </div>
+
+    <!-- What we cover -->
+    <div class="card" style="margin-bottom:28px;padding:28px 32px">
+      <h3 style="font-size:17px;font-weight:700;color:var(--gold);margin-bottom:14px">What You'll Find Here</h3>
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.75;margin-bottom:16px">
+        Every feature on BullSignal covers something real — live index moves, sector heatmaps, economic
+        events, IPO pipelines, earnings calendars, and daily market briefings. The focus is always on:
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:rgba(212,169,64,0.06);border:1px solid rgba(212,169,64,0.12);border-radius:10px;padding:16px">
+          <div style="font-size:20px;margin-bottom:8px">📰</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">What happened</div>
+          <div style="font-size:12px;color:var(--text-muted);line-height:1.6">The actual story — market moves, earnings, macro events — not just the headline.</div>
+        </div>
+        <div style="background:rgba(212,169,64,0.06);border:1px solid rgba(212,169,64,0.12);border-radius:10px;padding:16px">
+          <div style="font-size:20px;margin-bottom:8px">💡</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Why it matters</div>
+          <div style="font-size:12px;color:var(--text-muted);line-height:1.6">Real-world impact explained simply — for traders, investors, and the plain curious.</div>
+        </div>
+        <div style="background:rgba(212,169,64,0.06);border:1px solid rgba(212,169,64,0.12);border-radius:10px;padding:16px">
+          <div style="font-size:20px;margin-bottom:8px">🇮🇳</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">India focus</div>
+          <div style="font-size:12px;color:var(--text-muted);line-height:1.6">NIFTY, SENSEX, NSE/BSE stocks, economic calendar, and India macro — always front and centre.</div>
+        </div>
+        <div style="background:rgba(212,169,64,0.06);border:1px solid rgba(212,169,64,0.12);border-radius:10px;padding:16px">
+          <div style="font-size:20px;margin-bottom:8px">🌍</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Global context</div>
+          <div style="font-size:12px;color:var(--text-muted);line-height:1.6">Fed decisions, US earnings, and global macro — because India doesn't trade in a vacuum.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About the author -->
+    <div class="card" style="margin-bottom:28px;padding:28px 32px">
+      <h3 style="font-size:17px;font-weight:700;color:var(--gold);margin-bottom:14px">About the Author</h3>
+      <div style="display:flex;gap:20px;align-items:flex-start">
+        <div style="flex-shrink:0;width:64px;height:64px;border-radius:50%;background:rgba(212,169,64,0.12);border:2px solid rgba(212,169,64,0.3);display:flex;align-items:center;justify-content:center;font-size:28px">
+          👤
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">Apurva Gupta</div>
+          <div style="font-size:12px;color:var(--gold);margin-bottom:10px;letter-spacing:0.5px">Technology Enthusiast · Bangalore, India</div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.75;margin:0">
+            With a background in software and a deep interest in how markets, AI, and technology intersect,
+            Apurva built BullSignal to make Indian market data fast, visual, and genuinely useful.
+            The goal is simple: take everything happening in markets and explain it the way you'd tell
+            a smart friend over coffee — no jargon, no noise, just clear stories about what's going on
+            and why it matters.
+          </p>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.75;margin-top:10px;margin-bottom:0">
+            Posts and briefings on BullSignal are researched and written with the assistance of
+            <strong style="color:var(--text)">Claude AI by Anthropic</strong> — because using AI
+            to cover the future of markets felt like the most honest thing to do.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Get in touch -->
+    <div class="card" style="padding:28px 32px">
+      <h3 style="font-size:17px;font-weight:700;color:var(--gold);margin-bottom:14px">Get in Touch</h3>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:20px">
+        Have a market topic you'd like covered? A question about something you read? Or just want to say hello?
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <a href="mailto:apurvagupta1991@gmail.com" style="display:flex;align-items:center;gap:12px;text-decoration:none;background:rgba(212,169,64,0.06);border:1px solid rgba(212,169,64,0.12);border-radius:10px;padding:14px 18px;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(212,169,64,0.35)'" onmouseout="this.style.borderColor='rgba(212,169,64,0.12)'">
+          <span style="font-size:18px">✉️</span>
+          <div>
+            <div style="font-size:11px;color:var(--gold);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Email</div>
+            <div style="font-size:13px;color:var(--text)">apurvagupta1991@gmail.com</div>
+          </div>
+        </a>
+        <a href="https://x.com/Apurvagupta1991" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;text-decoration:none;background:rgba(212,169,64,0.06);border:1px solid rgba(212,169,64,0.12);border-radius:10px;padding:14px 18px;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(212,169,64,0.35)'" onmouseout="this.style.borderColor='rgba(212,169,64,0.12)'">
+          <span style="font-size:18px">𝕏</span>
+          <div>
+            <div style="font-size:11px;color:var(--gold);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Twitter / X</div>
+            <div style="font-size:13px;color:var(--text)">@Apurvagupta1991</div>
+          </div>
+        </a>
+        <a href="https://theapurva.com/" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;text-decoration:none;background:rgba(212,169,64,0.06);border:1px solid rgba(212,169,64,0.12);border-radius:10px;padding:14px 18px;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(212,169,64,0.35)'" onmouseout="this.style.borderColor='rgba(212,169,64,0.12)'">
+          <span style="font-size:18px">🌐</span>
+          <div>
+            <div style="font-size:11px;color:var(--gold);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Website</div>
+            <div style="font-size:13px;color:var(--text)">theapurva.com</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
 </BaseLayout>

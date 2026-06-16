@@ -47,6 +47,94 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return '#22c55e';
   }
 
+  // ─── Event detail descriptions ───────────────────────────────────────────
+  const EVENT_DETAILS = {
+    'CPI (Consumer Price Index) MoM': {
+      what: 'Measures the monthly change in prices paid by consumers for goods and services.',
+      why: 'The most-watched inflation gauge. A higher-than-expected reading pushes bond yields up and can trigger Fed rate hike expectations, pressuring equities.',
+      history: 'Pre-pandemic average ~0.2%/month. Spiked to 1.2% in March 2022 at peak inflation. The Fed targets ~2% annual inflation (~0.17% monthly).',
+      market: 'High print → stocks ↓, USD ↑, Gold ↓. Low print → stocks ↑, bonds rally.'
+    },
+    'Core CPI YoY': {
+      what: 'Year-over-year change in consumer prices excluding volatile food and energy.',
+      why: 'The Fed\'s preferred inflation measure for policy decisions. Strips out seasonal noise to show underlying price pressure.',
+      history: 'Peaked at 6.6% in Sep 2022 (highest since 1982). Fed target is ~2% YoY.',
+      market: 'Most market-moving release of the month. Surprises vs. estimate cause sharp moves in bonds, equities and USD.'
+    },
+    'Initial Jobless Claims': {
+      what: 'Weekly count of people filing for unemployment benefits for the first time.',
+      why: 'A real-time leading indicator of labor market health. Rising claims signal economic slowdown; falling claims confirm a tight labor market.',
+      history: 'Sub-300K is historically considered healthy. Hit 695K during COVID (Apr 2020). Current readings near 50-year lows.',
+      market: 'Higher claims (weak labor) → stocks mixed, yields fall. Lower claims → Fed may stay hawkish, growth stocks pressured.'
+    },
+    'Retail Sales MoM': {
+      what: 'Monthly change in total receipts at stores that sell merchandise to final consumers.',
+      why: 'Consumer spending drives ~70% of US GDP. A strong print confirms economic resilience; a miss raises recession fears.',
+      history: 'Average monthly growth ~0.3%. Plunged -16.4% in April 2020, then rebounded sharply with stimulus checks.',
+      market: 'Strong → cyclicals ↑, defensive stocks ↓. Weak → Fed pivot hopes, bonds rally.'
+    },
+    'Federal Reserve Interest Rate Decision': {
+      what: 'The Federal Open Market Committee (FOMC) sets the federal funds rate target — the benchmark for all US borrowing costs.',
+      why: 'The single most powerful economic lever. Rate changes ripple through mortgages, auto loans, corporate bonds, and global capital flows.',
+      history: 'Near-zero (0–0.25%) from 2020–2022. Raised to 5.25–5.50% (fastest cycle since 1980s) to fight inflation.',
+      market: 'Rate hike → equities pressured, USD ↑, bonds ↓. Rate cut → growth stocks ↑, USD ↓, emerging markets rally.'
+    },
+    'FOMC Press Conference': {
+      what: 'The Fed Chair holds a press conference after every FOMC meeting to explain policy decisions and outlook.',
+      why: 'Markets often react more to the press conference language than the rate decision itself — forward guidance shapes expectations.',
+      history: 'Jerome Powell\'s "unconditionally committed to restoring price stability" (Aug 2022) triggered a market selloff.',
+      market: 'Hawkish tone → yields ↑, stocks ↓. Dovish pivot signals → strong rally in risk assets.'
+    },
+    'Fed Dot Plot & Economic Projections': {
+      what: 'A chart showing each Fed official\'s anonymous forecast for interest rates over the next few years.',
+      why: 'Gives the market a window into how many rate cuts/hikes officials expect — the most direct signal of the Fed\'s rate path.',
+      history: 'The September 2023 dot plot shocked markets by removing two expected cuts, triggering a bond selloff.',
+      market: 'Dots moving higher → bearish for stocks and bonds. Dots moving lower → bullish for equities, especially growth.'
+    },
+    'S&P Global Manufacturing PMI Flash': {
+      what: 'A survey of purchasing managers at ~400 manufacturing companies. Above 50 = expansion, below 50 = contraction.',
+      why: 'One of the earliest monthly data points on economic momentum. Flash estimate released ~2 weeks before month-end.',
+      history: 'Dipped below 50 in 2022–2023 as rate hikes hit goods demand. Services PMI has held above 50.',
+      market: 'PMI above 50 and rising → cyclicals ↑. Below 50 → defensive sectors outperform.'
+    },
+    'Consumer Confidence': {
+      what: 'The Conference Board surveys ~3,000 households on their view of current business conditions and 6-month outlook.',
+      why: 'Confident consumers spend more. Confidence is a leading indicator for retail sales and GDP.',
+      history: 'Crashed to 85.7 in Oct 2022. Pre-pandemic readings above 130.',
+      market: 'Miss → consumer discretionary ↓. Strong beat → retail and travel stocks rally.'
+    },
+    'GDP QoQ (Final)': {
+      what: 'Annualized quarterly growth rate of the US economy — the broadest measure of economic output.',
+      why: 'Two consecutive negative quarters = technical recession. Final reading is the most accurate of three estimates.',
+      history: 'US GDP contracted in Q1 and Q2 2022 (technical recession fears). Rebounded strongly to +4.9% in Q3 2023.',
+      market: 'Weaker-than-expected → recession fears, bonds rally. Beat → USD ↑, stocks mixed (may mean rates stay higher).'
+    },
+    'PCE Price Index YoY': {
+      what: 'The Personal Consumption Expenditures price index — the Fed\'s officially preferred inflation gauge.',
+      why: 'The Fed targets 2% PCE inflation. Unlike CPI, it adjusts for changing consumer behavior and has broader coverage.',
+      history: 'Hit 7% in June 2022. Declined steadily toward the 2% target through 2023–24.',
+      market: 'Higher than expected → rate cut hopes delayed, bonds sell off. Closer to 2% → rate cut expectations build.'
+    },
+    'Non-Farm Payrolls': {
+      what: 'Monthly count of new jobs added across all sectors except farming, government, and non-profits.',
+      why: 'The single most-watched employment report. The Fed monitors labor market strength to calibrate rate policy.',
+      history: 'Lost 20.5M jobs in April 2020. Has added jobs consistently since. Normal range: 150–250K/month.',
+      market: 'Blowout number (>300K) → Fed stays hawkish, rate cut hopes fall. Miss (<100K) → rate cut bets surge.'
+    },
+    'Unemployment Rate': {
+      what: 'Percentage of the labor force that is jobless and actively seeking employment.',
+      why: 'Part of the Fed\'s dual mandate (maximum employment + stable prices). Low unemployment supports consumer spending.',
+      history: 'Hit 14.7% in April 2020. Declined to multi-decade lows near 3.4% in 2023.',
+      market: 'Surprise rise → rate cut hopes, bonds rally. Very low rate → Fed may keep rates higher for longer.'
+    },
+    'CPI YoY': {
+      what: 'Year-over-year change in the Consumer Price Index — the broadest measure of consumer inflation.',
+      why: 'Directly impacts cost-of-living adjustments, Social Security, bond yields, and Fed policy expectations.',
+      history: 'Peaked at 9.1% in June 2022 (40-year high). Declined toward 3% through 2023.',
+      market: 'Above forecast → rate cut hopes pushed further out. Below forecast → bond rally, growth stocks surge.'
+    },
+  };
+
   function renderEvents(events) {
     const list = document.getElementById('econList');
     if (!events.length) {
@@ -67,11 +155,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       return `
         <div class="econ-day">
           <div class="econ-day-label">${dayLabel}</div>
-          ${byDate[date].map(e => `
-            <div class="econ-event">
+          ${byDate[date].map((e, idx) => {
+            const key = e.event || e.name || '';
+            const det = EVENT_DETAILS[key] || null;
+            const uid = `ev-${date}-${idx}`;
+            return `
+            <div class="econ-event ec-clickable" onclick="toggleDetail('${uid}')">
               <div class="econ-impact-dot" style="background:${impactColor(e.impact)}" title="${e.impact || 'Low'}"></div>
               <div class="econ-event-info">
-                <div class="econ-event-name">${e.event || e.name || '—'}</div>
+                <div class="econ-event-name">${key || '—'} <span class="ec-expand-hint">▾</span></div>
                 <div class="econ-event-meta">
                   <span>${e.country || 'US'}</span>
                   ${e.actual   != null ? `<span class="econ-actual">Actual: <strong>${e.actual}${e.unit||''}</strong></span>` : ''}
@@ -83,10 +175,43 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 ${e.impact || 'Low'}
               </div>
             </div>
-          `).join('')}
+            ${det ? `
+            <div class="ec-detail" id="${uid}" style="display:none">
+              <div class="ec-detail-grid">
+                <div class="ec-detail-block">
+                  <div class="ec-det-label">📖 What is it?</div>
+                  <div class="ec-det-text">${det.what}</div>
+                </div>
+                <div class="ec-detail-block">
+                  <div class="ec-det-label">💡 Why it matters</div>
+                  <div class="ec-det-text">${det.why}</div>
+                </div>
+                <div class="ec-detail-block">
+                  <div class="ec-det-label">📊 Historical context</div>
+                  <div class="ec-det-text">${det.history}</div>
+                </div>
+                <div class="ec-detail-block">
+                  <div class="ec-det-label">📈 Market impact</div>
+                  <div class="ec-det-text">${det.market}</div>
+                </div>
+              </div>
+            </div>` : ''}
+            `;
+          }).join('')}
         </div>
       `;
     }).join('');
+  }
+
+  function toggleDetail(uid) {
+    const el = document.getElementById(uid);
+    if (!el) return;
+    const open = el.style.display !== 'none';
+    el.style.display = open ? 'none' : 'block';
+    // Flip the arrow on the parent event
+    const parent = el.previousElementSibling;
+    const hint = parent?.querySelector('.ec-expand-hint');
+    if (hint) hint.textContent = open ? '▾' : '▴';
   }
 
   async function loadEconomy() {
@@ -138,3 +263,44 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   loadEconomy();
 </script>
+
+<style>
+.ec-clickable { cursor: pointer; transition: background 0.15s; }
+.ec-clickable:hover { background: rgba(212,169,64,0.05) !important; }
+.ec-expand-hint { font-size: 11px; color: var(--gold); margin-left: 6px; transition: transform 0.2s; }
+.ec-detail {
+  margin: 0 0 4px 0;
+  border-radius: 0 0 10px 10px;
+  border: 1px solid rgba(212,169,64,0.15);
+  border-top: none;
+  background: rgba(212,169,64,0.04);
+  padding: 16px 20px 16px 52px;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+.ec-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 700px) { .ec-detail-grid { grid-template-columns: 1fr; } }
+.ec-detail-block {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(212,169,64,0.1);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.ec-det-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.ec-det-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+</style>
