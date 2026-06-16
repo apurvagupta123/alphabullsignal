@@ -373,7 +373,7 @@ export async function getStaticPaths() {
       document.getElementById('f52W').textContent = `${priceVsRange}% of range`;
       document.getElementById('f52WBench').textContent = priceVsRange<35?'Near 52W low — potential value zone':priceVsRange>75?'Near 52W high — check valuation':'Mid-range — neutral';
       const rangeColor = priceVsRange<35?'#22c55e':priceVsRange>75?'#ef4444':'#eab308';
-      (document.getElementById('f52W') as HTMLElement).style.color = rangeColor;
+      const f52wEl = document.getElementById('f52W'); if(f52wEl) f52wEl.style.color = rangeColor;
     }
 
     // Color PE based on valuation
@@ -439,15 +439,12 @@ export async function getStaticPaths() {
     const risk  = beta<0.9?'Low (defensive)':beta<1.2?'Moderate':beta<1.6?'Moderate-High':'High (volatile)';
     const valStatus = pe<16?'Undervalued vs market':pe<22?'Fairly valued':pe<28?'Moderately expensive':'Expensive — growth must justify premium';
 
-    document.getElementById('aiScore').textContent = score.toString();
-    (document.getElementById('aiScore') as HTMLElement).style.color = signalColor;
-    document.getElementById('aiSignal').textContent = signal;
-    (document.getElementById('aiSignal') as HTMLElement).style.color = signalColor;
+    const aiScoreEl = document.getElementById('aiScore'); if(aiScoreEl){aiScoreEl.textContent=score.toString();aiScoreEl.style.color=signalColor;}
+    const aiSignalEl = document.getElementById('aiSignal'); if(aiSignalEl){aiSignalEl.textContent=signal;aiSignalEl.style.color=signalColor;}
     document.getElementById('aiEntry').textContent = entry;
     document.getElementById('aiAlloc').textContent = alloc;
     document.getElementById('ai52W').textContent   = `${priceVsRange}% of 52W range`;
-    document.getElementById('aiMomentum').textContent = `${pct>=0?'+':''}${pct.toFixed(2)}% today`;
-    (document.getElementById('aiMomentum') as HTMLElement).style.color = pct>=0?'#22c55e':'#ef4444';
+    const aiMomEl = document.getElementById('aiMomentum'); if(aiMomEl){aiMomEl.textContent=`${pct>=0?'+':''}${pct.toFixed(2)}% today`;aiMomEl.style.color=pct>=0?'#22c55e':'#ef4444';}
     document.getElementById('aiValuation').textContent = valStatus;
     document.getElementById('aiRisk').textContent = risk;
     document.getElementById('aiDetail').textContent = `Score breakdown: Range position ${scoreRange}/100 · P/E ${scorePE}/100 · ROE ${scoreROE}/100 · Momentum ${scoreMomentum}/100 · Stability ${scoreBeta}/100. ${score>=65?'Technical and fundamental signals align favorably.':score>=45?'Mixed signals — partial entry or SIP is prudent.':'Both momentum and valuation need improvement before entry.'}`;
@@ -536,10 +533,10 @@ export async function getStaticPaths() {
     const ctxVixSub = document.getElementById('ctxVixSub');
     // Load VIX from local india-indices.json (no CORS)
     fetch('/data/india-indices.json').then(r=>r.json()).then(d=>{
-      const vixEntry = d?.indices?.find((i: any) => i.symbol==='^INDIAVIX');
+      const vixEntry = d?.indices?.find(i => i.symbol==='^INDIAVIX');
       if (vixEntry?.regularMarketPrice) {
         const vix = vixEntry.regularMarketPrice;
-        if(ctxVixEl){ctxVixEl.textContent=vix.toFixed(2);(ctxVixEl as HTMLElement).style.color=vix<15?'#22c55e':vix<22?'#eab308':'#ef4444';}
+        if(ctxVixEl){ctxVixEl.textContent=vix.toFixed(2);ctxVixEl.style.color=vix<15?'#22c55e':vix<22?'#eab308':'#ef4444';}
         if(ctxVixSub) ctxVixSub.textContent=vix<15?'Low fear — market calm':vix<22?'Moderate volatility':'High fear — watch carefully';
       }
     }).catch(()=>{});
@@ -689,7 +686,7 @@ export async function getStaticPaths() {
         const sRes = await fetch('/data/india-sectors.json');
         const sData = await sRes.json();
         const quotes = sData.quotes || {};
-        g.listed.forEach((s: {sym:string,name:string}) => {
+        g.listed.forEach(s => {
           const q = quotes[s.sym] || {};
           if (!q.regularMarketPrice) return;
           const chg=q.regularMarketChange||0, pct=q.regularMarketChangePercent||0, up=chg>=0, color=up?'#22c55e':'#ef4444';
