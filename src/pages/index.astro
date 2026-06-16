@@ -142,7 +142,7 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
     <!-- Table header -->
     <div class="mkt-table-head">
-      <span>Symbol</span>
+      <span>Company</span>
       <span>Price</span>
       <span>Change</span>
       <span class="mkt-th-pct">% Change</span>
@@ -294,44 +294,6 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </section>
 
-  <!-- ── Sector Guide Strip ────────────────────────────── -->
-  <section class="content-section">
-    <div class="guide-strip">
-      <div class="gs-title">Browse Indian Market Sectors</div>
-      <div class="gs-grid">
-        <a href="/markets?sector=banking" class="gs-card">
-          <div class="gs-icon">🏦</div>
-          <div class="gs-name">Banking</div>
-          <div class="gs-desc">NPA ratios, CASA, credit growth</div>
-        </a>
-        <a href="/markets?sector=it" class="gs-card">
-          <div class="gs-icon">💻</div>
-          <div class="gs-name">IT</div>
-          <div class="gs-desc">Deal wins, margins, USD revenue</div>
-        </a>
-        <a href="/markets?sector=pharma" class="gs-card">
-          <div class="gs-icon">💊</div>
-          <div class="gs-name">Pharma</div>
-          <div class="gs-desc">USFDA, R&D pipeline, domestic</div>
-        </a>
-        <a href="/markets?sector=auto" class="gs-card">
-          <div class="gs-icon">🚗</div>
-          <div class="gs-name">Auto</div>
-          <div class="gs-desc">Monthly volumes, EV transition</div>
-        </a>
-        <a href="/markets?sector=fmcg" class="gs-card">
-          <div class="gs-icon">🛒</div>
-          <div class="gs-name">FMCG</div>
-          <div class="gs-desc">Rural demand, margin recovery</div>
-        </a>
-        <a href="/markets?sector=infra" class="gs-card">
-          <div class="gs-icon">🏗️</div>
-          <div class="gs-name">Infra</div>
-          <div class="gs-desc">Order book, govt capex cycle</div>
-        </a>
-      </div>
-    </div>
-  </section>
 
   <!-- ── Blog Posts — From the Ledger (timeline) ──────── -->
   {ledgerPosts.length > 0 && (
@@ -820,45 +782,46 @@ const SECTOR_TAGS: Record<string, string> = {
 /* ── Stocks Table ────────────────────────────────────── */
 .mkt-table-head {
   display: grid;
-  grid-template-columns: 1fr 120px 160px 90px;
-  gap: 0 12px;
-  padding: 6px 14px;
+  grid-template-columns: 2fr 110px 150px 80px;
+  gap: 0 16px;
+  padding: 8px 16px;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.7px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 .mkt-th-pct { text-align: right; }
 
 .mkt-table {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .mkt-row {
   display: grid;
-  grid-template-columns: 1fr 120px 160px 90px;
-  gap: 0 12px;
+  grid-template-columns: 2fr 110px 150px 80px;
+  gap: 0 16px;
   align-items: center;
-  padding: 10px 14px;
+  padding: 12px 16px;
   background: var(--navy-2);
   border: 1px solid var(--border);
+  border-left: 3px solid transparent;
   border-radius: 8px;
   text-decoration: none;
-  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
-.mkt-row:hover { background: var(--navy-3); border-color: rgba(212,169,64,0.25); transform: translateX(2px); }
-.mkt-row.up { border-left: 2px solid #22c55e; }
-.mkt-row.dn { border-left: 2px solid #ef4444; }
+.mkt-row:hover { background: var(--navy-3); border-color: rgba(212,169,64,0.3); }
+.mkt-row.up { border-left-color: #22c55e; }
+.mkt-row.dn { border-left-color: #ef4444; }
 
 .mkt-row-sym {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: baseline;
+  gap: 10px;
   min-width: 0;
 }
 .mkt-row-sector {
@@ -866,28 +829,30 @@ const SECTOR_TAGS: Record<string, string> = {
   color: var(--text-muted);
   white-space: nowrap;
   flex-shrink: 0;
+  display: none;
 }
 .mkt-sym {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   color: #fff;
   flex-shrink: 0;
+  letter-spacing: 0.3px;
 }
 .mkt-name {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .mkt-row-price {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #fff;
   text-align: right;
 }
 .mkt-row-chg {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-align: right;
 }
@@ -918,10 +883,10 @@ const SECTOR_TAGS: Record<string, string> = {
 }
 
 @media (max-width: 700px) {
-  .mkt-table-head { grid-template-columns: 1fr 90px 90px; }
+  .mkt-table-head { grid-template-columns: 2fr 90px 90px; }
   .mkt-table-head .mkt-th-pct,
   .mkt-row .mkt-row-pct { display: none; }
-  .mkt-row { grid-template-columns: 1fr 90px 90px; }
+  .mkt-row { grid-template-columns: 2fr 90px 90px; }
 }
 @media (max-width: 480px) {
   .idx-pill { flex: 1 1 140px; min-width: 140px; }
