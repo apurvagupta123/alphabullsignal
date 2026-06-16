@@ -994,7 +994,7 @@ const SECTOR_TAGS: Record<string, string> = {
       const d = await r.json();
       if (d?.data?.length > 0) {
         const latest = d.data[0];
-        const fiiNet = latest.fiiNet, diiNet = latest.diiNet;
+        const fiiNet = latest.fiiNet * 100, diiNet = latest.diiNet * 100;
         const maxAbs = Math.max(Math.abs(fiiNet), Math.abs(diiNet), 100);
         setFiiBar('fiiBarPos','fiiBarNeg','fiiVal', fiiNet, maxAbs);
         setFiiBar('diiBarPos','diiBarNeg','diiVal', diiNet, maxAbs);
@@ -1030,8 +1030,8 @@ const SECTOR_TAGS: Record<string, string> = {
 
     // ── Market Mood donut — from index breadth ──────────
     setTimeout(() => {
-      const greenCount = document.querySelectorAll('.idx-card.up').length;
-      const redCount   = document.querySelectorAll('.idx-card.dn').length;
+      const greenCount = document.querySelectorAll('.idx-pill.up').length;
+      const redCount   = document.querySelectorAll('.idx-pill.dn').length;
       const total      = greenCount + redCount || 8;
       const circ       = 289; // 2π × 46
       const greenDash  = (greenCount / total) * circ;
