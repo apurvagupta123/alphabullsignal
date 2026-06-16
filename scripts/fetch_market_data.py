@@ -484,6 +484,91 @@ def main():
         print(f"  FII/DII fetch failed: {e} — saving empty fallback")
         save('fii-dii.json', {'lastUpdated': NOW, 'data': [], 'error': str(e)})
 
+    # 8. India IPO data from NSE
+    print("\n[8/9] India IPO Data (NSE)")
+    try:
+        import urllib.request as _ur, json as _j
+        _h = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json',
+            'Referer': 'https://www.nseindia.com/',
+            'Accept-Language': 'en-US,en;q=0.9',
+        }
+        req = _ur.Request('https://www.nseindia.com/api/allIpo', headers=_h)
+        with _ur.urlopen(req, timeout=15) as resp:
+            raw = _j.loads(resp.read().decode())
+        upcoming = raw.get('upcoming', [])
+        ongoing  = raw.get('ongoing', [])
+        listed   = raw.get('listed', [])[:20]  # last 20 listed
+
+        def parse_ipo(item, status):
+            return {
+                'company':     item.get('companyName', item.get('symbol', '')),
+                'symbol':      item.get('symbol', ''),
+                'openDate':    item.get('ipoOpenDate', item.get('openDate', '')),
+                'closeDate':   item.get('ipoCloseDate', item.get('closeDate', '')),
+                'listingDate': item.get('listingDate', ''),
+                'priceMin':    item.get('issuePrice', item.get('minPrice', '')),
+                'priceMax':    item.get('issuePrice', item.get('maxPrice', '')),
+                'lotSize':     item.get('lotSize', ''),
+                'issueSize':   item.get('issueSize', ''),
+                'status':      status,
+            }
+
+        ipo_data = {
+            'lastUpdated': NOW,
+            'upcoming': [parse_ipo(i, 'upcoming') for i in upcoming],
+            'ongoing':  [parse_ipo(i, 'ongoing')  for i in ongoing],
+            'listed':   [parse_ipo(i, 'listed')   for i in listed],
+        }
+        save('ipo.json', ipo_data)
+        print(f"  Saved ipo.json — {len(upcoming)} upcoming, {len(ongoing)} ongoing, {len(listed)} listed")
+    except Exception as e:
+        print(f"  IPO fetch failed: {e} — saving empty fallback")
+        save('ipo.json', {'lastUpdated': NOW, 'upcoming': [], 'ongoing': [], 'listed': [], 'error': str(e)})
+
+    # 9. India Earnings Calendar (next earnings date per company via yfinance)
+    print("\n[9/9] India Earnings Calendar (yfinance)")
+    EARNINGS_STOCKS = [
+        'TCS.NS','INFY.NS','WIPRO.NS','HCLTECH.NS','TECHM.NS',
+        'RELIANCE.NS','HDFCBANK.NS','ICICIBANK.NS','KOTAKBANK.NS','SBIN.NS','AXISBANK.NS',
+        'BAJFINANCE.NS','BAJAJFINSV.NS','LT.NS','BHARTIARTL.NS',
+        'SUNPHARMA.NS','DRREDDY.NS','CIPLA.NS','DIVISLAB.NS',
+        'HINDUNILVR.NS','ITC.NS','NESTLEIND.NS','BRITANNIA.NS',
+        'MARUTI.NS','TMCV.NS','TITAN.NS','ADANIENT.NS','ASIANPAINT.NS',
+        'NTPC.NS','ONGC.NS','COALINDIA.NS','TATASTEEL.NS',
+    ]
+    earnings_entries = []
+    def fetch_earnings_date(sym):
+        try:
+            cal = yf.Ticker(sym).calendar
+            if cal is None or cal.empty:
+                return None
+            ed = cal.get('Earnings Date')
+            if ed is not None and len(ed) > 0:
+                date_val = ed[0]
+                date_str = str(date_val)[:10] if date_val else None
+                if date_str:
+                    return {
+                        'symbol': sym,
+                        'name': sym.replace('.NS','').replace('.BO',''),
+                        'earningsDate': date_str,
+                    }
+        except Exception:
+            pass
+        return None
+
+    with ThreadPoolExecutor(max_workers=10) as ex:
+        futures = {ex.submit(fetch_earnings_date, sym): sym for sym in EARNINGS_STOCKS}
+        for future in as_completed(futures):
+            result = future.result()
+            if result:
+                earnings_entries.append(result)
+
+    earnings_entries.sort(key=lambda x: x['earningsDate'])
+    save('earnings.json', {'lastUpdated': NOW, 'earnings': earnings_entries})
+    print(f"  Saved earnings.json — {len(earnings_entries)} companies with upcoming dates")
+
     # Meta file (for "last updated" display on site)
     save('meta.json', {'lastUpdated': NOW, 'status': 'ok'})
 

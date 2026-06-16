@@ -1,306 +1,344 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="Economic Calendar">
+<BaseLayout title="India Economic Calendar">
   <section class="content-section" style="margin-top:48px">
     <div class="section-head">
-      <h2 class="section-title">🏛️ Economic Calendar</h2>
-      <span class="section-live">UPCOMING</span>
+      <h2 class="section-title">🏛️ India Economic Calendar</h2>
+      <span class="section-live">2026</span>
     </div>
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px">
-      Fed meetings, inflation data, jobs reports and key economic releases.
+      Key India macro events — RBI policy, inflation data, GDP, F&O expiry, and more.
     </p>
 
     <div class="econ-filters">
-      <button class="econ-filter active" data-impact="all">All Events</button>
-      <button class="econ-filter" data-impact="high">High Impact</button>
-      <button class="econ-filter" data-impact="medium">Medium</button>
+      <button class="econ-filter active" data-filter="all">All Events</button>
+      <button class="econ-filter" data-filter="high">High Impact</button>
+      <button class="econ-filter" data-filter="rbi">RBI Policy</button>
+      <button class="econ-filter" data-filter="inflation">Inflation</button>
+      <button class="econ-filter" data-filter="market">F&O / Market</button>
     </div>
 
-    <div id="econList">
-      <div class="ec-loading">Loading economic events…</div>
-    </div>
+    <div id="econList"></div>
   </section>
 </BaseLayout>
 
 <script>
-  const FMP = 'https://financialmodelingprep.com/api/v3';
-  const KEY  = 'demo';
-  let allEvents = [];
-  let activeFilter = 'all';
+// ── India Macro Calendar 2026 ─────────────────────────────────────────────────
+const EVENTS = [
+  // ── June 2026 ──
+  { date:'2026-06-12', event:'India CPI Inflation (May 2026)',   category:'Inflation', impact:'high',   tag:'inflation',
+    what:'Consumer Price Index for May 2026 — measures retail inflation across food, fuel, and core categories.',
+    why:'RBI\'s primary inflation target is 4% CPI. If CPI is above 5%, RBI may delay rate cuts or hike rates. Directly affects your grocery bills, petrol costs, and home loan EMIs.',
+    market:'CPI above 5% → RBI hawkish, Nifty dips, Bank Nifty falls. CPI near 4% → rate cut hopes, banking stocks rally.' },
+  { date:'2026-06-14', event:'India WPI Inflation (May 2026)',   category:'Inflation', impact:'medium', tag:'inflation',
+    what:'Wholesale Price Index — tracks inflation at the factory/wholesale level, 2 months before it reaches consumers.',
+    why:'A leading indicator of retail inflation. High WPI often precedes high CPI. Important for pricing in manufacturing and commodity-linked sectors.',
+    market:'High WPI → metal, cement, FMCG margins squeeze. Low WPI → relief for input-cost-sensitive sectors.' },
+  { date:'2026-06-25', event:'NSE F&O Monthly Expiry (June 2026)', category:'Market', impact:'medium', tag:'market',
+    what:'All June 2026 Futures & Options contracts on NSE expire today. Heavy volumes expected in the last hour of trading.',
+    why:'F&O expiry causes sharp intraday volatility as traders square off or roll positions. Can trigger short-covering rallies or selling pressure.',
+    market:'High open interest in puts → support levels tested. Heavy call OI → resistance capping upside. Index moves of 0.5–1.5% common near close.' },
 
-  function getNextMonthRange() {
-    const from = new Date();
-    const to   = new Date();
-    to.setDate(to.getDate() + 30);
-    return {
-      from: from.toISOString().split('T')[0],
-      to:   to.toISOString().split('T')[0]
-    };
-  }
+  // ── July 2026 ──
+  { date:'2026-07-10', event:'India IIP (May 2026)',             category:'Economy',   impact:'medium', tag:'',
+    what:'Index of Industrial Production for May 2026 — measures output growth across mining, manufacturing, and electricity sectors.',
+    why:'A gauge of industrial health. Strong IIP means factories are busy, which supports employment and corporate earnings. Released with a 2-month lag.',
+    market:'IIP above 5% → capital goods, auto, power stocks positive. IIP miss → infrastructure and industrial stocks under pressure.' },
+  { date:'2026-07-14', event:'India CPI Inflation (June 2026)',  category:'Inflation', impact:'high',   tag:'inflation',
+    what:'Consumer Price Index for June 2026 — tracks retail price changes across urban and rural India.',
+    why:'The most watched India macro number. RBI\'s 4% inflation target determines interest rate decisions, which directly affect home loan, auto loan, and personal loan EMIs for millions of Indians.',
+    market:'CPI above 5% → rate cut expectations pushed out, Nifty dips. CPI below 4% → rate cut probable, broader market rally.' },
+  { date:'2026-07-14', event:'India WPI Inflation (June 2026)', category:'Inflation',  impact:'medium', tag:'inflation',
+    what:'Wholesale Price Index for June 2026 — measures factory-gate price inflation, a leading indicator for retail prices.',
+    why:'Persistently high WPI feeds into CPI 4–8 weeks later. Important for commodity-linked sectors: steel, cement, chemicals, FMCG.',
+    market:'Rising WPI → margin pressure for consumer companies. Falling WPI → positive for auto OEMs, FMCG, packaging industries.' },
+  { date:'2026-07-30', event:'NSE F&O Monthly Expiry (July 2026)', category:'Market', impact:'medium', tag:'market',
+    what:'All July 2026 Futures & Options contracts expire. Expect high volatility in the final session.',
+    why:'Positions worth thousands of crores roll over or get squared off. Creates artificial price movements around key index levels.',
+    market:'Watch Bank Nifty and Nifty 50 open interest levels the week before for likely support/resistance.' },
 
-  function impactColor(impact) {
-    if (!impact) return '#7a8899';
-    const i = impact.toLowerCase();
-    if (i.includes('high'))   return '#ef4444';
-    if (i.includes('medium')) return '#f59e0b';
-    return '#22c55e';
-  }
+  // ── August 2026 ──
+  { date:'2026-08-07', event:'RBI MPC Policy Decision (Aug 2026)', category:'RBI', impact:'high', tag:'rbi',
+    what:'Reserve Bank of India\'s Monetary Policy Committee announces the repo rate decision after a 3-day meeting. The repo rate is the rate at which RBI lends to commercial banks.',
+    why:'The single most important event for Indian financial markets. A rate cut means cheaper home loans, auto loans, business loans — stimulating the economy. A rate hike means tighter liquidity and higher borrowing costs for everyone.',
+    market:'Rate cut → Nifty Bank +1–3%, real estate stocks surge, bond yields fall. Rate hold/hike → defensive sectors outperform, NBFCs fall. RBI also releases GDP and inflation forecasts which move markets.' },
+  { date:'2026-08-12', event:'India CPI Inflation (July 2026)',  category:'Inflation', impact:'high',  tag:'inflation',
+    what:'Consumer Price Index for July 2026 — especially important as monsoon progress affects food prices (vegetables, pulses, cereals).',
+    why:'July CPI is seasonally tricky — good monsoon keeps vegetable prices low, while a deficit monsoon pushes food inflation up sharply. RBI watches this closely before the October MPC meeting.',
+    market:'Food CPI surprise → risk of RBI staying hawkish. Core CPI (excluding food+fuel) is watched for "sticky inflation" signals.' },
+  { date:'2026-08-14', event:'India WPI Inflation (July 2026)',  category:'Inflation', impact:'medium', tag:'inflation',
+    what:'Wholesale Price Index for July 2026.',
+    why:'Monsoon-sensitive food commodities dominate July WPI. Also reflects crude oil and global commodity price trends.',
+    market:'Energy prices in WPI track Brent crude. Rising WPI → margin concerns for oil marketing companies (BPCL, IOC, HPCL).' },
+  { date:'2026-08-27', event:'NSE F&O Monthly Expiry (Aug 2026)', category:'Market', impact:'medium', tag:'market',
+    what:'August 2026 Futures & Options expiry on NSE.',
+    why:'August expiry often coincides with monsoon uncertainty and global risk-off events (historically August sees higher volatility — "August effect").',
+    market:'Watch VIX levels heading into expiry. VIX above 15 suggests hedging activity is elevated.' },
+  { date:'2026-08-31', event:'India GDP Q1 FY2027 (Apr–Jun 2026)', category:'GDP', impact:'high', tag:'',
+    what:'India\'s first-quarter GDP growth rate for FY2026-27 (April to June 2026) — announced by Ministry of Statistics.',
+    why:'Sets the tone for the entire fiscal year\'s growth trajectory. India is targeting 7%+ GDP growth. Compares India\'s performance vs China, US, and other major economies. Impacts foreign investor sentiment and FII flows.',
+    market:'GDP above 7% → FII inflows, Nifty bullish, rupee strengthens. Below 6.5% → fiscal deficit concerns, growth stocks correct, bond yields rise.' },
 
-  // ─── Event detail descriptions ───────────────────────────────────────────
-  const EVENT_DETAILS = {
-    'CPI (Consumer Price Index) MoM': {
-      what: 'Measures the monthly change in prices paid by consumers for goods and services.',
-      why: 'The most-watched inflation gauge. A higher-than-expected reading pushes bond yields up and can trigger Fed rate hike expectations, pressuring equities.',
-      history: 'Pre-pandemic average ~0.2%/month. Spiked to 1.2% in March 2022 at peak inflation. The Fed targets ~2% annual inflation (~0.17% monthly).',
-      market: 'High print → stocks ↓, USD ↑, Gold ↓. Low print → stocks ↑, bonds rally.'
-    },
-    'Core CPI YoY': {
-      what: 'Year-over-year change in consumer prices excluding volatile food and energy.',
-      why: 'The Fed\'s preferred inflation measure for policy decisions. Strips out seasonal noise to show underlying price pressure.',
-      history: 'Peaked at 6.6% in Sep 2022 (highest since 1982). Fed target is ~2% YoY.',
-      market: 'Most market-moving release of the month. Surprises vs. estimate cause sharp moves in bonds, equities and USD.'
-    },
-    'Initial Jobless Claims': {
-      what: 'Weekly count of people filing for unemployment benefits for the first time.',
-      why: 'A real-time leading indicator of labor market health. Rising claims signal economic slowdown; falling claims confirm a tight labor market.',
-      history: 'Sub-300K is historically considered healthy. Hit 695K during COVID (Apr 2020). Current readings near 50-year lows.',
-      market: 'Higher claims (weak labor) → stocks mixed, yields fall. Lower claims → Fed may stay hawkish, growth stocks pressured.'
-    },
-    'Retail Sales MoM': {
-      what: 'Monthly change in total receipts at stores that sell merchandise to final consumers.',
-      why: 'Consumer spending drives ~70% of US GDP. A strong print confirms economic resilience; a miss raises recession fears.',
-      history: 'Average monthly growth ~0.3%. Plunged -16.4% in April 2020, then rebounded sharply with stimulus checks.',
-      market: 'Strong → cyclicals ↑, defensive stocks ↓. Weak → Fed pivot hopes, bonds rally.'
-    },
-    'Federal Reserve Interest Rate Decision': {
-      what: 'The Federal Open Market Committee (FOMC) sets the federal funds rate target — the benchmark for all US borrowing costs.',
-      why: 'The single most powerful economic lever. Rate changes ripple through mortgages, auto loans, corporate bonds, and global capital flows.',
-      history: 'Near-zero (0–0.25%) from 2020–2022. Raised to 5.25–5.50% (fastest cycle since 1980s) to fight inflation.',
-      market: 'Rate hike → equities pressured, USD ↑, bonds ↓. Rate cut → growth stocks ↑, USD ↓, emerging markets rally.'
-    },
-    'FOMC Press Conference': {
-      what: 'The Fed Chair holds a press conference after every FOMC meeting to explain policy decisions and outlook.',
-      why: 'Markets often react more to the press conference language than the rate decision itself — forward guidance shapes expectations.',
-      history: 'Jerome Powell\'s "unconditionally committed to restoring price stability" (Aug 2022) triggered a market selloff.',
-      market: 'Hawkish tone → yields ↑, stocks ↓. Dovish pivot signals → strong rally in risk assets.'
-    },
-    'Fed Dot Plot & Economic Projections': {
-      what: 'A chart showing each Fed official\'s anonymous forecast for interest rates over the next few years.',
-      why: 'Gives the market a window into how many rate cuts/hikes officials expect — the most direct signal of the Fed\'s rate path.',
-      history: 'The September 2023 dot plot shocked markets by removing two expected cuts, triggering a bond selloff.',
-      market: 'Dots moving higher → bearish for stocks and bonds. Dots moving lower → bullish for equities, especially growth.'
-    },
-    'S&P Global Manufacturing PMI Flash': {
-      what: 'A survey of purchasing managers at ~400 manufacturing companies. Above 50 = expansion, below 50 = contraction.',
-      why: 'One of the earliest monthly data points on economic momentum. Flash estimate released ~2 weeks before month-end.',
-      history: 'Dipped below 50 in 2022–2023 as rate hikes hit goods demand. Services PMI has held above 50.',
-      market: 'PMI above 50 and rising → cyclicals ↑. Below 50 → defensive sectors outperform.'
-    },
-    'Consumer Confidence': {
-      what: 'The Conference Board surveys ~3,000 households on their view of current business conditions and 6-month outlook.',
-      why: 'Confident consumers spend more. Confidence is a leading indicator for retail sales and GDP.',
-      history: 'Crashed to 85.7 in Oct 2022. Pre-pandemic readings above 130.',
-      market: 'Miss → consumer discretionary ↓. Strong beat → retail and travel stocks rally.'
-    },
-    'GDP QoQ (Final)': {
-      what: 'Annualized quarterly growth rate of the US economy — the broadest measure of economic output.',
-      why: 'Two consecutive negative quarters = technical recession. Final reading is the most accurate of three estimates.',
-      history: 'US GDP contracted in Q1 and Q2 2022 (technical recession fears). Rebounded strongly to +4.9% in Q3 2023.',
-      market: 'Weaker-than-expected → recession fears, bonds rally. Beat → USD ↑, stocks mixed (may mean rates stay higher).'
-    },
-    'PCE Price Index YoY': {
-      what: 'The Personal Consumption Expenditures price index — the Fed\'s officially preferred inflation gauge.',
-      why: 'The Fed targets 2% PCE inflation. Unlike CPI, it adjusts for changing consumer behavior and has broader coverage.',
-      history: 'Hit 7% in June 2022. Declined steadily toward the 2% target through 2023–24.',
-      market: 'Higher than expected → rate cut hopes delayed, bonds sell off. Closer to 2% → rate cut expectations build.'
-    },
-    'Non-Farm Payrolls': {
-      what: 'Monthly count of new jobs added across all sectors except farming, government, and non-profits.',
-      why: 'The single most-watched employment report. The Fed monitors labor market strength to calibrate rate policy.',
-      history: 'Lost 20.5M jobs in April 2020. Has added jobs consistently since. Normal range: 150–250K/month.',
-      market: 'Blowout number (>300K) → Fed stays hawkish, rate cut hopes fall. Miss (<100K) → rate cut bets surge.'
-    },
-    'Unemployment Rate': {
-      what: 'Percentage of the labor force that is jobless and actively seeking employment.',
-      why: 'Part of the Fed\'s dual mandate (maximum employment + stable prices). Low unemployment supports consumer spending.',
-      history: 'Hit 14.7% in April 2020. Declined to multi-decade lows near 3.4% in 2023.',
-      market: 'Surprise rise → rate cut hopes, bonds rally. Very low rate → Fed may keep rates higher for longer.'
-    },
-    'CPI YoY': {
-      what: 'Year-over-year change in the Consumer Price Index — the broadest measure of consumer inflation.',
-      why: 'Directly impacts cost-of-living adjustments, Social Security, bond yields, and Fed policy expectations.',
-      history: 'Peaked at 9.1% in June 2022 (40-year high). Declined toward 3% through 2023.',
-      market: 'Above forecast → rate cut hopes pushed further out. Below forecast → bond rally, growth stocks surge.'
-    },
-  };
+  // ── September 2026 ──
+  { date:'2026-09-12', event:'India IIP (July 2026)',            category:'Economy',   impact:'medium', tag:'',
+    what:'Index of Industrial Production for July 2026.',
+    why:'Post-monsoon IIP shows whether industry rebounded after the seasonal slowdown. Auto production numbers are a key sub-index.',
+    market:'Strong auto + capital goods IIP → positive for Nifty Auto, L&T, ABB, Siemens.' },
+  { date:'2026-09-14', event:'India CPI Inflation (Aug 2026)',   category:'Inflation', impact:'high',  tag:'inflation',
+    what:'August 2026 CPI — peak kharif harvest season means vegetable prices usually start easing, helping bring food inflation down.',
+    why:'August-September is typically when food inflation peaks and then corrects. If vegetable prices don\'t cool as expected, it\'s a red flag for RBI.',
+    market:'Easing food inflation → rate cut window opens for December MPC. Sticky food CPI → rate cut delayed to February 2027.' },
+  { date:'2026-09-14', event:'India WPI Inflation (Aug 2026)',   category:'Inflation', impact:'medium', tag:'inflation',
+    what:'Wholesale Price Index for August 2026.',
+    why:'Reflects post-monsoon commodity price trends. Fuel WPI tracks global crude prices with a lag.',
+    market:'Crude oil above $90/barrel → WPI fuel component elevated → OMCs under pressure, aviation stocks fall.' },
+  { date:'2026-09-24', event:'NSE F&O Monthly Expiry (Sep 2026)', category:'Market', impact:'medium', tag:'market',
+    what:'September 2026 F&O expiry — also marks end of Q2 FY27 (Jul-Sep). Portfolio rebalancing by institutions is common.',
+    why:'September is a quarter-end month. Mutual funds and insurance companies rebalance portfolios, creating above-average volumes. FIIs may also square off India positions as US markets approach Q3 close.',
+    market:'Quarter-end flows can push beaten-down large-caps up as fund managers "window dress" portfolios. Small-caps may lag.' },
 
-  function renderEvents(events) {
-    const list = document.getElementById('econList');
-    if (!events.length) {
-      list.innerHTML = '<div class="ec-loading">No events found.</div>';
-      return;
-    }
+  // ── October 2026 ──
+  { date:'2026-10-10', event:'RBI MPC Policy Decision (Oct 2026)', category:'RBI', impact:'high', tag:'rbi',
+    what:'Reserve Bank of India\'s October Monetary Policy Committee meeting — one of the most anticipated of the year as it follows the Q1 GDP data and full monsoon picture.',
+    why:'By October, RBI has full visibility on: monsoon outcome, Q1 GDP, 6 months of inflation data, and global rate trends (US Fed). This gives highest confidence for a rate move. Rate cuts announced here take effect by Diwali — key for consumer sentiment.',
+    market:'October rate cut → Diwali rally amplified, auto + housing stocks surge. On hold → markets react to tone of MPC statement — growth vs inflation balance.' },
+  { date:'2026-10-12', event:'India IIP (Aug 2026)',             category:'Economy',   impact:'medium', tag:'',
+    what:'Industrial production data for August 2026.',
+    why:'Kharif harvest season traditionally boosts agro-processing and rural demand. August IIP captures early festive season demand for consumer goods.',
+    market:'Consumer durables IIP → proxy for festive demand outlook for Diwali. Strong print positive for FMCG, white goods, auto.' },
+  { date:'2026-10-13', event:'India CPI Inflation (Sep 2026)',  category:'Inflation',  impact:'high',  tag:'inflation',
+    what:'September CPI — published before the October MPC meeting, making it the most critical data point RBI uses for the October rate decision.',
+    why:'This CPI print directly influences whether the RBI cuts, holds, or adjusts stance. September CPI captures post-monsoon food prices and school/education fee hikes.',
+    market:'CPI below 4.5% before October MPC → near-certain rate cut priced in. CPI above 5% → rate cut probability drops, bond yields spike.' },
+  { date:'2026-10-14', event:'India WPI Inflation (Sep 2026)',  category:'Inflation',  impact:'medium', tag:'inflation',
+    what:'Wholesale Price Index for September 2026.',
+    why:'September WPI captures the full monsoon pass-through into farm-gate prices. Fuel and manufactured products components track global commodity cycles.',
+    market:'Commodity prices in WPI affect input costs for auto, cement, steel, and paints sectors.' },
+  { date:'2026-10-29', event:'NSE F&O Monthly Expiry (Oct 2026)', category:'Market', impact:'medium', tag:'market',
+    what:'October 2026 F&O expiry. Typically coincides with Diwali season — historically India\'s most bullish month.',
+    why:'Festive sentiment, retail buying, and FII inflows driven by Q2 results (which start in October) often create a "Diwali rally". F&O expiry near festival adds extra volatility.',
+    market:'Bullish Diwali years see Nifty gap up after expiry. Watch for "Muhurat trading" — a special 1-hour trading session on Diwali day itself.' },
 
-    // Group by date
-    const byDate = {};
-    events.forEach(e => {
-      const d = (e.date || '').split(' ')[0];
-      if (!byDate[d]) byDate[d] = [];
-      byDate[d].push(e);
-    });
+  // ── November 2026 ──
+  { date:'2026-11-12', event:'India IIP (Sep 2026)',             category:'Economy',   impact:'medium', tag:'',
+    what:'Industrial Production for September 2026 — the Q2 close month. This is also the last data before Q2 GDP announcement.',
+    why:'September IIP is often distorted by Navratri/festive season advance stocking. A leading indicator for Q2 GDP which comes at end of November.',
+    market:'Strong September IIP often confirms Q2 GDP beat. Capital goods sub-index is the most market-moving component.' },
+  { date:'2026-11-12', event:'India CPI Inflation (Oct 2026)',  category:'Inflation',  impact:'high',  tag:'inflation',
+    what:'October CPI — post-festive season. Food prices, especially onions and vegetables, are highly seasonal in October-November.',
+    why:'October CPI often surprises due to vegetable price spikes after monsoon withdrawal. This data influences December MPC meeting stance.',
+    market:'Vegetable-driven CPI spike → temporary; RBI usually "looks through" it. Core CPI (ex-food, fuel) is the key watch metric.' },
+  { date:'2026-11-16', event:'India WPI Inflation (Oct 2026)', category:'Inflation',   impact:'medium', tag:'inflation',
+    what:'Wholesale Price Index for October 2026.',
+    why:'Post-monsoon commodity prices, crude oil, and manufactured goods inflation tracked here.',
+    market:'Crude oil above $85 → inflation pressure on India (net oil importer), rupee weakens, OMCs under pressure.' },
+  { date:'2026-11-26', event:'NSE F&O Monthly Expiry (Nov 2026)', category:'Market', impact:'medium', tag:'market',
+    what:'November 2026 F&O expiry. Q2 earnings season is wrapping up around this time.',
+    why:'November is historically mixed — FII selling ahead of US year-end, while domestic institutional buying (DIIs) provides support. Large divergence between FII and DII flows creates volatility.',
+    market:'Track FII/DII data daily in November. Net FII selling above ₹5,000 Cr/week signals caution.' },
+  { date:'2026-11-30', event:'India GDP Q2 FY2027 (Jul–Sep 2026)', category:'GDP', impact:'high', tag:'',
+    what:'India\'s second quarter GDP for FY2026-27 (July to September 2026). Key data for assessing full-year growth trajectory.',
+    why:'Q2 captures peak kharif harvest, festive demand, and post-monsoon industrial activity. A strong Q2 GDP (above 7%) raises chances of full-year 7%+ growth — a big positive for market sentiment and FII flows.',
+    market:'GDP beat → India macro narrative strengthens, sovereign rating upgrade hopes, Nifty bullish. GDP miss → fiscal concerns, government capex expected to compensate.' },
 
-    list.innerHTML = Object.keys(byDate).sort().map(date => {
-      const dayLabel = new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-      return `
-        <div class="econ-day">
-          <div class="econ-day-label">${dayLabel}</div>
-          ${byDate[date].map((e, idx) => {
-            const key = e.event || e.name || '';
-            const det = EVENT_DETAILS[key] || null;
-            const uid = `ev-${date}-${idx}`;
-            return `
-            <div class="econ-event ec-clickable" onclick="toggleDetail('${uid}')">
-              <div class="econ-impact-dot" style="background:${impactColor(e.impact)}" title="${e.impact || 'Low'}"></div>
-              <div class="econ-event-info">
-                <div class="econ-event-name">${key || '—'} <span class="ec-expand-hint">▾</span></div>
-                <div class="econ-event-meta">
-                  <span>${e.country || 'US'}</span>
-                  ${e.actual   != null ? `<span class="econ-actual">Actual: <strong>${e.actual}${e.unit||''}</strong></span>` : ''}
-                  ${e.estimate != null ? `<span>Est: ${e.estimate}${e.unit||''}</span>` : ''}
-                  ${e.previous != null ? `<span>Prev: ${e.previous}${e.unit||''}</span>` : ''}
+  // ── December 2026 ──
+  { date:'2026-12-05', event:'RBI MPC Policy Decision (Dec 2026)', category:'RBI', impact:'high', tag:'rbi',
+    what:'Reserve Bank of India\'s December MPC decision — the last policy meeting of the calendar year 2026.',
+    why:'December MPC sets the rate environment for the new year. With Q2 GDP and October CPI data in hand, RBI has strong visibility. A rate cut here is typically accompanied by bullish year-end FII flows.',
+    market:'December rate cut → year-end rally, banking stocks surge, real estate re-rates. Rate hold → markets look ahead to February budget for fiscal stimulus. December MPC also publishes revised GDP and inflation forecasts for the year.' },
+  { date:'2026-12-12', event:'India IIP (Oct 2026)',             category:'Economy',   impact:'medium', tag:'',
+    what:'Industrial Production for October 2026 — festive season demand and production captured here.',
+    why:'October IIP reflects Diwali demand burst — auto dispatches, consumer electronics, steel for construction. A high print confirms festive season economic momentum.',
+    market:'Strong IIP → positive for auto, consumer durables, capital goods. Especially watched after festive season GDP signals.' },
+  { date:'2026-12-14', event:'India CPI Inflation (Nov 2026)',  category:'Inflation',  impact:'high',  tag:'inflation',
+    what:'November CPI — post-festive, pre-winter data. Rabi crop sowing season begins, food prices start stabilising.',
+    why:'November CPI gives the clearest picture of underlying inflation. The "vegetable spike" from October usually begins to reverse. If core CPI (4-5%) is falling, RBI gets more room for cuts in 2027.',
+    market:'November CPI below 4.5% → rate cut in February 2027 almost certain. Markets may pre-price cuts into banking and real estate stocks.' },
+  { date:'2026-12-14', event:'India WPI Inflation (Nov 2026)', category:'Inflation',   impact:'medium', tag:'inflation',
+    what:'Wholesale Price Index for November 2026.',
+    why:'Winter months usually see lower vegetable WPI. Global crude trends dominate the fuel component — important for India\'s import bill.',
+    market:'WPI fuel deflation → positive for OMCs and aviation. Low manufactured goods WPI → margin expansion for consumer companies.' },
+  { date:'2026-12-31', event:'NSE F&O Monthly Expiry (Dec 2026)', category:'Market', impact:'high', tag:'market',
+    what:'December 2026 F&O expiry — the last trading session of the calendar year. Also coincides with Nifty 50 annual review.',
+    why:'Year-end brings: (1) FII book closure and profit-taking, (2) mutual fund window dressing, (3) position squaring for FY2026 annual portfolios. Historically one of the most volatile expiry sessions.',
+    market:'Watch Nifty 50 annual performance and sectoral rotation. January effect: fresh money flows into market in first week of January — small and mid-caps often lead.' },
+];
+
+// ── Render ────────────────────────────────────────────────────────────────────
+let activeFilter = 'all';
+let expandedIdx  = null;
+
+function impactColor(impact) {
+  return impact === 'high' ? '#ef4444' : impact === 'medium' ? '#f59e0b' : '#22c55e';
+}
+function impactLabel(impact) {
+  return impact === 'high' ? 'HIGH' : impact === 'medium' ? 'MEDIUM' : 'LOW';
+}
+
+function isToday(dateStr) {
+  return dateStr === new Date().toISOString().split('T')[0];
+}
+function isPast(dateStr) {
+  return dateStr < new Date().toISOString().split('T')[0];
+}
+
+function groupByMonth(events) {
+  const map = {};
+  events.forEach(e => {
+    const d   = new Date(e.date);
+    const key = d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+    if (!map[key]) map[key] = [];
+    map[key].push(e);
+  });
+  return map;
+}
+
+function render() {
+  const filtered = activeFilter === 'all'
+    ? EVENTS
+    : EVENTS.filter(e => e.impact === activeFilter || e.tag === activeFilter);
+
+  const groups = groupByMonth(filtered);
+  const today  = new Date().toISOString().split('T')[0];
+
+  const container = document.getElementById('econList');
+  container.innerHTML = Object.entries(groups).map(([month, evts]) => `
+    <div class="econ-month-group">
+      <div class="econ-month-label">${month}</div>
+      ${evts.map((e, i) => {
+        const past = isPast(e.date);
+        const todayEvt = isToday(e.date);
+        const d = new Date(e.date);
+        const dayStr = d.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' });
+        const globalIdx = EVENTS.indexOf(e);
+        const expanded = expandedIdx === globalIdx;
+        return `
+          <div class="econ-item ${past ? 'past' : ''} ${todayEvt ? 'today' : ''}" onclick="toggleExpand(${globalIdx})">
+            <div class="econ-row">
+              <div class="econ-date-block">
+                <span class="econ-day">${d.getDate()}</span>
+                <span class="econ-mon">${d.toLocaleDateString('en-IN',{month:'short'})}</span>
+              </div>
+              <div class="econ-impact-dot" style="background:${impactColor(e.impact)};box-shadow:0 0 6px ${impactColor(e.impact)}44"></div>
+              <div class="econ-main">
+                <div class="econ-name">${e.event}${todayEvt ? ' <span class="econ-today-badge">TODAY</span>' : ''}</div>
+                <div class="econ-meta-row">
+                  <span class="econ-cat">${e.category}</span>
+                  <span class="econ-impact-lbl" style="color:${impactColor(e.impact)}">${impactLabel(e.impact)}</span>
+                  <span class="econ-weekday">${d.toLocaleDateString('en-IN',{weekday:'long'})}</span>
                 </div>
               </div>
-              <div class="econ-impact-badge" style="color:${impactColor(e.impact)};border-color:${impactColor(e.impact)}20;background:${impactColor(e.impact)}15">
-                ${e.impact || 'Low'}
-              </div>
+              <span class="econ-chevron">${expanded ? '▲' : '▼'}</span>
             </div>
-            ${det ? `
-            <div class="ec-detail" id="${uid}" style="display:none">
-              <div class="ec-detail-grid">
-                <div class="ec-detail-block">
-                  <div class="ec-det-label">📖 What is it?</div>
-                  <div class="ec-det-text">${det.what}</div>
+            ${expanded ? `
+            <div class="econ-detail">
+              <div class="econ-detail-grid">
+                <div class="econ-detail-block">
+                  <div class="econ-detail-label">📌 What is it?</div>
+                  <div class="econ-detail-text">${e.what}</div>
                 </div>
-                <div class="ec-detail-block">
-                  <div class="ec-det-label">💡 Why it matters</div>
-                  <div class="ec-det-text">${det.why}</div>
+                <div class="econ-detail-block">
+                  <div class="econ-detail-label">💡 Why does it matter?</div>
+                  <div class="econ-detail-text">${e.why}</div>
                 </div>
-                <div class="ec-detail-block">
-                  <div class="ec-det-label">📊 Historical context</div>
-                  <div class="ec-det-text">${det.history}</div>
-                </div>
-                <div class="ec-detail-block">
-                  <div class="ec-det-label">📈 Market impact</div>
-                  <div class="ec-det-text">${det.market}</div>
+                <div class="econ-detail-block econ-detail-full">
+                  <div class="econ-detail-label">📈 Market impact</div>
+                  <div class="econ-detail-text">${e.market}</div>
                 </div>
               </div>
             </div>` : ''}
-            `;
-          }).join('')}
-        </div>
-      `;
-    }).join('');
-  }
+          </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
 
-  function toggleDetail(uid) {
-    const el = document.getElementById(uid);
-    if (!el) return;
-    const open = el.style.display !== 'none';
-    el.style.display = open ? 'none' : 'block';
-    // Flip the arrow on the parent event
-    const parent = el.previousElementSibling;
-    const hint = parent?.querySelector('.ec-expand-hint');
-    if (hint) hint.textContent = open ? '▾' : '▴';
-  }
+function toggleExpand(idx) {
+  expandedIdx = expandedIdx === idx ? null : idx;
+  render();
+}
 
-  async function loadEconomy() {
-    const { from, to } = getNextMonthRange();
-    try {
-      const r = await fetch(`${FMP}/economic_calendar?from=${from}&to=${to}&apikey=${KEY}`);
-      const data = await r.json();
-      if (!Array.isArray(data) || !data.length) throw new Error('empty');
-      allEvents = data;
-      filterAndRender();
-    } catch {
-      // Comprehensive fallback
-      allEvents = [
-        { date: '2025-06-11', event: 'CPI (Consumer Price Index) MoM', country: 'US', impact: 'High', estimate: '0.3%', previous: '0.4%', actual: null },
-        { date: '2025-06-12', event: 'Core CPI YoY', country: 'US', impact: 'High', estimate: '3.5%', previous: '3.6%', actual: null },
-        { date: '2025-06-12', event: 'Initial Jobless Claims', country: 'US', impact: 'Medium', estimate: '220K', previous: '215K', actual: null },
-        { date: '2025-06-17', event: 'Retail Sales MoM', country: 'US', impact: 'High', estimate: '0.2%', previous: '-0.8%', actual: null },
-        { date: '2025-06-18', event: 'Federal Reserve Interest Rate Decision', country: 'US', impact: 'High', estimate: '5.25%', previous: '5.50%', actual: null },
-        { date: '2025-06-18', event: 'FOMC Press Conference', country: 'US', impact: 'High', estimate: null, previous: null, actual: null },
-        { date: '2025-06-18', event: 'Fed Dot Plot & Economic Projections', country: 'US', impact: 'High', estimate: null, previous: null, actual: null },
-        { date: '2025-06-20', event: 'S&P Global Manufacturing PMI Flash', country: 'US', impact: 'Medium', estimate: '51.2', previous: '51.3', actual: null },
-        { date: '2025-06-25', event: 'Consumer Confidence', country: 'US', impact: 'Medium', estimate: '98.5', previous: '97.0', actual: null },
-        { date: '2025-06-26', event: 'GDP QoQ (Final)', country: 'US', impact: 'High', estimate: '1.3%', previous: '1.6%', actual: null },
-        { date: '2025-06-27', event: 'PCE Price Index YoY', country: 'US', impact: 'High', estimate: '2.6%', previous: '2.7%', actual: null },
-        { date: '2025-07-02', event: 'Non-Farm Payrolls', country: 'US', impact: 'High', estimate: '185K', previous: '175K', actual: null },
-        { date: '2025-07-02', event: 'Unemployment Rate', country: 'US', impact: 'High', estimate: '3.9%', previous: '3.9%', actual: null },
-        { date: '2025-07-10', event: 'CPI YoY', country: 'US', impact: 'High', estimate: '3.3%', previous: '3.4%', actual: null },
-        { date: '2025-07-30', event: 'Federal Reserve Interest Rate Decision', country: 'US', impact: 'High', estimate: '5.00%', previous: '5.25%', actual: null },
-      ];
-      filterAndRender();
-    }
-  }
-
-  function filterAndRender() {
-    let filtered = allEvents;
-    if (activeFilter === 'high')   filtered = allEvents.filter(e => (e.impact||'').toLowerCase().includes('high'));
-    if (activeFilter === 'medium') filtered = allEvents.filter(e => (e.impact||'').toLowerCase().includes('medium'));
-    renderEvents(filtered);
-  }
-
-  document.querySelectorAll('.econ-filter').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.econ-filter').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeFilter = btn.dataset.impact;
-      filterAndRender();
-    });
+// Filter buttons
+document.querySelectorAll('.econ-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.econ-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    expandedIdx  = null;
+    render();
   });
+});
 
-  loadEconomy();
+render();
 </script>
 
 <style>
-.ec-clickable { cursor: pointer; transition: background 0.15s; }
-.ec-clickable:hover { background: rgba(212,169,64,0.05) !important; }
-.ec-expand-hint { font-size: 11px; color: var(--gold); margin-left: 6px; transition: transform 0.2s; }
-.ec-detail {
-  margin: 0 0 4px 0;
-  border-radius: 0 0 10px 10px;
-  border: 1px solid rgba(212,169,64,0.15);
-  border-top: none;
-  background: rgba(212,169,64,0.04);
-  padding: 16px 20px 16px 52px;
-  animation: fadeIn 0.2s ease;
+.econ-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+.econ-filter  {
+  padding:6px 14px; border-radius:20px; border:1px solid var(--border);
+  background:transparent; color:var(--text-muted); font-size:12px; font-weight:600;
+  cursor:pointer; transition:all 0.2s;
 }
-@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
-.ec-detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+.econ-filter.active, .econ-filter:hover {
+  background:var(--gold); color:#000; border-color:var(--gold);
 }
-@media (max-width: 700px) { .ec-detail-grid { grid-template-columns: 1fr; } }
-.ec-detail-block {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(212,169,64,0.1);
-  border-radius: 8px;
-  padding: 12px 14px;
+
+.econ-month-group  { margin-bottom:32px; }
+.econ-month-label  {
+  font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  color:var(--gold); border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;
 }
-.ec-det-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--gold);
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
-  text-transform: uppercase;
+
+.econ-item {
+  background:var(--navy-2); border:1px solid var(--border); border-radius:10px;
+  margin-bottom:8px; cursor:pointer; transition:border-color 0.2s, background 0.2s;
+  overflow:hidden;
 }
-.ec-det-text {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.55;
+.econ-item:hover  { border-color:rgba(212,169,64,0.3); background:rgba(212,169,64,0.02); }
+.econ-item.past   { opacity:0.5; }
+.econ-item.today  { border-color:var(--gold); background:rgba(212,169,64,0.04); }
+
+.econ-row {
+  display:grid; grid-template-columns:52px 14px 1fr 24px;
+  align-items:center; gap:14px; padding:14px 16px;
+}
+.econ-date-block { display:flex; flex-direction:column; align-items:center; }
+.econ-day  { font-size:20px; font-weight:800; color:#fff; line-height:1; }
+.econ-mon  { font-size:10px; color:var(--text-muted); margin-top:1px; }
+.econ-impact-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.econ-main { min-width:0; }
+.econ-name { font-size:14px; font-weight:600; color:#fff; white-space:normal; line-height:1.3; }
+.econ-today-badge {
+  display:inline-block; background:var(--gold); color:#000;
+  font-size:9px; font-weight:800; letter-spacing:0.5px; border-radius:3px;
+  padding:1px 5px; margin-left:6px; vertical-align:middle;
+}
+.econ-meta-row { display:flex; gap:10px; align-items:center; margin-top:4px; flex-wrap:wrap; }
+.econ-cat      { font-size:10px; color:var(--text-muted); font-weight:600; letter-spacing:0.5px; }
+.econ-impact-lbl { font-size:10px; font-weight:700; letter-spacing:0.5px; }
+.econ-weekday  { font-size:10px; color:var(--text-muted); }
+.econ-chevron  { color:var(--text-muted); font-size:10px; }
+
+.econ-detail {
+  border-top:1px solid var(--border); padding:16px;
+  background:rgba(0,0,0,0.15);
+}
+.econ-detail-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:14px;
+}
+.econ-detail-full { grid-column:1/-1; }
+.econ-detail-block {
+  background:rgba(212,169,64,0.04); border:1px solid rgba(212,169,64,0.1);
+  border-radius:8px; padding:12px 14px;
+}
+.econ-detail-label {
+  font-size:11px; font-weight:700; color:var(--gold); letter-spacing:0.5px; margin-bottom:6px;
+}
+.econ-detail-text { font-size:12px; color:var(--text-muted); line-height:1.7; }
+
+@media (max-width:600px) {
+  .econ-detail-grid { grid-template-columns:1fr; }
+  .econ-row { grid-template-columns:44px 12px 1fr 20px; gap:10px; }
 }
 </style>
