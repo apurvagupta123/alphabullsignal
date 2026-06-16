@@ -1,0 +1,46 @@
+name: Fetch Market Data
+
+on:
+  schedule:
+    # After Indian market close: 10:30 UTC = 4:00 PM IST (Mon-Fri)
+    - cron: '30 10 * * 1-5'
+    # After US market close: 21:30 UTC = 4:30 PM EST (Mon-Fri)
+    - cron: '30 21 * * 1-5'
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  fetch-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to commit JSON files back to repo
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install yfinance --quiet
+
+      - name: Fetch market data
+        run: python3 scripts/fetch_market_data.py
+
+      - name: Commit updated data files
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/
+          # Only commit if something actually changed
+          git diff --staged --quiet || git commit -m "chore: update market data [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main

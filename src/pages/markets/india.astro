@@ -13,7 +13,7 @@ const NSE_STOCKS = [
   { sym: 'LT.NS',          name: 'Larsen & Toubro' },
   { sym: 'SBIN.NS',        name: 'State Bank of India' },
   { sym: 'WIPRO.NS',       name: 'Wipro' },
-  { sym: 'TATAMOTORS.NS',  name: 'Tata Motors' },
+  { sym: 'TMCV.NS',        name: 'Tata Motors (CV)' },
   { sym: 'BHARTIARTL.NS',  name: 'Bharti Airtel' },
   { sym: 'MARUTI.NS',      name: 'Maruti Suzuki' },
   { sym: 'ADANIENT.NS',    name: 'Adani Enterprises' },
@@ -44,6 +44,7 @@ const BSE_STOCKS = [
       <div class="sh-perf">
         <span class="shp-label">NIFTY 50 TODAY</span>
         <span class="shp-val" id="niftyChg">Loading…</span>
+        <span style="font-size:10px;color:var(--text-muted);margin-top:4px" id="dataAge"></span>
       </div>
     </div>
 
@@ -131,76 +132,74 @@ const BSE_STOCKS = [
 
 </BaseLayout>
 
-<script define:vars={{
-  nseSyms: ['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS','HINDUNILVR.NS','BAJFINANCE.NS','KOTAKBANK.NS','LT.NS','SBIN.NS','WIPRO.NS','TATAMOTORS.NS','BHARTIARTL.NS','MARUTI.NS','ADANIENT.NS'],
-  bseSyms: ['RELIANCE.BO','TCS.BO','HDFCBANK.BO','INFY.BO','ICICIBANK.BO','TATASTEEL.BO','SUNPHARMA.BO','ONGC.BO','BAJAJFINSV.BO','POWERGRID.BO']
-}}>
-  const PROXY = 'https://corsproxy.io/?';
-
-  async function yfQuotes(syms) {
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-    const r = await fetch(PROXY + encodeURIComponent(url));
-    return (await r.json())?.quoteResponse?.result || [];
-  }
-
-  function renderQuotes(quotes) {
-    let totalPct = 0, count = 0;
-    quotes.forEach(q => {
-      const chg = q.regularMarketChange ?? 0;
-      const pct = q.regularMarketChangePercent ?? 0;
-      const up  = chg >= 0;
-      const color = up ? '#22c55e' : '#ef4444';
-      totalPct += pct; count++;
-
-      const card = document.getElementById(`sc-${q.symbol}`);
-      if (card) card.classList.add(up ? 'up' : 'dn');
-      const bEl = document.getElementById(`scb-${q.symbol}`);
-      if (bEl) { bEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; bEl.classList.add(up?'badge-up':'badge-dn'); }
-      const pEl = document.getElementById(`scp-${q.symbol}`);
-      if (pEl) pEl.textContent = `₹${q.regularMarketPrice?.toFixed(2)}`;
-      const cEl = document.getElementById(`scc-${q.symbol}`);
-      if (cEl) { cEl.textContent = `${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)}`; cEl.style.color = color; }
-    });
-    return count ? totalPct / count : 0;
-  }
-
-  async function loadIndices() {
+<script>
+  // ── Load from pre-fetched JSON (updated daily by GitHub Actions) ──
+  async function loadData() {
     try {
-      const quotes = await yfQuotes(['^NSEI','^BSESN','^NSEBANK','^NIFTYMIDCAP150']);
-      quotes.forEach(q => {
+      const [stocksRes, idxRes] = await Promise.all([
+        fetch('/data/india-stocks.json'),
+        fetch('/data/india-indices.json'),
+      ]);
+      const stocks = await stocksRes.json();
+      const idxData = await idxRes.json();
+
+      // Show last-updated time
+      if (stocks.lastUpdated) {
+        const d = new Date(stocks.lastUpdated);
+        const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
+        const dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
+        const el = document.getElementById('dataAge');
+        if (el) el.textContent = `Data as of ${timeStr} IST, ${dateStr}`;
+      }
+
+      // Render indices
+      const idxKeyMap = {'^NSEI':'nsei','^BSESN':'bsesn','^NSEBANK':'nsebank','^CNXMIDCAP':'mid'};
+      idxData.indices.forEach(q => {
+        if (!q.regularMarketPrice) return;
+        const chg = q.regularMarketChange ?? 0;
+        const pct = q.regularMarketChangePercent ?? 0;
+        const up  = chg >= 0;
+        const key = idxKeyMap[q.symbol];
+        if (!key) return;
+        const card = document.getElementById(`idx-${q.symbol.replace('^','')}`);
+        if (card) { card.classList.remove('skeleton'); card.classList.add(up ? 'up' : 'dn'); }
+        const pEl = document.getElementById(`${key}-price`);
+        if (pEl) pEl.textContent = q.regularMarketPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+        const cEl = document.getElementById(`${key}-chg`);
+        if (cEl) { cEl.textContent = `${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`; cEl.style.color = up ? '#22c55e' : '#ef4444'; }
+      });
+
+      // NIFTY hero badge
+      const nifty = idxData.indices.find(q => q.symbol === '^NSEI');
+      if (nifty) {
+        const pct = nifty.regularMarketChangePercent ?? 0;
+        const up  = pct >= 0;
+        const el  = document.getElementById('niftyChg');
+        if (el) { el.textContent = `${up?'+':''}${pct.toFixed(2)}%`; el.style.color = up ? '#22c55e' : '#ef4444'; }
+      }
+
+      // Render stock cards (NSE + BSE combined)
+      const allStocks = [...(stocks.nse || []), ...(stocks.bse || [])];
+      allStocks.forEach(q => {
+        if (!q.regularMarketPrice) return;
         const chg = q.regularMarketChange ?? 0;
         const pct = q.regularMarketChangePercent ?? 0;
         const up  = chg >= 0;
         const color = up ? '#22c55e' : '#ef4444';
-        const idMap = {'^NSEI':'nsei','^BSESN':'bsesn','^NSEBANK':'nsebank','^NIFTYMIDCAP150':'mid'};
-        const key = idMap[q.symbol];
-        if (!key) return;
-        const card = document.getElementById(`idx-${q.symbol.replace('^','')}`);
-        if (card) { card.classList.remove('skeleton'); card.classList.add(up?'up':'dn'); }
-        const pEl = document.getElementById(`${key}-price`);
-        if (pEl) pEl.textContent = q.regularMarketPrice?.toLocaleString('en-IN', {maximumFractionDigits:2});
-        const cEl = document.getElementById(`${key}-chg`);
-        if (cEl) { cEl.textContent = `${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`; cEl.style.color = color; }
+        const card = document.getElementById(`sc-${q.symbol}`);
+        if (card) card.classList.add(up ? 'up' : 'dn');
+        const bEl = document.getElementById(`scb-${q.symbol}`);
+        if (bEl) { bEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`; bEl.classList.add(up ? 'badge-up' : 'badge-dn'); }
+        const pEl = document.getElementById(`scp-${q.symbol}`);
+        if (pEl) pEl.textContent = `₹${q.regularMarketPrice.toFixed(2)}`;
+        const cEl = document.getElementById(`scc-${q.symbol}`);
+        if (cEl) { cEl.textContent = `${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)}`; cEl.style.color = color; }
       });
-      const nifty = quotes.find(q => q.symbol === '^NSEI');
-      if (nifty) {
-        const pct = nifty.regularMarketChangePercent ?? 0;
-        const up = pct >= 0;
-        const el = document.getElementById('niftyChg');
-        if (el) { el.textContent = `${up?'+':''}${pct.toFixed(2)}%`; el.style.color = up?'#22c55e':'#ef4444'; }
-      }
-    } catch {}
+
+    } catch (e) {
+      console.error('Failed to load market data:', e);
+    }
   }
 
-  async function loadIndia() {
-    try {
-      const [nseQ, bseQ] = await Promise.all([yfQuotes(nseSyms), yfQuotes(bseSyms)]);
-      renderQuotes(nseQ);
-      renderQuotes(bseQ);
-    } catch {}
-  }
-
-  loadIndices();
-  loadIndia();
-  setInterval(() => { loadIndices(); loadIndia(); }, 60000);
+  loadData();
 </script>
