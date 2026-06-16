@@ -719,9 +719,9 @@ const SECTOR_TAGS: Record<string, string> = {
 
 /* ── Indices Strip ───────────────────────────────────── */
 .idx-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
   padding: 4px 0;
 }
 .idx-pill {
@@ -733,8 +733,6 @@ const SECTOR_TAGS: Record<string, string> = {
   border-top: 3px solid transparent;
   border-radius: 10px;
   padding: 16px 18px 14px;
-  flex: 1 1 150px;
-  min-width: 140px;
   overflow: hidden;
   transition: border-color 0.2s, background 0.2s;
 }
@@ -888,8 +886,11 @@ const SECTOR_TAGS: Record<string, string> = {
   .mkt-row .mkt-row-pct { display: none; }
   .mkt-row { grid-template-columns: 2fr 90px 90px; }
 }
-@media (max-width: 480px) {
-  .idx-pill { flex: 1 1 140px; min-width: 140px; }
+@media (max-width: 700px) {
+  .idx-strip { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 400px) {
+  .idx-strip { grid-template-columns: 1fr 1fr; }
 }
 </style>
 
