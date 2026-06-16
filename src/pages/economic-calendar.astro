@@ -220,11 +220,6 @@ function render() {
       html += `<div class="ec-month-sep">${month}</div>`;
     }
 
-    // Date block
-    const highestImpact = events.some(e => e.impact === 'high') ? 'high'
-                        : events.some(e => e.impact === 'medium') ? 'medium' : 'low';
-    const borderColor = IC[highestImpact];
-
     // When badge
     let whenBadge = '';
     if (todayBlk) {
@@ -234,74 +229,67 @@ function render() {
     } else if (!past && days <= 30) {
       whenBadge = `<span class="ec-when-badge" style="background:rgba(245,158,11,0.1);color:#f59e0b;border-color:rgba(245,158,11,0.3)">In ${days}d</span>`;
     } else if (past) {
-      whenBadge = `<span style="font-size:11px;color:var(--text-muted)">${Math.abs(days)}d ago</span>`;
+      whenBadge = `<span class="ec-ago">${Math.abs(days)}d ago</span>`;
     }
 
-    // Date label
     const dayNum = d.getDate();
     const monStr = d.toLocaleDateString('en-IN', { month:'short' });
-    const wday   = d.toLocaleDateString('en-IN', { weekday:'long' });
+    const wday   = d.toLocaleDateString('en-IN', { weekday:'short' });
 
-    html += `
-    <div class="ec-date-block ${past ? 'ec-past' : ''} ${todayBlk ? 'ec-today-block' : ''}"
-         style="border-left:3px solid ${borderColor}">
-      <!-- Date header -->
-      <div class="ec-date-header">
-        <div class="ec-date-label">
-          <span class="ec-day-num">${dayNum}</span>
-          <div class="ec-date-text">
-            <span class="ec-mon-str">${monStr}</span>
-            <span class="ec-wday-str">${wday}</span>
+    // Each event = its own row card (like stock rows), with date shown only on first event of the date
+    events.forEach((e, i) => {
+      const key   = date + '::' + e.event;
+      const isExp = expanded[key];
+      const c     = IC[e.impact];
+      const icon  = CI[e.category] || '📌';
+
+      html += `
+      <div class="ec-row-card ${past ? 'ec-past' : ''} ${todayBlk ? 'ec-today-row' : ''}"
+           style="border-left:3px solid ${c}"
+           onclick="toggleEvent('${key.replace(/'/g,"\\'")}')">
+        <div class="ec-row-main">
+
+          <!-- Date column (only show on first event of a date group) -->
+          <div class="ec-col-date">
+            ${i === 0 ? `
+              <span class="ec-day-num">${dayNum}</span>
+              <span class="ec-mon-str">${monStr}</span>
+              <span class="ec-wday-str">${wday}</span>
+            ` : `<span class="ec-same-date">↑</span>`}
+          </div>
+
+          <!-- Event name + subtitle -->
+          <div class="ec-col-event">
+            <div class="ec-event-name">${e.event}</div>
+            <div class="ec-event-sub">${e.subtitle}</div>
+          </div>
+
+          <!-- Right: category + impact + countdown + chevron -->
+          <div class="ec-col-right">
+            <span class="ec-cat-chip">${icon} ${e.category}</span>
+            <span class="ec-impact-pill" style="background:${c}18;color:${c};border:1px solid ${c}44">${e.impact.toUpperCase()}</span>
+            ${i === 0 ? whenBadge : ''}
+            <span class="ec-chev ${isExp ? 'open' : ''}">›</span>
           </div>
         </div>
-        <div class="ec-date-meta">
-          ${whenBadge}
-          <span class="ec-event-count">${events.length} event${events.length > 1 ? 's' : ''}</span>
-        </div>
-      </div>
 
-      <!-- Events for this date -->
-      <div class="ec-events-list">
-        ${events.map((e, i) => {
-          const key = date + '::' + e.event;
-          const isExp = expanded[key];
-          const c = IC[e.impact];
-          const icon = CI[e.category] || '📌';
-          return `
-          <div class="ec-event-item ${i < events.length-1 ? 'ec-event-divider' : ''}" onclick="toggleEvent('${key.replace(/'/g,"\\'")}')">
-            <div class="ec-event-row">
-              <div class="ec-event-left">
-                <span class="ec-impact-dot" style="background:${c};box-shadow:0 0 5px ${c}55"></span>
-                <div>
-                  <div class="ec-event-name">${e.event}</div>
-                  <div class="ec-event-sub">${e.subtitle}</div>
-                </div>
-              </div>
-              <div class="ec-event-right">
-                <span class="ec-cat-chip">${icon} ${e.category}</span>
-                <span class="ec-impact-pill" style="background:${c}18;color:${c};border:1px solid ${c}44">${e.impact.toUpperCase()}</span>
-                <span class="ec-chev ${isExp ? 'open' : ''}">›</span>
-              </div>
-            </div>
-            ${isExp ? `
-            <div class="ec-detail-inner">
-              <div class="ec-detail-block">
-                <div class="ec-detail-lbl">📌 What is it?</div>
-                <div class="ec-detail-txt">${e.what}</div>
-              </div>
-              <div class="ec-detail-block">
-                <div class="ec-detail-lbl">💡 Why it matters</div>
-                <div class="ec-detail-txt">${e.why}</div>
-              </div>
-              <div class="ec-detail-block">
-                <div class="ec-detail-lbl">📈 Market impact</div>
-                <div class="ec-detail-txt">${e.market}</div>
-              </div>
-            </div>` : ''}
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
+        ${isExp ? `
+        <div class="ec-detail-inner">
+          <div class="ec-detail-block">
+            <div class="ec-detail-lbl">📌 What is it?</div>
+            <div class="ec-detail-txt">${e.what}</div>
+          </div>
+          <div class="ec-detail-block">
+            <div class="ec-detail-lbl">💡 Why it matters</div>
+            <div class="ec-detail-txt">${e.why}</div>
+          </div>
+          <div class="ec-detail-block">
+            <div class="ec-detail-lbl">📈 Market impact</div>
+            <div class="ec-detail-txt">${e.market}</div>
+          </div>
+        </div>` : ''}
+      </div>`;
+    });
   });
 
   container.innerHTML = html;
@@ -351,87 +339,82 @@ render();
 /* Month separator */
 .ec-month-sep {
   font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase;
-  color:var(--gold); padding:6px 0 10px 0; margin-top:8px;
-  border-bottom:1px solid rgba(212,169,64,0.15); margin-bottom:12px;
+  color:var(--gold); padding:6px 0 10px 0; margin-top:16px;
+  border-bottom:1px solid rgba(212,169,64,0.15); margin-bottom:10px;
 }
 
-/* Date block — the main card per date */
-.ec-date-block {
+/* ── Each event = its own row card (like stock rows) ── */
+.ec-row-card {
   background:var(--navy-2); border:1px solid var(--border);
-  border-radius:12px; margin-bottom:10px; overflow:hidden;
-  transition:border-color 0.2s;
+  border-radius:10px; margin-bottom:6px;
+  cursor:pointer; overflow:hidden;
+  transition:border-color 0.2s, background 0.15s;
+  /* border-left set inline per impact color */
 }
-.ec-date-block:hover   { border-color:rgba(212,169,64,0.25); }
-.ec-date-block.ec-past { opacity:0.45; }
-.ec-today-block        { border-color:rgba(212,169,64,0.4) !important; }
+.ec-row-card:hover    { background:rgba(212,169,64,0.02); border-color:rgba(212,169,64,0.25); }
+.ec-row-card.ec-past  { opacity:0.42; }
+.ec-row-card.ec-today-row { background:rgba(212,169,64,0.04); }
 
-/* Date header row */
-.ec-date-header {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:12px 16px; border-bottom:1px solid var(--border);
-  background:rgba(0,0,0,0.15);
-}
-.ec-date-label { display:flex; align-items:center; gap:12px; }
-.ec-day-num    { font-size:28px; font-weight:800; color:#fff; line-height:1; }
-.ec-date-text  { display:flex; flex-direction:column; }
-.ec-mon-str    { font-size:12px; font-weight:700; color:var(--gold); text-transform:uppercase; }
-.ec-wday-str   { font-size:11px; color:var(--text-muted); }
-.ec-date-meta  { display:flex; align-items:center; gap:10px; }
-.ec-when-badge {
-  font-size:9px; font-weight:800; letter-spacing:0.6px;
-  padding:3px 9px; border-radius:20px; border:1px solid;
-}
-.ec-event-count {
-  font-size:10px; color:var(--text-muted); font-weight:600;
-  background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:10px;
-  border:1px solid var(--border);
+.ec-row-main {
+  display:grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items:center; gap:16px; padding:13px 16px;
 }
 
-/* Events inside a date block */
-.ec-events-list { }
-.ec-event-item  {
-  padding:12px 16px; cursor:pointer; transition:background 0.15s;
+/* Date column */
+.ec-col-date {
+  display:flex; flex-direction:column; align-items:center;
+  text-align:center; flex-shrink:0;
 }
-.ec-event-item:hover { background:rgba(255,255,255,0.02); }
-.ec-event-divider { border-bottom:1px solid rgba(255,255,255,0.05); }
+.ec-day-num   { font-size:22px; font-weight:800; color:#fff; line-height:1; display:block; }
+.ec-mon-str   { font-size:10px; font-weight:700; color:var(--gold); text-transform:uppercase; display:block; margin-top:1px; }
+.ec-wday-str  { font-size:9px; color:var(--text-muted); display:block; margin-top:1px; }
+.ec-same-date { font-size:14px; color:rgba(255,255,255,0.1); display:block; text-align:center; }
+.ec-ago       { font-size:10px; color:var(--text-muted); }
 
-.ec-event-row {
-  display:flex; justify-content:space-between; align-items:center; gap:12px;
+/* Event name column */
+.ec-col-event { min-width:0; }
+.ec-event-name { font-size:14px; font-weight:700; color:#fff; margin-bottom:3px; }
+.ec-event-sub  { font-size:11px; color:var(--text-muted); }
+
+/* Right column */
+.ec-col-right {
+  display:flex; align-items:center; gap:8px; flex-shrink:0;
 }
-.ec-event-left  { display:flex; align-items:center; gap:12px; flex:1; min-width:0; }
-.ec-impact-dot  { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-.ec-event-name  { font-size:13px; font-weight:700; color:#fff; margin-bottom:2px; }
-.ec-event-sub   { font-size:11px; color:var(--text-muted); }
-.ec-event-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
 .ec-cat-chip {
   font-size:10px; color:var(--text-muted); background:rgba(255,255,255,0.05);
-  border:1px solid var(--border); padding:2px 8px; border-radius:20px; white-space:nowrap;
+  border:1px solid var(--border); padding:3px 9px; border-radius:20px; white-space:nowrap;
 }
 .ec-impact-pill {
   font-size:9px; font-weight:800; letter-spacing:0.6px;
-  padding:2px 8px; border-radius:20px; white-space:nowrap;
+  padding:3px 9px; border-radius:20px; white-space:nowrap;
+}
+.ec-when-badge {
+  font-size:9px; font-weight:800; letter-spacing:0.5px;
+  padding:3px 9px; border-radius:20px; border:1px solid; white-space:nowrap;
 }
 .ec-chev {
-  font-size:18px; color:var(--text-muted); transition:transform 0.2s; flex-shrink:0;
+  font-size:20px; color:var(--text-muted); transition:transform 0.2s; flex-shrink:0;
 }
 .ec-chev.open { transform:rotate(90deg); color:var(--gold); }
 
 /* Expanded detail */
 .ec-detail-inner {
   display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
-  margin-top:10px; padding:14px;
-  background:rgba(0,0,0,0.2); border-radius:8px;
-  border:1px solid rgba(212,169,64,0.1);
+  padding:14px 16px 16px 16px;
+  background:rgba(0,0,0,0.2);
+  border-top:1px solid rgba(212,169,64,0.1);
 }
 .ec-detail-lbl {
   font-size:10px; font-weight:800; color:var(--gold);
   letter-spacing:0.5px; margin-bottom:5px; text-transform:uppercase;
 }
-.ec-detail-txt { font-size:12px; color:var(--text-muted); line-height:1.7; }
+.ec-detail-txt { font-size:12px; color:var(--text-muted); line-height:1.75; }
 
 @media (max-width:640px) {
-  .ec-cat-chip  { display:none; }
+  .ec-cat-chip   { display:none; }
   .ec-detail-inner { grid-template-columns:1fr; }
-  .ec-day-num   { font-size:22px; }
+  .ec-row-main   { grid-template-columns:52px 1fr auto; gap:10px; }
+  .ec-day-num    { font-size:18px; }
 }
 </style>
