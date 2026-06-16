@@ -10,7 +10,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="news-tabs">
       <button class="ntab active" data-tab="market">📰 Market News</button>
       <button class="ntab" data-tab="pulse">📊 Market Pulse</button>
-      <button class="ntab" data-tab="stocks">📈 Stocks</button>
       <button class="ntab" data-tab="etf">🏦 ETFs</button>
       <button class="ntab" data-tab="crypto">₿ Crypto</button>
     </div>
@@ -81,16 +80,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       blogs: [
         { url: 'https://ritholtz.com/feed/',                 source: 'Ritholtz',            color: '#c9a84c' },
         { url: 'https://abnormalreturns.com/feed/',          source: 'Abnormal Returns',    color: '#22c55e' },
-      ],
-    },
-    stocks: {
-      label: 'India Stocks',
-      isStocks: true,
-      news: [],
-      blogs: [
-        { url: 'https://realinvestmentadvice.com/feed/',     source: 'Real Inv. Advice',    color: '#22c55e' },
-        { url: 'https://www.capitalspectator.com/feed/',     source: 'Capital Spectator',   color: '#f0c040' },
-        { url: 'https://feeds.bbci.co.uk/news/business/rss.xml', source: 'BBC Business',   color: '#bb1919' },
       ],
     },
     etf: {
@@ -228,63 +217,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ─── Render India Stock Rows ──────────────────────────────────────────────
-  async function renderStocksTab() {
-    const mainFeed = document.getElementById('newsMainFeed');
-    const mainMore = document.getElementById('loadMoreMain');
-    document.getElementById('mainColTitle').textContent = 'NSE Stocks';
-    document.getElementById('mainCount').textContent = '';
-    mainMore.style.display = 'none';
-    mainFeed.innerHTML = '<div class="news-skeleton-list">' + Array(8).fill('<div class="news-skeleton" style="height:52px"></div>').join('') + '</div>';
-
-    try {
-      const r = await fetch('/data/india-stocks.json');
-      const data = await r.json();
-      const stocks = [...(data.nse || []), ...(data.bse || [])].filter(q => q.regularMarketPrice);
-
-      if (!stocks.length) {
-        mainFeed.innerHTML = '<div class="news-empty">No stock data available.</div>';
-        return;
-      }
-
-      document.getElementById('mainCount').textContent = `${stocks.length} stocks`;
-
-      // Table header
-      let html = `<div class="ns-stock-head">
-        <span>Stock</span>
-        <span style="text-align:right">Price</span>
-        <span style="text-align:right">Change</span>
-        <span style="text-align:right">%</span>
-      </div>`;
-
-      let rowsHtml = '';
-      stocks.forEach(q => {
-        const sym = (q.symbol || '').replace('.NS','').replace('.BO','');
-        const price = Number(q.regularMarketPrice);
-        const chg   = Number(q.regularMarketChange ?? 0);
-        const pct   = Number(q.regularMarketChangePercent ?? 0);
-        const up    = chg >= 0;
-        const color = up ? '#22c55e' : '#ef4444';
-        rowsHtml += `<a class="ns-stock-row" href="/company/${(q.symbol||'').toLowerCase().replace(/\./g,'-')}"
-          style="border-left-color:${color}">
-          <div class="ns-stock-sym">
-            <span class="ns-sym">${escHtml(sym)}</span>
-            <span class="ns-name">${escHtml(q.shortName || q.longName || '')}</span>
-          </div>
-          <div class="ns-price" style="color:#fff">₹${price.toFixed(2)}</div>
-          <div class="ns-chg" style="color:${color}">${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)}</div>
-          <div class="ns-pct">
-            <span class="ns-badge" style="background:${color}20;color:${color}">${up?'+':''}${pct.toFixed(2)}%</span>
-          </div>
-        </a>`;
-      });
-
-      mainFeed.innerHTML = html + `<div class="ns-stock-table">${rowsHtml}</div>`;
-    } catch (e) {
-      mainFeed.innerHTML = '<div class="news-empty">Failed to load stock data.</div>';
-    }
-  }
-
   // ─── Render feeds into columns ────────────────────────────────────────────
   function renderColumns() {
     const mainFeed = document.getElementById('newsMainFeed');
@@ -322,18 +254,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     document.getElementById('newsLoading').style.display = 'block';
     document.getElementById('loadMoreMain').style.display = 'none';
     document.getElementById('loadMoreBlog').style.display = 'none';
-
-    if (tab.isStocks) {
-      // Special: show India stock price rows in main column
-      document.getElementById('newsLoading').style.display = 'none';
-      await renderStocksTab();
-      // Still load blogs column
-      const blogsData = await fetchColumn(tab.blogs);
-      blogItems = blogsData;
-      document.getElementById('blogCount').textContent = blogItems.length ? `${blogItems.length} articles` : '';
-      document.getElementById('newsBlogFeed').innerHTML = renderByTime(blogItems, blogShown);
-      return;
-    }
 
     // Fetch both columns in parallel
     const [newsItems, blogsData] = await Promise.all([
