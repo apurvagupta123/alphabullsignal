@@ -196,6 +196,7 @@ input  { outline: none; font-family: inherit; border: none; }
 /* ── Hero ─────────────────────────────────────────────────── */
 .hero {
   position: relative;
+  overflow: hidden;
   padding: 72px 28px 56px;
   border-bottom: 1px solid var(--border);
   background: var(--navy);

@@ -39,6 +39,8 @@ const SECTOR_TAGS: Record<string, string> = {
 
   <!-- ── Hero ────────────────────────────────────────── -->
   <section class="hero">
+    <!-- Golden graph background -->
+    <img src="/golden-graph.avif" alt="" class="hero-graph-bg" aria-hidden="true" />
     <div class="hero-inner hero-split">
 
       <!-- Left: Text Content -->
@@ -380,6 +382,24 @@ const SECTOR_TAGS: Record<string, string> = {
 </BaseLayout>
 
 <style>
+/* ── Hero graph background ──────────────────────────── */
+.hero-graph-bg {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1100px;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+  opacity: 0.13;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: luminosity;
+  filter: sepia(1) saturate(3) hue-rotate(5deg) brightness(1.1);
+}
+
 /* ── Hero Split Layout ───────────────────────────────── */
 .hero-split {
   display: flex;
