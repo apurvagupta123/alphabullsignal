@@ -670,18 +670,17 @@ const SECTOR_TAGS: Record<string, string> = {
     if(!result) return;
     const s=rawSym.toUpperCase().trim();
     const sym=s.includes('.')?s:s+'.NS';
+    const fname=sym.replace(/\./g,'-');
     result.innerHTML=`<p class="sl-hint">Analyzing ${sym}…</p>`;
     try{
-      const fhSym='NSE:'+sym.replace('.NS','');
-      const [qRes,pRes]=await Promise.all([
-        fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`,{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
-        fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${fhSym}&token=${FH_KEY}`,{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
-      ]);
-      if(!qRes.c) throw new Error('not found');
-      const price=qRes.c,chg=qRes.d||0,pct=qRes.dp||0;
-      const high52=qRes.h||price,low52=qRes.l||price;
+      const res=await fetch(`/data/company/${fname}.json`);
+      if(!res.ok) throw new Error('not found');
+      const d=await res.json();
+      if(!d.regularMarketPrice) throw new Error('not found');
+      const price=d.regularMarketPrice,chg=d.regularMarketChange||0,pct=d.regularMarketChangePercent||0;
+      const high52=d.fiftyTwoWeekHigh||price,low52=d.fiftyTwoWeekLow||price;
       const up=chg>=0,color=up?'#22c55e':'#ef4444';
-      const mcap=pRes.marketCapitalization?`₹${(pRes.marketCapitalization*1e6/1e7).toFixed(0)}Cr`:'—';
+      const mcap=d.marketCap>=1e12?`₹${(d.marketCap/1e12).toFixed(2)}T`:d.marketCap>=1e9?`₹${(d.marketCap/1e9).toFixed(1)}B`:d.marketCap>=1e7?`₹${(d.marketCap/1e7).toFixed(0)}Cr`:'—';
       const priceVsHigh=high52>low52?((price-low52)/(high52-low52))*100:50;
       const momentum=pct>1?'Strong positive':pct>0?'Mild positive':pct>-1?'Mild negative':'Strong negative';
       const score=Math.max(10,Math.min(90,Math.round(50+pct*2-(priceVsHigh-50)*0.3)));
@@ -689,7 +688,7 @@ const SECTOR_TAGS: Record<string, string> = {
       const actionColor=score>65?'#22c55e':score>40?'#eab308':'#ef4444';
       const entryAdvice=score>65?'Consider SIP entry or buy on 3–5% dip. Price is well-positioned in its 52-week range.':score>40?'No strong signal yet. Use SIP or wait for breakout confirmation on high volume.':'Under selling pressure. Wait for RSI < 40 and price stabilization near 52W low before entering.';
       result.innerHTML=`
-        <div class="sl-company">${pRes.name||sym.replace('.NS','')} <span style="font-size:12px;color:var(--text-muted);font-weight:400">${pRes.finnhubIndustry||''}</span></div>
+        <div class="sl-company">${d.longName||sym.replace('.NS','')} <span style="font-size:12px;color:var(--text-muted);font-weight:400">${d.sector||''}</span></div>
         <div class="sl-price-row">
           <span class="sl-price" style="color:var(--gold)">₹${price.toLocaleString('en-IN',{maximumFractionDigits:2})}</span>
           <span class="sl-delta" style="color:${color}">${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)} (${up?'+':''}${pct.toFixed(2)}%)</span>
@@ -711,7 +710,7 @@ const SECTOR_TAGS: Record<string, string> = {
         <a href="/company/${sym.toLowerCase().replace(/\./g,'-')}" style="display:inline-block;margin-top:12px;background:var(--gold);color:#0b0f1a;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700">Full Deep Dive →</a>
       `;
     }catch{
-      result.innerHTML=`<p class="sl-hint" style="color:#ef4444">Ticker "${rawSym}" not found on NSE. Try: RELIANCE, TCS, HDFCBANK, INFY, SBIN</p>`;
+      result.innerHTML=`<p class="sl-hint" style="color:#ef4444">Ticker "${rawSym}" not found. Try: RELIANCE, TCS, HDFCBANK, INFY, SBIN, BAJFINANCE</p>`;
     }
   }
 
