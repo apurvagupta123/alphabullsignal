@@ -1086,9 +1086,10 @@ const SECTOR_TAGS: Record<string, string> = {
       if (lblEl) lblEl.textContent = 'green';
       if (gCount) gCount.textContent = String(greenCount);
       if (rCount) rCount.textContent = String(redCount);
-      const mood   = pct > 65 ? 'Bullish' : pct > 40 ? 'Neutral' : 'Bearish';
-      const advice = pct > 65 ? 'Most sectors advancing.' : pct > 40 ? 'Mixed signals — be selective.' : 'Broad selling — watch levels.';
-      if (moodV) { moodV.textContent = mood; (moodV as HTMLElement).style.color = pct > 65 ? '#10ef62' : pct > 40 ? '#eab308' : '#ff4757'; }
+      const mood   = pct >= 80 ? 'Very Bullish' : pct >= 60 ? 'Bullish' : pct >= 45 ? 'Neutral' : pct >= 25 ? 'Bearish' : 'Very Bearish';
+      const advice = pct >= 80 ? 'Strong broad rally — most sectors green.' : pct >= 60 ? 'Most sectors advancing.' : pct >= 45 ? 'Mixed signals — be selective.' : pct >= 25 ? 'Broad selling — watch levels.' : 'Heavy selling across sectors.';
+      const moodColor = pct >= 60 ? '#10ef62' : pct >= 45 ? '#eab308' : '#ff4757';
+      if (moodV) { moodV.textContent = mood; (moodV as HTMLElement).style.color = moodColor; }
       if (moodI) moodI.textContent = advice;
     }, 3500);
   }
