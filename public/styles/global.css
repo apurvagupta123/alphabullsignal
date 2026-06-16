@@ -1200,18 +1200,23 @@ a.news-item:hover .ni-title { color: var(--gold-light); }
 /* 52-Week Tracker */
 .tabs-row { margin-bottom: 16px; }
 .w52-item {
-  display: grid;
-  grid-template-columns: 60px 70px 1fr auto auto;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--border);
 }
 .w52-item:last-child { border-bottom: none; }
-.w52-sym   { font-weight: 700; color: var(--gold); font-size: 13px; }
-.w52-price { font-size: 13px; font-weight: 700; color: #fff; }
-.w52-bar-wrap { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
-.w52-bar { height: 100%; border-radius: 2px; transition: width 0.5s; }
+.w52-row {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.w52-sym   { font-weight: 700; color: var(--gold); font-size: 13px; white-space: nowrap; }
+.w52-name  { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.w52-price { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; text-align: right; }
+.w52-bar-wrap { height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+.w52-bar  { height: 100%; border-radius: 3px; transition: width 0.5s; }
+.w52-meta { display: flex; justify-content: space-between; font-size: 11px; }
 
 /* Watchlist */
 .wl-add-row { display: flex; gap: 10px; margin-bottom: 16px; }

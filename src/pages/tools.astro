@@ -210,19 +210,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         const barW  = type === 'high' ? Math.max(0, 100 + pct) : Math.min(100, pct);
         const shortSym = q.symbol.replace('.NS','').replace('.BO','');
         return `<div class="w52-item">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-            <div>
-              <span class="w52-sym">${shortSym}</span>
-              <span style="font-size:11px;color:var(--text-muted);margin-left:6px">${q.name}</span>
-            </div>
+          <div class="w52-row">
+            <span class="w52-sym">${shortSym}</span>
+            <span class="w52-name">${q.name}</span>
             <span class="w52-price">₹${fmt(q.price)}</span>
           </div>
           <div class="w52-bar-wrap">
             <div class="w52-bar" style="width:${barW}%;background:${color}"></div>
           </div>
-          <div style="display:flex;justify-content:space-between;margin-top:4px">
-            <span style="font-size:11px;color:${color}">${pct.toFixed(1)}% ${lbl}</span>
-            <span style="font-size:11px;color:var(--text-muted)">52W ref: ₹${fmt(ref)}</span>
+          <div class="w52-meta">
+            <span style="color:${color};font-weight:600">${pct.toFixed(1)}% ${lbl}</span>
+            <span style="color:var(--text-muted)">52W ref: ₹${fmt(ref)}</span>
           </div>
         </div>`;
       }).join('');
