@@ -32,8 +32,8 @@ const { title } = Astro.props;
       .news-bar {
         top: 0 !important;
         z-index: 999 !important;
-        background: #0d1420 !important;
-        border-bottom: 1px solid rgba(201,168,76,0.15) !important;
+        background: #030609 !important;
+        border-bottom: 1px solid rgba(0,212,255,0.12) !important;
       }
       .ticker-bar:not(.news-bar) {
         top: 36px !important;
@@ -41,12 +41,12 @@ const { title } = Astro.props;
       }
       body { padding-top: 128px !important; }
       .site-nav { top: 72px !important; }
-      body { background: #0d1117 !important; }
+      body { background: #05080f !important; }
       body::before { display: none !important; }
-      /* News ticker text — gold to match site accent */
-      .news-bar .ti { color: #c9a84c !important; }
-      .news-bar .ti strong { color: #e8c97a !important; }
-      .news-bar .ti-sep { color: rgba(201,168,76,0.35) !important; }
+      /* News ticker text — cyan to match new accent */
+      .news-bar .ti { color: #00d4ff !important; }
+      .news-bar .ti strong { color: #66e8ff !important; }
+      .news-bar .ti-sep { color: rgba(0,212,255,0.3) !important; }
     </style>
   </head>
   <body>
@@ -186,6 +186,17 @@ const { title } = Astro.props;
 
       loadTicker();
       setInterval(loadTicker, 60000);
+
+      // ── Scroll-reveal IntersectionObserver ──────────────────────
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
       // ── News Ticker ───────────────────────────────────────────────────
       async function loadNewsTicker() {
