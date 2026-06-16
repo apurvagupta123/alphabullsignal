@@ -249,13 +249,11 @@ function render() {
            onclick="toggleEvent('${key.replace(/'/g,"\\'")}')">
         <div class="ec-row-main">
 
-          <!-- Date column (only show on first event of a date group) -->
+          <!-- Date column -->
           <div class="ec-col-date">
-            ${i === 0 ? `
-              <span class="ec-day-num">${dayNum}</span>
-              <span class="ec-mon-str">${monStr}</span>
-              <span class="ec-wday-str">${wday}</span>
-            ` : `<span class="ec-same-date">↑</span>`}
+            <span class="ec-day-num">${dayNum}</span>
+            <span class="ec-mon-str">${monStr}</span>
+            <span class="ec-wday-str">${wday}</span>
           </div>
 
           <!-- Event name + subtitle -->
