@@ -13,7 +13,7 @@ const SECTOR_TAGS: Record<string, string> = {
   'INFY.NS':       '💻 IT',
   'ICICIBANK.NS':  '🏦 Banking',
   'BAJFINANCE.NS': '💳 Finance',
-  'TATAMOTORS.NS': '🚗 Auto',
+  'TMCV.NS':       '🚗 Auto',
   'BHARTIARTL.NS': '📡 Telecom',
   'MARUTI.NS':     '🚗 Auto',
   'SBIN.NS':       '🏦 PSU Bank',
@@ -171,7 +171,7 @@ const SECTOR_TAGS: Record<string, string> = {
       <a href="/markets" class="section-more">View all sectors →</a>
     </div>
     <div class="markets-grid" id="marketsGrid">
-      {['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS','BAJFINANCE.NS','TATAMOTORS.NS','BHARTIARTL.NS','MARUTI.NS','SBIN.NS','LT.NS','WIPRO.NS','HCLTECH.NS','KOTAKBANK.NS','TITAN.NS','ASIANPAINT.NS'].map((sym) => (
+      {['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS','BAJFINANCE.NS','TMCV.NS','BHARTIARTL.NS','MARUTI.NS','SBIN.NS','LT.NS','WIPRO.NS','HCLTECH.NS','KOTAKBANK.NS','TITAN.NS','ASIANPAINT.NS'].map((sym) => (
         <a class="mkt-card" id={`mc-${sym}`} href={`/company/${sym.toLowerCase().replace(/\./g,'-')}`}>
           {SECTOR_TAGS[sym] && <span class="mkt-sector-tag">{SECTOR_TAGS[sym]}</span>}
           <div class="mkt-top">
@@ -542,72 +542,15 @@ const SECTOR_TAGS: Record<string, string> = {
 </style>
 
 <script>
-  const FH_KEY  = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
-  const PROXIES = ['https://corsproxy.io/?','https://api.allorigins.win/raw?url='];
-
-  const CACHE_TTL = 90000;
-  function getCache(key: string) {
-    try { const c = JSON.parse(localStorage.getItem(key)||'null'); if(c&&Date.now()-c.ts<CACHE_TTL) return c.data; } catch {} return null;
-  }
-  function setCache(key: string, data: any) {
-    try { localStorage.setItem(key, JSON.stringify({ts:Date.now(),data})); } catch {}
-  }
-
-  const IN_NAMES: Record<string,string> = {
-    'RELIANCE.NS':'Reliance Industries','TCS.NS':'Tata Consultancy Services','HDFCBANK.NS':'HDFC Bank',
-    'INFY.NS':'Infosys','ICICIBANK.NS':'ICICI Bank','BAJFINANCE.NS':'Bajaj Finance',
-    'TATAMOTORS.NS':'Tata Motors','BHARTIARTL.NS':'Bharti Airtel','MARUTI.NS':'Maruti Suzuki',
-    'SBIN.NS':'State Bank of India','LT.NS':'Larsen & Toubro','WIPRO.NS':'Wipro',
-    'HCLTECH.NS':'HCL Technologies','KOTAKBANK.NS':'Kotak Mahindra Bank','TITAN.NS':'Titan Company','ASIANPAINT.NS':'Asian Paints',
+  // ── All data from local JSON files (updated daily by GitHub Actions) ──
+  const IDX_MAP: Record<string,string> = {
+    '^NSEI':'NSEI','^BSESN':'BSESN','^NSEBANK':'NSEBANK',
+    '^CNXIT':'IT','^CNXAUTO':'AUTO','^CNXPHARMA':'PHARMA','^CNXFMCG':'FMCG'
   };
 
-  async function fetchIndianQuote(nsSym: string) {
-    const fhSym = 'NSE:' + nsSym.replace(/\.(NS|BO)$/,'');
-    try {
-      const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FH_KEY}`, {signal:AbortSignal.timeout(7000)});
-      const d = await r.json();
-      if (!d.c) return null;
-      return { symbol:nsSym, shortName:IN_NAMES[nsSym]||nsSym.replace('.NS',''), regularMarketPrice:d.c, regularMarketChange:d.d||0, regularMarketChangePercent:d.dp||0, high52:d.h, low52:d.l };
-    } catch { return null; }
-  }
-
-  function renderMarketCard(q: any) {
-    const chg=q.regularMarketChange??0, pct=q.regularMarketChangePercent??0, up=chg>=0;
-    const color=up?'#22c55e':'#ef4444';
-    const nameEl=document.getElementById(`mn-${q.symbol}`),badgeEl=document.getElementById(`mb-${q.symbol}`),priceEl=document.getElementById(`mp-${q.symbol}`),chgEl=document.getElementById(`mch-${q.symbol}`),card=document.getElementById(`mc-${q.symbol}`);
-    if(nameEl) nameEl.textContent=q.shortName||'';
-    if(priceEl) priceEl.textContent=`₹${q.regularMarketPrice?.toLocaleString('en-IN',{maximumFractionDigits:2})}`;
-    if(chgEl){chgEl.textContent=`${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)} ${up?'+':''}${pct.toFixed(2)}%`;(chgEl as HTMLElement).style.color=color;}
-    if(badgeEl){badgeEl.textContent=`${up?'+':''}${pct.toFixed(2)}%`;badgeEl.classList.add(up?'badge-up':'badge-dn');}
-    if(card) card.classList.add(up?'up':'dn');
-    const fhSym='NSE:'+q.symbol.replace('.NS','');
-    const to=Math.floor(Date.now()/1000),from=to-30*86400;
-    fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${fhSym}&resolution=D&from=${from}&to=${to}&token=${FH_KEY}`)
-      .then(r=>r.json()).then((d:any)=>{
-        if(d.s!=='ok'||!d.c?.length) return;
-        const canvas=document.getElementById(`chart-${q.symbol}`) as HTMLCanvasElement;
-        if(!canvas) return;
-        new (window as any).Chart(canvas,{type:'line',data:{labels:d.c.map((_:any,i:number)=>i),datasets:[{data:d.c,borderColor:color,borderWidth:2,pointRadius:0,fill:true,backgroundColor:up?'rgba(34,197,94,0.08)':'rgba(239,68,68,0.08)'}]},options:{animation:false,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
-      }).catch(()=>{});
-  }
-
-  async function loadMarkets() {
-    const syms=['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS','BAJFINANCE.NS','TATAMOTORS.NS','BHARTIARTL.NS','MARUTI.NS','SBIN.NS','LT.NS','WIPRO.NS','HCLTECH.NS','KOTAKBANK.NS','TITAN.NS','ASIANPAINT.NS'];
-    const cached=getCache('india_mkts_v4');
-    if(cached) cached.forEach(renderMarketCard);
-    const results:any[]=[];
-    for(let i=0;i<syms.length;i+=4){
-      const chunk=syms.slice(i,i+4);
-      const res=await Promise.allSettled(chunk.map(fetchIndianQuote));
-      res.forEach((r:any)=>{if(r.status==='fulfilled'&&r.value){renderMarketCard(r.value);results.push(r.value);}});
-    }
-    if(results.length>0) setCache('india_mkts_v4',results);
-  }
-
   function renderIndiaIndex(q: any) {
-    const idMap:Record<string,string>={'^NSEI':'NSEI','^BSESN':'BSESN','^NSEBANK':'NSEBANK','^NIFTYMIDCAP150':'MID','^CNXIT':'IT','^CNXAUTO':'AUTO','^CNXPHARMA':'PHARMA','^CNXFMCG':'FMCG'};
-    const key=idMap[q.symbol]; if(!key) return;
-    const chg=q.regularMarketChange??0,pct=q.regularMarketChangePercent??0,up=chg>=0;
+    const key = IDX_MAP[q.symbol]; if (!key) return;
+    const chg=q.regularMarketChange??0, pct=q.regularMarketChangePercent??0, up=chg>=0;
     const color=up?'#22c55e':'#ef4444';
     const card=document.getElementById(`hidx-${key}`);
     if(card){card.classList.remove('skeleton');card.classList.add(up?'up':'dn');}
@@ -618,32 +561,30 @@ const SECTOR_TAGS: Record<string, string> = {
   }
 
   async function loadIndiaIndices() {
-    const cached=getCache('india_idx_v4');
-    if(cached) cached.forEach(renderIndiaIndex);
-    const IDX=[
-      {enc:'%5ENSEI',sym:'^NSEI'},{enc:'%5EBSESN',sym:'^BSESN'},
-      {enc:'%5ENSEBANK',sym:'^NSEBANK'},{enc:'%5ENIFTYMIDCAP150',sym:'^NIFTYMIDCAP150'},
-      {enc:'%5ECNXIT',sym:'^CNXIT'},{enc:'%5ECNXAUTO',sym:'^CNXAUTO'},
-      {enc:'%5ECNXPHARMA',sym:'^CNXPHARMA'},{enc:'%5ECNXFMCG',sym:'^CNXFMCG'},
-    ];
-    const results:any[]=[];
-    await Promise.all(IDX.map(async({enc,sym:idxSym})=>{
-      const url=`https://query2.finance.yahoo.com/v8/finance/chart/${enc}?range=1d&interval=5m`;
-      for(const px of PROXIES){
-        try{
-          const r=await fetch(px+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
-          if(!r.ok) continue;
-          const d=await r.json();
-          const meta=d?.chart?.result?.[0]?.meta;
-          if(!meta?.regularMarketPrice) continue;
-          const price=meta.regularMarketPrice,prev=meta.previousClose||meta.chartPreviousClose||price;
-          const chg=price-prev,pct=prev?(chg/prev)*100:0;
-          const q={symbol:idxSym,regularMarketPrice:price,regularMarketChange:chg,regularMarketChangePercent:pct};
-          renderIndiaIndex(q);results.push(q);break;
-        }catch{}
-      }
-    }));
-    if(results.length>0) setCache('india_idx_v4',results);
+    try {
+      const res = await fetch('/data/india-indices.json');
+      const data = await res.json();
+      data.indices.forEach(renderIndiaIndex);
+    } catch(e) { console.error('indices load failed', e); }
+  }
+
+  function renderMarketCard(q: any) {
+    const chg=q.regularMarketChange??0, pct=q.regularMarketChangePercent??0, up=chg>=0;
+    const color=up?'#22c55e':'#ef4444';
+    const nameEl=document.getElementById(`mn-${q.symbol}`),badgeEl=document.getElementById(`mb-${q.symbol}`),priceEl=document.getElementById(`mp-${q.symbol}`),chgEl=document.getElementById(`mch-${q.symbol}`),card=document.getElementById(`mc-${q.symbol}`);
+    if(nameEl) nameEl.textContent=q.name||q.symbol.replace('.NS','');
+    if(priceEl) priceEl.textContent=`₹${q.regularMarketPrice?.toLocaleString('en-IN',{maximumFractionDigits:2})}`;
+    if(chgEl){chgEl.textContent=`${up?'▲':'▼'} ₹${Math.abs(chg).toFixed(2)} ${up?'+':''}${pct.toFixed(2)}%`;(chgEl as HTMLElement).style.color=color;}
+    if(badgeEl){badgeEl.textContent=`${up?'+':''}${pct.toFixed(2)}%`;badgeEl.classList.add(up?'badge-up':'badge-dn');}
+    if(card) card.classList.add(up?'up':'dn');
+  }
+
+  async function loadMarkets() {
+    try {
+      const res = await fetch('/data/india-stocks.json');
+      const data = await res.json();
+      data.nse.forEach(renderMarketCard);
+    } catch(e) { console.error('stocks load failed', e); }
   }
 
   async function loadMarketPulse() {

@@ -29,8 +29,16 @@ NOW = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 # ── Symbol lists ──────────────────────────────────────────────────────────────
 
-INDIA_INDICES = ['^NSEI', '^BSESN', '^NSEBANK', '^CNXMIDCAP']
-INDEX_NAMES   = {'^NSEI': 'NIFTY 50', '^BSESN': 'SENSEX', '^NSEBANK': 'NIFTY BANK', '^CNXMIDCAP': 'NIFTY MIDCAP'}
+INDIA_INDICES = ['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^CNXAUTO', '^CNXPHARMA', '^CNXFMCG']
+INDEX_NAMES   = {
+    '^NSEI':      'NIFTY 50',
+    '^BSESN':     'SENSEX',
+    '^NSEBANK':   'NIFTY BANK',
+    '^CNXIT':     'NIFTY IT',
+    '^CNXAUTO':   'NIFTY AUTO',
+    '^CNXPHARMA': 'NIFTY PHARMA',
+    '^CNXFMCG':   'NIFTY FMCG',
+}
 
 NSE_STOCKS = [
     ('RELIANCE.NS',   'Reliance Industries'),
@@ -48,6 +56,9 @@ NSE_STOCKS = [
     ('BHARTIARTL.NS', 'Bharti Airtel'),
     ('MARUTI.NS',     'Maruti Suzuki'),
     ('ADANIENT.NS',   'Adani Enterprises'),
+    ('HCLTECH.NS',    'HCL Technologies'),
+    ('TITAN.NS',      'Titan Company'),
+    ('ASIANPAINT.NS', 'Asian Paints'),
 ]
 
 BSE_STOCKS = [
