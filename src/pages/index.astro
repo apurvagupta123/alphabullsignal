@@ -288,12 +288,13 @@ const SECTOR_TAGS: Record<string, string> = {
       <h2 class="section-title">Company Spotlight</h2>
     </div>
     <div class="spotlight-box">
-      <div class="spotlight-search">
-        <input id="slInput" type="text" class="sl-input" placeholder="Enter NSE ticker (e.g. RELIANCE, TCS, HDFCBANK)" />
+      <div class="spotlight-search" style="position:relative">
+        <input id="slInput" type="text" class="sl-input" placeholder="Search company name or ticker (e.g. RELIANCE, HDFC Bank, TCS)" autocomplete="off" />
         <button id="slBtn" class="sl-btn">Analyze →</button>
+        <div id="slDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1a1509;border:1px solid rgba(212,169,64,0.35);border-radius:10px;margin-top:4px;z-index:200;max-height:240px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.5)"></div>
       </div>
       <div id="slResult">
-        <p class="sl-hint">Enter an NSE stock symbol above to get current price and AI investment insight.</p>
+        <p class="sl-hint">Search for any NSE company — by name or ticker symbol.</p>
       </div>
     </div>
   </section>
@@ -1127,17 +1128,74 @@ const SECTOR_TAGS: Record<string, string> = {
     }catch{}
   }
 
-  // Spotlight
+  // Spotlight — autocomplete + fuzzy match
+  let _slTickers: {symbol:string,name:string,sector:string,file:string}[] = [];
+  async function slLoadTickers() {
+    if(_slTickers.length) return;
+    try{ const r=await fetch('/data/tickers.json'); _slTickers=await r.json(); }catch{}
+  }
+  function slSearch(q:string) {
+    if(!q||q.length<1) return [];
+    const lq=q.toLowerCase();
+    return _slTickers.filter(t=>
+      t.symbol.toLowerCase().startsWith(lq)||
+      t.name.toLowerCase().includes(lq)||
+      t.symbol.toLowerCase().includes(lq)
+    ).slice(0,8);
+  }
+  const slInput=document.getElementById('slInput') as HTMLInputElement;
+  const slDropdown=document.getElementById('slDropdown') as HTMLDivElement;
+  slLoadTickers();
+  slInput?.addEventListener('input',()=>{
+    const q=slInput.value.trim();
+    const matches=slSearch(q);
+    if(!matches.length||!q){slDropdown.style.display='none';return;}
+    slDropdown.innerHTML=matches.map(t=>`
+      <div class="sl-dd-item" data-symbol="${t.symbol}" data-file="${t.file}"
+        style="padding:10px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(212,169,64,0.1);transition:background 0.15s">
+        <div>
+          <span style="font-weight:700;color:#fff;font-size:14px">${t.symbol}</span>
+          <span style="font-size:12px;color:var(--text-muted);margin-left:8px">${t.name}</span>
+        </div>
+        <span style="font-size:10px;color:var(--gold);background:rgba(212,169,64,0.12);padding:2px 8px;border-radius:10px">${t.sector||'NSE'}</span>
+      </div>`).join('');
+    slDropdown.style.display='block';
+    slDropdown.querySelectorAll('.sl-dd-item').forEach(el=>{
+      (el as HTMLElement).addEventListener('mouseover',()=>(el as HTMLElement).style.background='rgba(212,169,64,0.10)');
+      (el as HTMLElement).addEventListener('mouseout',()=>(el as HTMLElement).style.background='');
+      el.addEventListener('click',()=>{
+        const sym=(el as HTMLElement).dataset.symbol||'';
+        slInput.value=sym;
+        slDropdown.style.display='none';
+        loadSpotlight(sym);
+      });
+    });
+  });
+  document.addEventListener('click',(e)=>{if(!(e.target as Element)?.closest?.('.spotlight-search'))slDropdown.style.display='none';});
+
   async function loadSpotlight(rawSym: string) {
     const result=document.getElementById('slResult');
     if(!result) return;
     const s=rawSym.toUpperCase().trim();
-    const sym=s.includes('.')?s:s+'.NS';
-    const fname=sym.replace(/\./g,'-');
-    result.innerHTML=`<p class="sl-hint">Analyzing ${sym}…</p>`;
+    // Try to find the ticker in our manifest first
+    await slLoadTickers();
+    let fileEntry=_slTickers.find(t=>t.symbol===s);
+    if(!fileEntry){
+      // Fuzzy fallback: partial match
+      fileEntry=_slTickers.find(t=>t.symbol.startsWith(s)||t.name.toLowerCase().includes(s.toLowerCase()));
+    }
+    const fname=fileEntry?fileEntry.file:(s+'-NS');
+    const sym=fname.replace(/-/g,'.');  // for display
+    result.innerHTML=`<p class="sl-hint">Analyzing ${fileEntry?.name||s}…</p>`;
     try{
       const res=await fetch(`/data/company/${fname}.json`);
-      if(!res.ok) throw new Error('not found');
+      if(!res.ok) {
+        // Suggest close matches
+        const suggestions=_slTickers.filter(t=>t.symbol.includes(s)||t.name.toLowerCase().includes(s.toLowerCase())).slice(0,5);
+        const sugHtml=suggestions.length?`<div style="margin-top:12px"><div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Did you mean:</div>${suggestions.map(t=>`<span onclick="document.getElementById('slInput').value='${t.symbol}';loadSpotlightExt('${t.symbol}')" style="display:inline-block;margin:3px;padding:5px 12px;background:rgba(212,169,64,0.12);border:1px solid rgba(212,169,64,0.3);border-radius:8px;cursor:pointer;font-size:12px;color:var(--gold)">${t.symbol} <span style="color:var(--text-muted)">${t.name}</span></span>`).join('')}</div>`:'';
+        result.innerHTML=`<p class="sl-hint" style="color:#ef4444">No data for "${rawSym}" yet.${!sugHtml?' Try: RELIANCE, TCS, HDFCBANK, INFY, SBIN':''}</p>${sugHtml}`;
+        return;
+      }
       const d=await res.json();
       if(!d.regularMarketPrice) throw new Error('not found');
       const price=d.regularMarketPrice,chg=d.regularMarketChange||0,pct=d.regularMarketChangePercent||0;
@@ -1170,15 +1228,18 @@ const SECTOR_TAGS: Record<string, string> = {
           <div style="font-size:12px;color:var(--text-muted)">${entryAdvice}</div>
           <div style="font-size:11px;color:var(--text-dim);margin-top:8px">⚠️ Algorithmic analysis only — not financial advice. Always DYOR.</div>
         </div>
-        <a href="/company/${sym.toLowerCase().replace(/\./g,'-')}" style="display:inline-block;margin-top:12px;background:var(--gold);color:#0b0f1a;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700">Full Deep Dive →</a>
+        <a href="/company/${(fileEntry?.file||fname).toLowerCase()}" style="display:inline-block;margin-top:12px;background:var(--gold);color:#0b0f1a;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700">Full Deep Dive →</a>
       `;
     }catch{
-      result.innerHTML=`<p class="sl-hint" style="color:#ef4444">Ticker "${rawSym}" not found. Try: RELIANCE, TCS, HDFCBANK, INFY, SBIN, BAJFINANCE</p>`;
+      const suggestions=_slTickers.filter(t=>t.symbol.includes(s)||t.name.toLowerCase().includes(s.toLowerCase())).slice(0,5);
+      const sugHtml=suggestions.length?`<div style="margin-top:12px">${suggestions.map(t=>`<span onclick="document.getElementById('slInput').value='${t.symbol}';loadSpotlightExt('${t.symbol}')" style="display:inline-block;margin:3px;padding:5px 12px;background:rgba(212,169,64,0.12);border:1px solid rgba(212,169,64,0.3);border-radius:8px;cursor:pointer;font-size:12px;color:var(--gold)">${t.symbol}</span>`).join('')}</div>`:'';
+      result.innerHTML=`<p class="sl-hint" style="color:#ef4444">No data available for "${rawSym}" yet.</p>${sugHtml}`;
     }
   }
+  (window as any).loadSpotlightExt=(sym:string)=>loadSpotlight(sym);
 
-  document.getElementById('slBtn')?.addEventListener('click',()=>{const v=(document.getElementById('slInput') as HTMLInputElement)?.value;if(v?.trim()) loadSpotlight(v.trim());});
-  document.getElementById('slInput')?.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){const v=(document.getElementById('slInput') as HTMLInputElement)?.value;if(v?.trim()) loadSpotlight(v.trim());}});
+  document.getElementById('slBtn')?.addEventListener('click',()=>{const v=slInput?.value;if(v?.trim()){slDropdown.style.display='none';loadSpotlight(v.trim());}});
+  slInput?.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){slDropdown.style.display='none';const v=slInput?.value;if(v?.trim()) loadSpotlight(v.trim());}});
 
   loadMarkets();
   loadIndiaIndices();
