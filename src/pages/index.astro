@@ -310,44 +310,44 @@ const SECTOR_TAGS: Record<string, string> = {
 
 
   <!-- ── Morning Market Briefing ──────────────────────── -->
-  {morningPosts.length > 0 && (
-    <section class="content-section reveal" id="from-ledger">
-      <div class="section-head">
-        <h2 class="section-title">🌅 Morning Market Briefing</h2>
-        <span class="section-live">MORNING</span>
-      </div>
-      <div class="tl-list">
-        {morningPosts.map((post: any) => {
-          const d = new Date(post.frontmatter.date);
-          const day   = d.toLocaleDateString('en-IN', { day: 'numeric' });
-          const month = d.toLocaleDateString('en-IN', { month: 'short' });
-          const year  = d.getFullYear();
-          return (
-            <a href={post.url} class="tl-item">
-              <div class="tl-date-col">
-                <span class="tl-day">{day}</span>
-                <span class="tl-mon">{month} {year}</span>
-              </div>
-              <div class="tl-dot-col">
-                <div class="tl-dot"></div>
-                <div class="tl-line"></div>
-              </div>
-              <div class="tl-body">
-                <h3 class="tl-title">{post.frontmatter.title}</h3>
-                {post.frontmatter.excerpt && <p class="tl-desc">{post.frontmatter.excerpt}</p>}
-                <span class="tl-read">Read more →</span>
-              </div>
-            </a>
-          );
-        })}
-      </div>
-      {allMorningPosts.length > 5 && (
-        <div class="tl-viewall-wrap">
-          <a href="/blog" class="tl-viewall">View all morning briefings →</a>
-        </div>
+  <section class="content-section reveal" id="from-ledger">
+    <div class="section-head">
+      <h2 class="section-title">🌅 Morning Market Briefing</h2>
+      <span class="section-live">MORNING</span>
+    </div>
+    <div class="tl-list">
+      {morningPosts.length > 0 ? morningPosts.map((post: any) => {
+        const d = new Date(post.frontmatter.date);
+        const day   = d.toLocaleDateString('en-IN', { day: 'numeric' });
+        const month = d.toLocaleDateString('en-IN', { month: 'short' });
+        const year  = d.getFullYear();
+        return (
+          <a href={post.url} class="tl-item">
+            <div class="tl-date-col">
+              <span class="tl-day">{day}</span>
+              <span class="tl-mon">{month} {year}</span>
+            </div>
+            <div class="tl-dot-col">
+              <div class="tl-dot"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-body">
+              <h3 class="tl-title">{post.frontmatter.title}</h3>
+              {post.frontmatter.excerpt && <p class="tl-desc">{post.frontmatter.excerpt}</p>}
+              <span class="tl-read">Read more →</span>
+            </div>
+          </a>
+        );
+      }) : (
+        <p class="tl-empty">Morning briefings publish weekdays at 10 AM IST — check back soon.</p>
       )}
-    </section>
-  )}
+    </div>
+    {allMorningPosts.length > 5 && (
+      <div class="tl-viewall-wrap">
+        <a href="/blog" class="tl-viewall">View all morning briefings →</a>
+      </div>
+    )}
+  </section>
 
   <!-- ── Evening Indian Market Briefing ─────────────────── -->
   {eveningPosts.length > 0 && (
@@ -692,6 +692,12 @@ const SECTOR_TAGS: Record<string, string> = {
   transition: opacity 0.2s;
 }
 .tl-viewall:hover { opacity: 0.75; }
+.tl-empty {
+  color: var(--muted);
+  font-size: 14px;
+  padding: 18px 0;
+  font-style: italic;
+}
 
 .tl-item {
   display: grid;
