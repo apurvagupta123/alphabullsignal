@@ -1,0 +1,112 @@
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a1628;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#0d2044;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#091530;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f5c518;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e8a000;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f5c518;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#f5c518;stop-opacity:0" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)" />
+
+  <!-- Grid pattern -->
+  <g opacity="0.06" stroke="#f5c518" stroke-width="0.5">
+    <line x1="0" y1="105" x2="1200" y2="105"/>
+    <line x1="0" y1="210" x2="1200" y2="210"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="420" x2="1200" y2="420"/>
+    <line x1="0" y1="525" x2="1200" y2="525"/>
+    <line x1="150" y1="0" x2="150" y2="630"/>
+    <line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="450" y1="0" x2="450" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="750" y1="0" x2="750" y2="630"/>
+    <line x1="900" y1="0" x2="900" y2="630"/>
+    <line x1="1050" y1="0" x2="1050" y2="630"/>
+  </g>
+
+  <!-- Decorative chart line -->
+  <polyline points="80,480 160,440 240,460 320,380 400,350 480,320 560,290 640,310 720,260 800,230 880,210 960,190 1040,175 1120,155"
+    fill="none" stroke="#f5c518" stroke-width="2.5" opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Top gold bar -->
+  <rect x="0" y="0" width="1200" height="5" fill="url(#goldGrad)" />
+
+  <!-- BullSignal logo area -->
+  <text x="60" y="68" font-family="Georgia, serif" font-size="22" fill="#f5c518" font-weight="700" letter-spacing="3">BULLSIGNAL</text>
+  <rect x="60" y="76" width="160" height="2" fill="#f5c518" opacity="0.5"/>
+
+  <!-- Date badge -->
+  <rect x="60" y="96" width="200" height="32" rx="4" fill="#f5c518" opacity="0.12"/>
+  <text x="75" y="118" font-family="Arial, sans-serif" font-size="14" fill="#f5c518" font-weight="600" letter-spacing="1.5">JUNE 17, 2026</text>
+
+  <!-- Main title -->
+  <text x="60" y="215" font-family="Georgia, serif" font-size="58" fill="#ffffff" font-weight="700" letter-spacing="-1">India Market</text>
+  <text x="60" y="285" font-family="Georgia, serif" font-size="58" fill="#f5c518" font-weight="700" letter-spacing="-1">Briefing</text>
+
+  <!-- Subtitle -->
+  <text x="62" y="335" font-family="Arial, sans-serif" font-size="20" fill="#a8c4e0" font-weight="400" letter-spacing="0.5">What Today's Markets Are Telling You</text>
+
+  <!-- Divider -->
+  <rect x="60" y="365" width="500" height="1.5" fill="#f5c518" opacity="0.4"/>
+
+  <!-- NIFTY card -->
+  <rect x="60" y="390" width="230" height="110" rx="8" fill="#ffffff" opacity="0.05"/>
+  <rect x="60" y="390" width="230" height="4" rx="2" fill="#22c55e"/>
+  <text x="80" y="425" font-family="Arial, sans-serif" font-size="13" fill="#a8c4e0" font-weight="600" letter-spacing="2">NIFTY 50</text>
+  <text x="80" y="465" font-family="Georgia, serif" font-size="34" fill="#ffffff" font-weight="700">24,085</text>
+  <text x="80" y="493" font-family="Arial, sans-serif" font-size="15" fill="#22c55e" font-weight="600">▲ +0.40%</text>
+
+  <!-- SENSEX card -->
+  <rect x="310" y="390" width="230" height="110" rx="8" fill="#ffffff" opacity="0.05"/>
+  <rect x="310" y="390" width="230" height="4" rx="2" fill="#22c55e"/>
+  <text x="330" y="425" font-family="Arial, sans-serif" font-size="13" fill="#a8c4e0" font-weight="600" letter-spacing="2">SENSEX</text>
+  <text x="330" y="465" font-family="Georgia, serif" font-size="34" fill="#ffffff" font-weight="700">77,155</text>
+  <text x="330" y="493" font-family="Arial, sans-serif" font-size="15" fill="#22c55e" font-weight="600">▲ +0.45%</text>
+
+  <!-- VIX card -->
+  <rect x="560" y="390" width="180" height="110" rx="8" fill="#ffffff" opacity="0.05"/>
+  <rect x="560" y="390" width="180" height="4" rx="2" fill="#f5c518"/>
+  <text x="580" y="425" font-family="Arial, sans-serif" font-size="13" fill="#a8c4e0" font-weight="600" letter-spacing="2">VIX</text>
+  <text x="580" y="465" font-family="Georgia, serif" font-size="34" fill="#ffffff" font-weight="700">13.19</text>
+  <text x="580" y="493" font-family="Arial, sans-serif" font-size="15" fill="#f5c518" font-weight="600">▼ CALM</text>
+
+  <!-- Right side decorative element -->
+  <circle cx="980" cy="315" r="200" fill="#f5c518" opacity="0.03"/>
+  <circle cx="980" cy="315" r="160" fill="none" stroke="#f5c518" stroke-width="1" opacity="0.08"/>
+  <circle cx="980" cy="315" r="120" fill="none" stroke="#f5c518" stroke-width="1" opacity="0.06"/>
+
+  <!-- Bull icon (stylized) -->
+  <text x="920" y="350" font-family="Arial, sans-serif" font-size="100" fill="#f5c518" opacity="0.15">🐂</text>
+
+  <!-- Sector tags -->
+  <rect x="760" y="420" width="110" height="28" rx="14" fill="#22c55e" opacity="0.2"/>
+  <text x="815" y="439" font-family="Arial, sans-serif" font-size="12" fill="#22c55e" font-weight="700" text-anchor="middle">AUTO +1.64%</text>
+
+  <rect x="880" y="420" width="110" height="28" rx="14" fill="#22c55e" opacity="0.2"/>
+  <text x="935" y="439" font-family="Arial, sans-serif" font-size="12" fill="#22c55e" font-weight="700" text-anchor="middle">FMCG +1.49%</text>
+
+  <rect x="1000" y="420" width="90" height="28" rx="14" fill="#22c55e" opacity="0.2"/>
+  <text x="1045" y="439" font-family="Arial, sans-serif" font-size="12" fill="#22c55e" font-weight="700" text-anchor="middle">IT +0.85%</text>
+
+  <rect x="760" y="458" width="110" height="28" rx="14" fill="#f59e0b" opacity="0.2"/>
+  <text x="815" y="477" font-family="Arial, sans-serif" font-size="12" fill="#f59e0b" font-weight="700" text-anchor="middle">PHARMA -0.05%</text>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="610" width="1200" height="20" fill="#f5c518" opacity="0.08"/>
+  <text x="60" y="624" font-family="Arial, sans-serif" font-size="11" fill="#a8c4e0" opacity="0.7">thebusinessledger.theapurva.com</text>
+  <text x="1140" y="624" font-family="Arial, sans-serif" font-size="11" fill="#a8c4e0" opacity="0.7" text-anchor="end">Created with Claude AI</text>
+</svg>
