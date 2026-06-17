@@ -50,28 +50,40 @@ const BSE_STOCKS = [
 
     <!-- Indices Bar -->
     <div class="indices-grid" style="margin-top:24px" id="indiaIndices">
-      <div class="idx-card skeleton" id="idx-NSEI">
+      <div class="idx-card skeleton idx-clickable" id="idx-NSEI" data-idx="NSEI">
         <span class="idx-name">NIFTY 50</span>
         <span class="idx-price" id="nsei-price">—</span>
         <span class="idx-chg"   id="nsei-chg">—</span>
+        <span class="idx-tap-hint">tap for details</span>
       </div>
-      <div class="idx-card skeleton" id="idx-BSESN">
+      <div class="idx-card skeleton idx-clickable" id="idx-BSESN" data-idx="BSESN">
         <span class="idx-name">SENSEX</span>
         <span class="idx-price" id="bsesn-price">—</span>
         <span class="idx-chg"   id="bsesn-chg">—</span>
+        <span class="idx-tap-hint">tap for details</span>
       </div>
-      <div class="idx-card skeleton" id="idx-NSEBANK">
+      <div class="idx-card skeleton idx-clickable" id="idx-NSEBANK" data-idx="NSEBANK">
         <span class="idx-name">NIFTY BANK</span>
         <span class="idx-price" id="nsebank-price">—</span>
         <span class="idx-chg"   id="nsebank-chg">—</span>
+        <span class="idx-tap-hint">tap for details</span>
       </div>
-      <div class="idx-card skeleton" id="idx-NIFTYMIDCAP">
-        <span class="idx-name">NIFTY MIDCAP</span>
+      <div class="idx-card skeleton idx-clickable" id="idx-NIFTYMIDCAP" data-idx="NIFTYMIDCAP">
+        <span class="idx-name">SMALLCAP</span>
         <span class="idx-price" id="mid-price">—</span>
         <span class="idx-chg"   id="mid-chg">—</span>
+        <span class="idx-tap-hint">tap for details</span>
       </div>
     </div>
   </section>
+
+  <!-- Index Detail Modal -->
+  <div id="idxModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);padding:20px;overflow-y:auto" onclick="if(event.target===this)this.style.display='none'">
+    <div id="idxModalBox" style="max-width:640px;margin:60px auto;background:linear-gradient(135deg,rgba(212,169,64,0.13) 0%,rgba(26,21,9,0.98) 60%);border:1px solid rgba(212,169,64,0.35);border-radius:18px;padding:32px 36px;position:relative">
+      <button onclick="document.getElementById('idxModal').style.display='none'" style="position:absolute;top:16px;right:18px;background:rgba(212,169,64,0.12);border:1px solid rgba(212,169,64,0.25);color:var(--gold);border-radius:8px;padding:4px 12px;font-size:13px;cursor:pointer">✕ Close</button>
+      <div id="idxModalContent"></div>
+    </div>
+  </div>
 
   <!-- NSE Stocks -->
   <section class="content-section" style="margin-top:32px">
@@ -173,7 +185,9 @@ const BSE_STOCKS = [
         const up  = chg >= 0;
         const key = idxKeyMap[q.symbol];
         if (!key) return;
-        const card = document.getElementById(`idx-${q.symbol.replace('^','')}`);
+        const idxKey = q.symbol.replace('^','');
+        _idxLiveData[idxKey] = {price: q.regularMarketPrice, chg, pct, high52: q.fiftyTwoWeekHigh, low52: q.fiftyTwoWeekLow};
+        const card = document.getElementById(`idx-${idxKey}`);
         if (card) { card.classList.remove('skeleton'); card.classList.add(up ? 'up' : 'dn'); }
         const pEl = document.getElementById(`${key}-price`);
         if (pEl) pEl.textContent = q.regularMarketPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 });
@@ -213,10 +227,103 @@ const BSE_STOCKS = [
     }
   }
 
+  // ── Index detail explainer data ───────────────────────
+  const IDX_INFO: Record<string,{title:string,icon:string,what:string,who:string,why:string,movers:string,sip:string}> = {
+    NSEI: {
+      title:'NIFTY 50',icon:'📊',
+      what:'NIFTY 50 is India\'s most-watched stock index. It tracks the 50 largest and most liquid companies listed on the NSE (National Stock Exchange). Think of it as a report card for India\'s biggest businesses — from Reliance and TCS to HDFC Bank and Infosys.',
+      who:'Top sectors: Financial Services (~33%), IT (~13%), Oil & Gas (~12%), Consumer Goods (~9%), Auto (~6%). Heavyweights include Reliance Industries, HDFC Bank, Infosys, ICICI Bank, and TCS.',
+      why:'When NIFTY 50 goes up, it usually means: the economy is healthy, earnings are growing, and investors are optimistic about India\'s future. When it falls, it signals caution — either globally or in specific sectors.',
+      movers:'Global cues (US markets, FII flows), RBI interest rate decisions, quarterly earnings results, USD/INR exchange rate, crude oil prices, and major government policy announcements.',
+      sip:'Your mutual fund SIP likely benchmarks against NIFTY 50. A rising NIFTY means your equity funds are probably doing well. A dip means your SIP is buying more units at a lower price — which is actually good for long-term wealth building.'
+    },
+    BSESN: {
+      title:'SENSEX',icon:'🏛️',
+      what:'SENSEX (Sensitive Index) is India\'s oldest stock index, launched in 1986 by BSE (Bombay Stock Exchange). It tracks the top 30 companies by market cap and trading volume. While NIFTY covers 50 stocks, SENSEX is more concentrated — making it slightly more volatile but faster to react to news.',
+      who:'Top companies: Reliance, HDFC Bank, Infosys, ICICI Bank, TCS, L&T, Bajaj Finance, Kotak Mahindra Bank. Together just these 8 stocks make up nearly 50% of the index weight.',
+      why:'SENSEX is the "face" of Indian markets internationally. When foreign media or investors talk about Indian markets, they almost always quote SENSEX. It\'s the oldest benchmark, so it captures India\'s entire economic history since the 1980s.',
+      movers:'Same as NIFTY but since it has only 30 stocks, a big move in Reliance or HDFC Bank can swing SENSEX noticeably. More sensitive to banking sector news.',
+      sip:'SENSEX and NIFTY generally move together (correlation >0.99). If SENSEX is up 1%, NIFTY is usually up ~0.95-1% too. For practical investment decisions, treat them as the same signal.'
+    },
+    NSEBANK: {
+      title:'NIFTY BANK',icon:'🏦',
+      what:'NIFTY Bank tracks the 12 most liquid banking stocks on NSE. Banks are the backbone of any economy — they lend money to businesses, manage your savings, and facilitate all transactions. When banks do well, the whole economy usually does well.',
+      who:'Includes HDFC Bank, ICICI Bank, Kotak Mahindra Bank, SBI, Axis Bank, IndusInd Bank, Bank of Baroda, Federal Bank. Private banks like HDFC and ICICI have the highest weight (~60% combined).',
+      why:'NIFTY Bank is often more volatile than NIFTY 50. It reacts sharply to: RBI rate decisions (higher rates = banks earn more on loans but borrowers pay more), NPA (bad loan) data, GDP growth, and credit demand. When NIFTY Bank falls, it often drags down NIFTY 50 with it — because banks are such a large part of the economy.',
+      movers:'RBI Monetary Policy Committee meetings, bank quarterly results (NPA levels, net interest margin), credit growth data, US Federal Reserve rate decisions (affects FII flows), and currency movements (USD/INR).',
+      sip:'If you have a banking sector fund, monitor NIFTY Bank closely. A rising NIFTY Bank means: banks are profitable, loans are being repaid, and credit is growing — all signs of a healthy economy.'
+    },
+    NIFTYMIDCAP: {
+      title:'NIFTY MIDCAP / SMALLCAP',icon:'🚀',
+      what:'This index tracks mid-sized and smaller Indian companies — the next generation of potential large-caps. These are businesses with market caps between ₹5,000 Cr and ₹20,000 Cr. They grow faster than large-caps but are also riskier.',
+      who:'A diverse mix of sectors — chemicals, specialty pharma, auto ancillaries, specialty finance, consumer brands, IT services. Examples include companies like Persistent Systems, Metropolis, Rajesh Exports, and Navin Fluorine.',
+      why:'Smallcap and midcap indices are leading indicators — they react faster to economic changes than large-caps. When retail investors are optimistic, they pile into smallcaps first. When fear strikes, they exit smallcaps fastest.',
+      movers:'Domestic retail investor sentiment (since FIIs mostly trade large-caps), Budget announcements (capex, sector policies), domestic consumption data, and GST collection numbers. Less influenced by global cues than NIFTY 50.',
+      sip:'Smallcap funds can give 2-3x returns of NIFTY 50 in bull markets — but they can also fall 40-60% in bear markets. Ideal for long-term (10+ year) SIPs where you can ride out volatility.'
+    }
+  };
+
+  // Store live data for modal
+  let _idxLiveData: Record<string,{price:number,chg:number,pct:number,high52?:number,low52?:number}> = {};
+
+  function showIdxModal(key: string) {
+    const info = IDX_INFO[key]; if(!info) return;
+    const live = _idxLiveData[key];
+    const up = (live?.pct??0) >= 0;
+    const color = up ? '#22c55e' : '#ef4444';
+    const priceHtml = live ? `
+      <div style="display:flex;align-items:baseline;gap:16px;margin:16px 0 20px">
+        <span style="font-size:2rem;font-weight:800;color:var(--gold)">${live.price.toLocaleString('en-IN',{maximumFractionDigits:2})}</span>
+        <span style="font-size:1rem;font-weight:700;color:${color}">${up?'▲':'▼'} ${Math.abs(live.pct).toFixed(2)}% today</span>
+      </div>` : '';
+    document.getElementById('idxModalContent')!.innerHTML = `
+      <div style="font-size:28px;margin-bottom:8px">${info.icon}</div>
+      <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">${info.title}</div>
+      ${priceHtml}
+      <div class="idx-modal-section">
+        <div class="idx-modal-label">WHAT IS IT?</div>
+        <p class="idx-modal-text">${info.what}</p>
+      </div>
+      <div class="idx-modal-section">
+        <div class="idx-modal-label">WHO'S INSIDE?</div>
+        <p class="idx-modal-text">${info.who}</p>
+      </div>
+      <div class="idx-modal-section">
+        <div class="idx-modal-label">WHAT DOES IT SIGNAL?</div>
+        <p class="idx-modal-text">${info.why}</p>
+      </div>
+      <div class="idx-modal-section">
+        <div class="idx-modal-label">WHAT MOVES IT?</div>
+        <p class="idx-modal-text">${info.movers}</p>
+      </div>
+      <div style="background:rgba(212,169,64,0.08);border:1px solid rgba(212,169,64,0.22);border-radius:10px;padding:16px 18px;margin-top:20px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gold);margin-bottom:6px">💡 WHAT IT MEANS FOR YOUR SIP</div>
+        <p class="idx-modal-text" style="margin:0">${info.sip}</p>
+      </div>
+      <p style="font-size:10px;color:var(--text-dim);margin-top:16px;text-align:center">⚠️ Educational context only — not financial advice. Always DYOR.</p>`;
+    document.getElementById('idxModal')!.style.display = 'block';
+  }
+
+  document.querySelectorAll('.idx-clickable').forEach(el => {
+    el.addEventListener('click', () => {
+      const key = (el as HTMLElement).dataset.idx || '';
+      showIdxModal(key);
+    });
+  });
+
   loadData();
 </script>
 
 <style is:global>
+/* ── Clickable index cards ───────────────────────────── */
+.idx-clickable { cursor:pointer; }
+.idx-clickable:hover { transform:translateY(-4px); border-color:rgba(212,169,64,0.55) !important; box-shadow:0 8px 32px rgba(212,169,64,0.18); }
+.idx-tap-hint { display:block; font-size:9px; color:var(--gold); opacity:0.5; margin-top:4px; letter-spacing:0.5px; text-transform:uppercase; }
+.idx-clickable:hover .idx-tap-hint { opacity:1; }
+.idx-modal-section { margin-bottom:18px; }
+.idx-modal-label { font-size:9px; font-weight:800; letter-spacing:1.5px; color:var(--gold); margin-bottom:5px; }
+.idx-modal-text { font-size:13px; color:var(--text-muted); line-height:1.8; margin:0; }
+
 /* ── India markets row table ──────────────────────────── */
 .in-table-head {
   display: grid;
