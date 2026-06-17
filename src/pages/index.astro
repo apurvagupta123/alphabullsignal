@@ -742,127 +742,111 @@ const SECTOR_TAGS: Record<string, string> = {
 /* ── News Section ─────────────────────────────────── */
 .news-grid {
   display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 24px;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
   align-items: start;
 }
+
+/* ── Featured article (left) */
 .news-featured {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  text-decoration: none;
-  background: linear-gradient(135deg, rgba(212,169,64,0.10) 0%, rgba(184,134,11,0.05) 100%);
-  border: 1px solid rgba(212,169,64,0.22);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
-  transition: border-color 0.2s, transform 0.2s;
+  border: 1px solid rgba(212,169,64,0.18);
+  background: rgba(212,169,64,0.04);
+  transition: border-color 0.2s;
+  cursor: pointer;
 }
-.news-featured:hover { border-color: rgba(212,169,64,0.5); transform: translateY(-2px); }
-.news-feat-img-wrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; }
-.news-feat-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.news-feat-body { padding: 18px 20px 20px; }
+.news-featured:hover { border-color: rgba(212,169,64,0.4); }
+.news-feat-body { padding: 14px 16px; }
 .news-source-tag {
   display: inline-block;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.7px;
   text-transform: uppercase;
   color: var(--gold);
-  background: rgba(212,169,64,0.12);
-  border: 1px solid rgba(212,169,64,0.3);
-  border-radius: 4px;
-  padding: 2px 8px;
-  margin-bottom: 10px;
+  opacity: 0.85;
+  margin-bottom: 6px;
 }
 .news-feat-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.4;
   color: var(--text);
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
+.news-feat-img-wrap {
+  width: 100%;
+  max-height: 200px;
+  overflow: hidden;
+}
+.news-feat-img { width: 100%; height: 200px; object-fit: cover; display: block; }
 .news-feat-excerpt {
-  font-size: 13.5px;
-  line-height: 1.6;
+  font-size: 12.5px;
+  line-height: 1.55;
   color: var(--muted);
-  margin: 0 0 12px;
+  margin: 8px 0 6px;
 }
-.news-feat-time { font-size: 11px; color: var(--muted); opacity: 0.7; }
+.news-feat-time { font-size: 10.5px; color: var(--muted); opacity: 0.6; }
 
-/* Side list */
+/* ── Side list (right) — compact text only */
 .news-side {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  background: linear-gradient(135deg, rgba(212,169,64,0.07) 0%, rgba(184,134,11,0.03) 100%);
-  border: 1px solid rgba(212,169,64,0.18);
-  border-radius: 12px;
+  border: 1px solid rgba(212,169,64,0.15);
+  border-radius: 10px;
   overflow: hidden;
+  background: rgba(212,169,64,0.03);
 }
 .news-side-item {
   display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  padding: 11px 14px;
-  text-decoration: none;
+  flex-direction: column;
+  padding: 9px 13px;
   border-bottom: 1px solid rgba(212,169,64,0.08);
+  cursor: pointer;
   transition: background 0.15s;
 }
 .news-side-item:last-of-type { border-bottom: none; }
-.news-side-item:hover { background: rgba(212,169,64,0.07); }
-.news-side-img {
-  width: 64px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 5px;
-  flex-shrink: 0;
-}
-.news-side-body { flex: 1; min-width: 0; }
+.news-side-item:hover { background: rgba(212,169,64,0.06); }
 .news-side-source {
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--gold);
-  opacity: 0.8;
-  display: block;
+  opacity: 0.75;
   margin-bottom: 3px;
 }
 .news-side-title {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.4;
   color: var(--text);
-  margin: 0 0 4px;
+  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.news-side-time { font-size: 10px; color: var(--muted); opacity: 0.6; }
+.news-side-time { display: none; } /* hidden for compactness */
 .news-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 14px;
-  border-top: 1px solid rgba(212,169,64,0.12);
+  padding: 8px 13px;
+  border-top: 1px solid rgba(212,169,64,0.1);
+  margin-top: 6px;
 }
-.news-updated { font-size: 10px; color: var(--muted); opacity: 0.55; }
+.news-updated { font-size: 10px; color: var(--muted); opacity: 0.5; }
 .news-more { font-size: 11px; font-weight: 600; color: var(--gold); text-decoration: none; }
 .news-more:hover { opacity: 0.75; }
-
 @media (max-width: 900px) {
   .news-grid { grid-template-columns: 1fr; }
-  .news-side { display: none; } /* show only featured on mobile */
+  .news-side { display: none; }
 }
-@media (max-width: 600px) {
-  .news-feat-title { font-size: 17px; }
-}
+.news-loading { color: var(--muted); font-size: 13px; padding: 20px 0; opacity: 0.5; }
 
-.news-loading { color: var(--muted); font-size: 14px; padding: 24px 0; opacity: 0.5; }
-
-/* news card buttons — preserve card styles, just reset button chrome */
+/* news card buttons — reset browser button styles, preserve card CSS */
 .news-card-btn {
   background: none;
   border: none;
@@ -874,10 +858,6 @@ const SECTOR_TAGS: Record<string, string> = {
   cursor: pointer;
   display: block;
   width: 100%;
-}
-.news-featured.news-card-btn {
-  display: flex;
-  flex-direction: column;
 }
 
 /* ── News Modal ─────────────────────────────────────────── */
@@ -1802,27 +1782,26 @@ const SECTOR_TAGS: Record<string, string> = {
       const featured = articles[0];
       const sides = articles.slice(1, 13);
 
-      // Featured card
+      // Featured card — title first, then image, then excerpt (MoneyControl style)
+      const featTime = new Date(featured.publishedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       const featHtml = `
         <button class="news-featured news-card-btn" data-idx="0">
-          ${featured.image ? `<div class="news-feat-img-wrap"><img src="${featured.image}" alt="" class="news-feat-img" loading="lazy"/></div>` : ''}
           <div class="news-feat-body">
             <span class="news-source-tag">${featured.source}</span>
             <h3 class="news-feat-title">${featured.title}</h3>
-            <p class="news-feat-excerpt">${(featured.excerpt||'').slice(0,160)}</p>
-            <span class="news-feat-time">${new Date(featured.publishedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+            <p class="news-feat-excerpt">${(featured.excerpt||'').slice(0,140)}</p>
+          </div>
+          ${featured.image ? `<div class="news-feat-img-wrap"><img src="${featured.image}" alt="" class="news-feat-img" loading="lazy"/></div>` : ''}
+          <div style="padding:8px 16px 12px">
+            <span class="news-feat-time">${featTime}</span>
           </div>
         </button>`;
 
-      // Side cards
+      // Side cards — compact, text-only (no thumbnail)
       const sidesHtml = sides.map((a, i) => `
         <button class="news-side-item news-card-btn" data-idx="${i+1}">
-          ${a.image ? `<img src="${a.image}" alt="" class="news-side-img" loading="lazy"/>` : ''}
-          <div class="news-side-body">
-            <span class="news-side-source">${a.source}</span>
-            <p class="news-side-title">${a.title}</p>
-            <span class="news-side-time">${new Date(a.publishedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
-          </div>
+          <span class="news-side-source">${a.source}</span>
+          <p class="news-side-title">${a.title}</p>
         </button>`).join('');
 
       grid.innerHTML = featHtml + `<div class="news-side">${sidesHtml}</div>`;
