@@ -192,13 +192,7 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
           ))}
         </select>
       </div>
-      <div class="mkts-pills" id="mktsPills">
-        {Object.entries(SECTORS).map(([key, s]) => (
-          <button class={`mkts-pill ${key === 'banking' ? 'active' : ''}`} data-sector={key}>
-            {s.icon} {s.label}
-          </button>
-        ))}
-      </div>
+
     </div>
 
     <div class="mkts-desc-bar">
@@ -304,7 +298,6 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
     if (descEl) descEl.textContent = SECTORS[sectorKey].desc;
     const dd = document.getElementById('sectorDropdown');
     if (dd) dd.value = sectorKey;
-    document.querySelectorAll('.mkts-pill').forEach(b => {
       b.classList.toggle('active', b.dataset.sector === sectorKey);
     });
     buildGrid(sectorKey);
@@ -317,7 +310,6 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
     const validSector = SECTORS[initSector] ? initSector : 'banking';
 
     document.getElementById('sectorDropdown')?.addEventListener('change', (e) => switchSector(e.target.value));
-    document.querySelectorAll('.mkts-pill').forEach(btn => {
       btn.addEventListener('click', () => switchSector(btn.dataset.sector || 'banking'));
     });
     document.getElementById('refreshBtn')?.addEventListener('click', async () => {
@@ -347,16 +339,11 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
   .mkts-dropdown { appearance:none; -webkit-appearance:none; background:var(--navy-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center; border:1px solid var(--border); border-radius:10px; color:#fff; font-size:13px; font-weight:600; padding:10px 36px 10px 14px; cursor:pointer; min-width:220px; transition:border-color .15s; }
   .mkts-dropdown:focus { outline:none; border-color:var(--gold); }
   .mkts-dropdown option { background:#1a2235; color:#fff; }
-  .mkts-pills { display:flex; flex-wrap:wrap; gap:6px; }
-  .mkts-pill { padding:7px 14px; border-radius:20px; border:1px solid var(--border); background:var(--navy-2); color:var(--text-muted); font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; }
-  .mkts-pill:hover { border-color:rgba(201,168,76,.4); color:var(--gold); }
-  .mkts-pill.active { background:var(--gold); color:#0b0f1a; border-color:var(--gold); }
   .mkts-desc-bar { display:flex; align-items:center; font-size:12px; color:var(--text-muted); margin-bottom:14px; padding:9px 14px; background:var(--navy-2); border-radius:8px; border:1px solid var(--border); }
   .sector-guide-bar { background:rgba(201,168,76,.06); border:1px solid rgba(201,168,76,.15); border-radius:10px; padding:12px 16px; margin-bottom:20px; }
   .sgb-title { font-size:10px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
   .sgb-items { display:flex; flex-wrap:wrap; gap:6px; }
   .sgb-item { font-size:11px; color:var(--text-muted); background:rgba(255,255,255,.04); padding:4px 10px; border-radius:20px; border:1px solid var(--border); }
-  @media (max-width:700px) { .mkts-pills{display:none;} .mkts-dropdown{min-width:160px;} }
 
   /* Sector stock rows */
   .sx-table-head {
