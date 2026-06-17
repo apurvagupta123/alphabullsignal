@@ -167,19 +167,30 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
           <circle cx="98"  cy="198" r="3.5" fill="#d4a940" opacity="0.7"/>
           <circle cx="218" cy="212" r="3"   fill="#fde68a" opacity="0.6"/>
         </g>
-        <!-- Golden trending-up arrow (compact, fits inside inner ring) -->
+        <!-- Golden trending-up arrow — bold & clear -->
         <g class="go-arrow">
+          <!-- Glow layer -->
           <polyline points="136,180 146,170 154,176 164,162 173,167 184,150"
-            fill="none" stroke="rgba(180,130,20,0.4)" stroke-width="6"
-            stroke-linecap="round" stroke-linejoin="round" transform="translate(2,3)"/>
-          <polyline points="136,180 146,170 154,176 164,162 173,167 184,150"
-            fill="none" stroke="url(#arrowGradL)" stroke-width="4.5"
+            fill="none" stroke="rgba(253,230,138,0.35)" stroke-width="10"
             stroke-linecap="round" stroke-linejoin="round"/>
-          <polygon points="184,150 172,147 179,160" fill="url(#arrowGradL)"/>
-          <polygon points="186,148 174,145 181,158" fill="rgba(253,230,138,0.35)"/>
-          <circle cx="154" cy="176" r="2.5" fill="#fde68a" opacity="0.7"/>
-          <circle cx="173" cy="167" r="2.5" fill="#fde68a" opacity="0.7"/>
-          <circle cx="184" cy="150" r="3.5" fill="#fde68a" opacity="0.95"/>
+          <!-- Shadow -->
+          <polyline points="136,180 146,170 154,176 164,162 173,167 184,150"
+            fill="none" stroke="rgba(120,80,0,0.5)" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round" transform="translate(2,3)"/>
+          <!-- Main line -->
+          <polyline points="136,180 146,170 154,176 164,162 173,167 184,150"
+            fill="none" stroke="#fde68a" stroke-width="5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Bold arrowhead -->
+          <polygon points="184,150 168,144 175,162" fill="#fde68a"/>
+          <!-- Arrowhead glow -->
+          <polygon points="184,150 168,144 175,162" fill="rgba(253,230,138,0.4)"
+            transform="scale(1.15) translate(-24,-24)"/>
+          <!-- Highlight dots at zigzag peaks -->
+          <circle cx="154" cy="176" r="3.5" fill="#fff" opacity="0.85"/>
+          <circle cx="173" cy="167" r="3.5" fill="#fff" opacity="0.85"/>
+          <circle cx="184" cy="150" r="5"   fill="#fde68a"/>
+          <circle cx="184" cy="150" r="8"   fill="rgba(253,230,138,0.25)"/>
         </g>
         <circle cx="160" cy="160" r="148" fill="none" stroke="rgba(212,169,64,0.07)" stroke-width="20" class="go-pulse-l"/>
         <circle cx="160" cy="160" r="36" fill="rgba(212,169,64,0.07)"/>
