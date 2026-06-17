@@ -3,28 +3,487 @@ const { frontmatter } = Astro.props;
 import BaseLayout from './BaseLayout.astro';
 ---
 <BaseLayout title={frontmatter.title}>
+  <!-- ── Animated Background Orbs ── -->
+  <div class="post-bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
   <div class="post-page">
-    <article>
-      <div class="post-header">
-        <h1>{frontmatter.title}</h1>
-        <p class="meta">
-          {new Date(frontmatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-          {frontmatter.author ? ` · ${frontmatter.author}` : ''}
-        </p>
+
+    <!-- ── Hero Header ── -->
+    <header class="post-hero">
+
+      <!-- Orbital Chart Decoration -->
+      <div class="orbital-wrap" aria-hidden="true">
+        <svg class="orbital-svg" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+          <!-- Outer ring -->
+          <circle cx="160" cy="160" r="148" fill="none" stroke="rgba(212,169,64,0.15)" stroke-width="1"/>
+          <!-- Middle ring - rotates -->
+          <g class="ring-mid">
+            <circle cx="160" cy="160" r="110" fill="none" stroke="rgba(212,169,64,0.25)" stroke-width="1" stroke-dasharray="8 6"/>
+            <!-- Dots on ring -->
+            <circle cx="160" cy="50" r="4" fill="#d4a940" opacity="0.8"/>
+            <circle cx="255" cy="205" r="3" fill="#fde68a" opacity="0.6"/>
+            <circle cx="72"  cy="230" r="3" fill="#d4a940" opacity="0.7"/>
+          </g>
+          <!-- Inner ring - rotates opposite -->
+          <g class="ring-inner">
+            <circle cx="160" cy="160" r="72" fill="none" stroke="rgba(212,169,64,0.35)" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <circle cx="160" cy="88"  r="5" fill="#fde68a" opacity="0.9"/>
+            <circle cx="225" cy="196" r="4" fill="#d4a940" opacity="0.7"/>
+            <circle cx="100" cy="210" r="3" fill="#fde68a" opacity="0.6"/>
+          </g>
+          <!-- Bar chart in center -->
+          <g class="bars-spin">
+            <rect x="138" y="175" width="10" height="28" rx="2" fill="rgba(212,169,64,0.7)"/>
+            <rect x="152" y="162" width="10" height="41" rx="2" fill="rgba(253,230,138,0.85)"/>
+            <rect x="166" y="170" width="10" height="33" rx="2" fill="rgba(212,169,64,0.6)"/>
+            <rect x="180" y="158" width="10" height="45" rx="2" fill="rgba(253,230,138,0.75)"/>
+          </g>
+          <!-- Center glow -->
+          <circle cx="160" cy="160" r="38" fill="rgba(212,169,64,0.06)"/>
+          <!-- Pulse ring -->
+          <circle cx="160" cy="160" r="148" fill="none" stroke="rgba(212,169,64,0.08)" stroke-width="18" class="pulse-ring"/>
+        </svg>
+        <div class="orbital-glow"></div>
       </div>
-      <div class="post-content">
-        <slot />
+
+      <!-- Title block -->
+      <div class="post-hero-text">
+        <div class="post-meta-line">
+          <span class="meta-date">{new Date(frontmatter.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          {frontmatter.author && <><span class="meta-sep">·</span><span class="meta-author">{frontmatter.author}</span></>}
+          {frontmatter.tags && frontmatter.tags.map((tag: string) => <span class="meta-tag">{tag}</span>)}
+        </div>
+        <h1 class="post-title">{frontmatter.title}</h1>
+        {frontmatter.excerpt && <p class="post-excerpt">{frontmatter.excerpt}</p>}
       </div>
+    </header>
+
+    <!-- ── Banner Image ── -->
+    {frontmatter.image && (
+      <div class="post-banner-wrap">
+        <img src={frontmatter.image} alt={frontmatter.title} class="post-banner" loading="eager" />
+        <div class="post-banner-overlay"></div>
+      </div>
+    )}
+
+    <!-- ── Content ── -->
+    <article class="post-content" id="post-content">
+      <slot />
     </article>
+
+    <!-- ── Footer Rule ── -->
+    <div class="post-footer-rule">
+      <span class="pfr-line"></span>
+      <span class="pfr-diamond">◆</span>
+      <span class="pfr-line"></span>
+    </div>
+
   </div>
 </BaseLayout>
 
+<style>
+/* ── Page shell ─────────────────────────────────── */
+.post-page {
+  position: relative;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  z-index: 1;
+}
+
+/* ── Animated BG orbs ───────────────────────────── */
+.post-bg-orbs {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0;
+  animation: orbFloat 18s ease-in-out infinite;
+}
+.orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(212,169,64,0.18) 0%, transparent 70%);
+  top: -100px; left: -150px;
+  animation-delay: 0s;
+}
+.orb-2 {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(253,230,138,0.12) 0%, transparent 70%);
+  bottom: 5%; right: -80px;
+  animation-delay: 6s;
+}
+.orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(212,169,64,0.10) 0%, transparent 70%);
+  top: 40%; left: 50%;
+  animation-delay: 12s;
+}
+@keyframes orbFloat {
+  0%   { opacity: 0; transform: translate(0,0) scale(1);    }
+  20%  { opacity: 1; }
+  50%  { transform: translate(30px,-40px) scale(1.1); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(0,0) scale(1);    }
+}
+
+/* ── Hero ───────────────────────────────────────── */
+.post-hero {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  padding: 40px 44px 36px;
+  background: linear-gradient(135deg,
+    rgba(212,169,64,0.07) 0%,
+    rgba(7,6,26,0.0) 50%,
+    rgba(212,169,64,0.05) 100%);
+  border: 1px solid rgba(212,169,64,0.22);
+  border-radius: 20px 20px 0 0;
+  position: relative;
+  overflow: hidden;
+}
+.post-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(212,169,64,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Orbital decoration ─────────────────────────── */
+.orbital-wrap {
+  flex-shrink: 0;
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+.orbital-svg {
+  width: 160px;
+  height: 160px;
+  filter: drop-shadow(0 0 18px rgba(212,169,64,0.35));
+}
+.ring-mid  { transform-origin: 160px 160px; animation: spinCW  18s linear infinite; }
+.ring-inner{ transform-origin: 160px 160px; animation: spinCCW 10s linear infinite; }
+.bars-spin { transform-origin: 163px 175px; animation: spinCW  28s linear infinite; }
+.pulse-ring { animation: pulseRing 3s ease-out infinite; }
+@keyframes spinCW  { to { transform: rotate(360deg); } }
+@keyframes spinCCW { to { transform: rotate(-360deg); } }
+@keyframes pulseRing {
+  0%   { stroke-opacity: 0.08; stroke-width: 18; r: 148; }
+  50%  { stroke-opacity: 0.18; stroke-width: 10; }
+  100% { stroke-opacity: 0.08; stroke-width: 18; }
+}
+.orbital-glow {
+  position: absolute;
+  inset: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,169,64,0.10) 0%, transparent 70%);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%, 100% { transform: scale(1);   opacity: 0.7; }
+  50%       { transform: scale(1.2); opacity: 1; }
+}
+
+/* ── Hero text ──────────────────────────────────── */
+.post-hero-text {
+  flex: 1;
+  min-width: 0;
+}
+.post-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.meta-date, .meta-author {
+  color: rgba(212,169,64,0.80);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.meta-sep { color: rgba(212,169,64,0.35); font-size: 0.8rem; }
+.meta-tag {
+  background: rgba(212,169,64,0.12);
+  color: #d4a940;
+  border: 1px solid rgba(212,169,64,0.28);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.post-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 14px;
+  background: linear-gradient(135deg, #fff 0%, #fde68a 55%, #d4a940 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titleShimmer 4s ease-in-out infinite alternate;
+}
+@keyframes titleShimmer {
+  from { filter: brightness(1); }
+  to   { filter: brightness(1.15) drop-shadow(0 0 12px rgba(212,169,64,0.3)); }
+}
+.post-excerpt {
+  color: rgba(255,255,255,0.60);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin: 0;
+  border-left: 2px solid rgba(212,169,64,0.4);
+  padding-left: 14px;
+}
+
+/* ── Banner ─────────────────────────────────────── */
+.post-banner-wrap {
+  position: relative;
+  width: 100%;
+  max-height: 400px;
+  overflow: hidden;
+  background: #07061a;
+  border-left: 1px solid rgba(212,169,64,0.22);
+  border-right: 1px solid rgba(212,169,64,0.22);
+}
+.post-banner {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+  animation: bannerReveal 0.8s ease-out both;
+}
+.post-banner-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(to top, #07061a 0%, transparent 100%);
+}
+@keyframes bannerReveal {
+  from { opacity: 0; transform: scale(1.04); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Content ────────────────────────────────────── */
+.post-content {
+  padding: 44px 48px 52px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(212,169,64,0.18);
+  border-top: none;
+  border-radius: 0 0 20px 20px;
+  color: rgba(255,255,255,0.87);
+  font-size: 1.05rem;
+  line-height: 1.82;
+  position: relative;
+}
+.post-content::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 48px; right: 48px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,169,64,0.4), transparent);
+}
+
+/* Headings */
+.post-content :global(h2) {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 2.2em 0 0.7em;
+  background: linear-gradient(90deg, #fde68a, #d4a940);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  padding-bottom: 10px;
+  opacity: 0;
+  transform: translateX(-16px);
+  animation: slideIn 0.5s ease-out both;
+}
+.post-content :global(h2)::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(212,169,64,0.5), transparent);
+}
+.post-content :global(h3) {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #d4a940;
+  margin: 1.6em 0 0.5em;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  animation: slideIn 0.5s ease-out 0.1s both;
+}
+@keyframes slideIn {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Paragraphs */
+.post-content :global(p) { margin: 0 0 1.1em; }
+
+/* Strong = highlight */
+.post-content :global(strong) {
+  color: #fde68a;
+  font-weight: 700;
+  text-shadow: 0 0 20px rgba(253,230,138,0.25);
+}
+
+/* Links */
+.post-content :global(a) {
+  color: #d4a940;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(212,169,64,0.35);
+  transition: border-color 0.2s, color 0.2s;
+}
+.post-content :global(a:hover) {
+  color: #fde68a;
+  border-color: rgba(253,230,138,0.7);
+}
+
+/* Lists */
+.post-content :global(ul), .post-content :global(ol) {
+  padding-left: 1.4em;
+  margin: 0 0 1.1em;
+}
+.post-content :global(li) { margin-bottom: 0.45em; }
+.post-content :global(ul li::marker) { color: #d4a940; }
+
+/* Blockquote */
+.post-content :global(blockquote) {
+  margin: 1.5em 0;
+  padding: 16px 20px;
+  border-left: 3px solid #d4a940;
+  background: rgba(212,169,64,0.06);
+  border-radius: 0 8px 8px 0;
+  color: rgba(255,255,255,0.75);
+  font-style: italic;
+}
+
+/* Tables */
+.post-content :global(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.6em 0;
+  font-size: 0.9rem;
+}
+.post-content :global(th) {
+  background: rgba(212,169,64,0.14);
+  color: #fde68a;
+  padding: 11px 15px;
+  text-align: left;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(212,169,64,0.3);
+  white-space: nowrap;
+}
+.post-content :global(td) {
+  padding: 10px 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  white-space: nowrap;
+}
+.post-content :global(tr:hover td) { background: rgba(212,169,64,0.04); }
+.post-content :global(tr:nth-child(even) td) { background: rgba(255,255,255,0.02); }
+
+/* Table scroll wrapper (added by JS) */
+.post-content :global(.table-wrap) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid rgba(212,169,64,0.18);
+  border-radius: 10px;
+  margin: 1.6em 0;
+}
+.post-content :global(.table-wrap table) { margin: 0; }
+
+/* Horizontal rule */
+.post-content :global(hr) {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,169,64,0.35), transparent);
+  margin: 2em 0;
+}
+
+/* em (italic) */
+.post-content :global(em) { color: rgba(255,255,255,0.65); }
+
+/* ── Footer rule ────────────────────────────────── */
+.post-footer-rule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 48px;
+  padding: 0 4px;
+}
+.pfr-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,169,64,0.35));
+}
+.pfr-line:last-child {
+  background: linear-gradient(90deg, rgba(212,169,64,0.35), transparent);
+}
+.pfr-diamond {
+  color: #d4a940;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  animation: spinCW 12s linear infinite;
+  display: inline-block;
+}
+
+/* ── Responsive ─────────────────────────────────── */
+@media (max-width: 700px) {
+  .post-hero { flex-direction: column; padding: 28px 20px 24px; gap: 20px; }
+  .orbital-wrap { width: 110px; height: 110px; }
+  .orbital-svg { width: 110px; height: 110px; }
+  .post-content { padding: 28px 20px 36px; }
+  .post-content::before { left: 20px; right: 20px; }
+  .post-content :global(th), .post-content :global(td) { white-space: normal; }
+}
+</style>
+
 <script>
-  // Wrap every table in post-content with a scroll container for mobile
+  // Wrap tables for horizontal scroll
   document.querySelectorAll('.post-content table').forEach(table => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'table-wrap';
-    table.parentNode.insertBefore(wrapper, table);
-    wrapper.appendChild(table);
+    if (table.closest('.table-wrap')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'table-wrap';
+    table.parentNode.insertBefore(wrap, table);
+    wrap.appendChild(table);
+  });
+
+  // Scroll-reveal for h2/h3 that load offscreen
+  const revealEls = document.querySelectorAll('.post-content h2, .post-content h3, .post-content p, .post-content ul, .post-content blockquote');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        (e.target as HTMLElement).style.opacity = '1';
+        (e.target as HTMLElement).style.transform = 'translateX(0)';
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+  revealEls.forEach(el => {
+    (el as HTMLElement).style.transition = 'opacity 0.45s ease, transform 0.45s ease';
+    (el as HTMLElement).style.opacity = '0';
+    (el as HTMLElement).style.transform = 'translateY(14px)';
+    obs.observe(el);
   });
 </script>

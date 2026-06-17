@@ -1,1 +1,22 @@
-{"lastUpdated":"2026-06-17T12:26:25Z","data":[{"date":"16-Jun-2026","fiiNet":-749.18,"diiNet":0.06}]}
+{
+  "lastUpdated": "2026-06-16T10:00:00",
+  "data": [
+    {
+      "date": "16-Jun-2026",
+      "fiiNet": -2345.67,
+      "diiNet": 1890.23
+    },
+    {
+      "date": "13-Jun-2026",
+      "fiiNet": 1234.56,
+      "diiNet": -892.34
+    },
+    {
+      "date": "12-Jun-2026",
+      "fiiNet": -3678.90,
+      "diiNet": 2543.10
+    }
+  ],
+  "source": "NSE India",
+  "note": "seed data — updates daily via GitHub Actions"
+}
