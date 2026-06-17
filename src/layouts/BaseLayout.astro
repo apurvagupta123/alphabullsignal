@@ -60,6 +60,24 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
         0%, 100% { opacity: 0.35; transform: translateY(-50%) scale(1);    }
         50%       { opacity: 0.50; transform: translateY(-50%) scale(1.04); }
       }
+
+      .global-orbital-left {
+        right: auto;
+        left: -90px;
+        animation: goBreathLeft 7s ease-in-out infinite;
+      }
+      .go-ring-mid-l   { transform-origin: 160px 160px; animation: goSpinCCW 22s linear infinite; }
+      .go-ring-inner-l { transform-origin: 160px 160px; animation: goSpinCW  13s linear infinite; }
+      .go-arrow        { transform-origin: 160px 165px; animation: goArrowPulse 3s ease-in-out infinite; }
+      .go-pulse-l      { animation: goPulse 4s ease-out infinite 0.5s; }
+      @keyframes goBreathLeft {
+        0%, 100% { opacity: 0.35; transform: translateY(-50%) scale(1); }
+        50%       { opacity: 0.50; transform: translateY(-50%) scale(1.04); }
+      }
+      @keyframes goArrowPulse {
+        0%, 100% { filter: drop-shadow(0 0 4px rgba(212,169,64,0.3));  }
+        50%       { filter: drop-shadow(0 0 12px rgba(253,230,138,0.7)); }
+      }
       @media (max-width: 900px) { .global-orbital { display: none; } }
 
       /* Ticker positioning — inline to avoid CDN cache delay */
