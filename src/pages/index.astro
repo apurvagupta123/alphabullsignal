@@ -120,16 +120,16 @@ const SECTOR_TAGS: Record<string, string> = {
   <section class="indices-section reveal">
     <div class="idx-strip" id="indicesBar">
       {[
-        {key:'NSEI',   name:'NIFTY 50'},
-        {key:'BSESN',  name:'SENSEX'},
-        {key:'NSEBANK',name:'NIFTY BANK'},
-        {key:'MID',    name:'SMALLCAP'},
-        {key:'IT',     name:'NIFTY IT'},
-        {key:'AUTO',   name:'NIFTY AUTO'},
-        {key:'PHARMA', name:'PHARMA'},
-        {key:'FMCG',   name:'NIFTY FMCG'},
-      ].map(({key, name}) => (
-        <div class="idx-pill skeleton" id={`hidx-${key}`}>
+        {key:'NSEI',   name:'NIFTY 50',   idx:'NSEI'},
+        {key:'BSESN',  name:'SENSEX',     idx:'BSESN'},
+        {key:'NSEBANK',name:'NIFTY BANK', idx:'NSEBANK'},
+        {key:'MID',    name:'SMALLCAP',   idx:'NIFTYMIDCAP'},
+        {key:'IT',     name:'NIFTY IT',   idx:'IT'},
+        {key:'AUTO',   name:'NIFTY AUTO', idx:'AUTO'},
+        {key:'PHARMA', name:'PHARMA',     idx:'PHARMA'},
+        {key:'FMCG',   name:'NIFTY FMCG',idx:'FMCG'},
+      ].map(({key, name, idx}) => (
+        <div class="idx-pill skeleton" id={`hidx-${key}`} data-idx={idx} style="cursor:pointer">
           <span class="idx-pill-name">{name}</span>
           <span class="idx-pill-price" id={`hidx-${key}-price`}>—</span>
           <span class="idx-pill-chg"   id={`hidx-${key}-chg`}>—</span>
@@ -137,6 +137,14 @@ const SECTOR_TAGS: Record<string, string> = {
       ))}
     </div>
   </section>
+
+  <!-- ── Index Detail Modal ───────────────────────────── -->
+  <div id="idxModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);padding:20px;overflow-y:auto" onclick="if(event.target===this)this.style.display='none'">
+    <div style="max-width:620px;margin:60px auto;background:linear-gradient(135deg,rgba(212,169,64,0.13) 0%,rgba(10,9,4,0.99) 60%);border:1px solid rgba(212,169,64,0.35);border-radius:18px;padding:32px 36px;position:relative">
+      <button onclick="document.getElementById('idxModal').style.display='none'" style="position:absolute;top:16px;right:18px;background:rgba(212,169,64,0.12);border:1px solid rgba(212,169,64,0.25);color:var(--gold);border-radius:8px;padding:4px 12px;font-size:13px;cursor:pointer">✕ Close</button>
+      <div id="idxModalContent"></div>
+    </div>
+  </div>
 
   <!-- ── Today's Indian Markets ──────────────────────── -->
   <section class="content-section reveal" id="markets">
@@ -949,7 +957,9 @@ const SECTOR_TAGS: Record<string, string> = {
     const key = IDX_MAP[q.symbol]; if (!key) return;
     const chg=q.regularMarketChange??0, pct=q.regularMarketChangePercent??0, up=chg>=0;
     const color=up?'#22c55e':'#ef4444';
+    // Store for modal
     const card=document.getElementById(`hidx-${key}`);
+    if(card?.dataset?.idx) _idxHomeLive[card.dataset.idx]={price:q.regularMarketPrice,pct};
     if(card){card.classList.remove('skeleton');card.classList.add(up?'up':'dn');}
     const pEl=document.getElementById(`hidx-${key}-price`);
     if(pEl) pEl.textContent=q.regularMarketPrice?.toLocaleString('en-IN',{maximumFractionDigits:2});
@@ -1240,6 +1250,45 @@ const SECTOR_TAGS: Record<string, string> = {
 
   document.getElementById('slBtn')?.addEventListener('click',()=>{const v=slInput?.value;if(v?.trim()){slDropdown.style.display='none';loadSpotlight(v.trim());}});
   slInput?.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){slDropdown.style.display='none';const v=slInput?.value;if(v?.trim()) loadSpotlight(v.trim());}});
+
+  // ── Index card click → modal ─────────────────────────
+  const _IDX_INFO: Record<string,{title:string,icon:string,what:string,who:string,why:string,movers:string,sip:string}> = {
+    NSEI:{title:'NIFTY 50',icon:'📊',what:'NIFTY 50 tracks the 50 largest companies on NSE — India\'s main stock exchange. Think of it as a report card for the country\'s biggest businesses: Reliance, TCS, HDFC Bank, Infosys, ICICI Bank. When NIFTY rises, it means investors are confident. When it falls, they\'re cautious.',who:'Financial Services (~33%), IT (~13%), Oil & Gas (~12%), Consumer Goods (~9%), Auto (~6%). Top stocks: Reliance, HDFC Bank, Infosys, ICICI Bank, TCS.',why:'A rising NIFTY means corporate earnings are growing, the economy is healthy, and money is flowing into India. A falling NIFTY means uncertainty — it could be global (US recession fears, oil prices) or local (RBI rate hikes, weak earnings).',movers:'US markets overnight, FII/DII flows, RBI rate decisions, quarterly earnings, crude oil prices, USD/INR rate, and major government policy announcements.',sip:'Your equity mutual fund SIP benchmarks against NIFTY. When NIFTY dips, your SIP buys more units at lower prices — actually building more long-term wealth.'},
+    BSESN:{title:'SENSEX',icon:'🏛️',what:'SENSEX is India\'s oldest stock index (since 1986), tracking the top 30 companies on BSE (Bombay Stock Exchange). More concentrated than NIFTY — just 30 stocks — so one big move in Reliance or HDFC Bank can swing it noticeably.',who:'Reliance, HDFC Bank, Infosys, ICICI Bank, TCS, L&T, Bajaj Finance, Kotak Mahindra Bank dominate — these 8 stocks alone make up ~50% of the index.',why:'SENSEX is the face of India internationally. When global media or investors talk about Indian markets, they quote SENSEX. Tracks India\'s entire economic history since the 1980s.',movers:'Same as NIFTY 50 but more sensitive to banking sector moves since banking stocks are heavily weighted.',sip:'SENSEX and NIFTY move almost identically (99%+ correlation). Treat them as the same signal for your investment decisions.'},
+    NSEBANK:{title:'NIFTY BANK',icon:'🏦',what:'NIFTY Bank tracks India\'s 12 largest banking stocks. Banks are the economy\'s backbone — they lend to businesses, manage your savings, and drive credit growth. When banks do well, the whole economy usually follows.',who:'HDFC Bank, ICICI Bank, Kotak Mahindra Bank, SBI, Axis Bank, IndusInd Bank, Bank of Baroda, Federal Bank. Private banks (HDFC + ICICI) carry ~60% of the weight.',why:'NIFTY Bank is more volatile than NIFTY 50 and reacts sharply to RBI decisions, NPA (bad loan) data, and credit demand. A falling NIFTY Bank often drags down the broader market.',movers:'RBI Monetary Policy meetings, bank quarterly results (NPA levels, net interest margin), credit growth data, and US Federal Reserve rate decisions (affects FII flows).',sip:'Banking sector funds track NIFTY Bank. Rising NIFTY Bank = banks are profitable, loans are being repaid, credit is growing = healthy economy.'},
+    NIFTYMIDCAP:{title:'SMALLCAP / MIDCAP',icon:'🚀',what:'Tracks mid-sized Indian companies (₹5,000–₹20,000 Cr market cap) — the next generation of potential large-caps. They grow faster than large-caps but are also riskier and more volatile.',who:'Diverse mix: specialty chemicals, auto ancillaries, specialty pharma, consumer brands, IT services. Examples: Persistent Systems, Metropolis Healthcare, Navin Fluorine.',why:'Midcap/smallcap indices are leading indicators — they react faster to economic changes. When retail investors are optimistic, they pile into small-caps first. When fear strikes, they exit first too.',movers:'Domestic retail investor sentiment, Budget announcements, GST collections, domestic consumption data. Less driven by global cues than NIFTY 50.',sip:'Smallcap funds can give 2–3x NIFTY returns in bull markets but can fall 40–60% in bear markets. Best suited for long-term (10+ year) SIPs that can ride out volatility.'},
+    IT:{title:'NIFTY IT',icon:'💻',what:'Tracks India\'s top IT companies — TCS, Infosys, Wipro, HCL Tech, Tech Mahindra. These companies earn most of their revenue in US dollars but pay salaries in rupees, so currency movements matter a lot.',who:'TCS, Infosys, HCL Technologies, Wipro, Tech Mahindra, LTIMindtree, Mphasis, Coforge. Top 2 (TCS + Infosys) carry ~55% of the weight.',why:'When USD strengthens against INR, Indian IT companies earn more in rupee terms — like a pay raise. When US companies cut tech spending (like in 2023), Indian IT order books shrink.',movers:'USD/INR rate, US tech sector spending (guided by US company results), Fed rate decisions, US GDP data, and global outsourcing trends.',sip:'IT sector funds are good bets during weak rupee periods. But they underperform when global tech spending slows — as seen in 2022–23.'},
+    AUTO:{title:'NIFTY AUTO',icon:'🚗',what:'Tracks India\'s top automobile companies — from Maruti and Tata Motors to Bajaj Auto and Hero MotoCorp. Reflects consumer spending confidence: when people buy cars and bikes, the economy is doing well.',who:'Maruti Suzuki, Mahindra & Mahindra, Tata Motors, Bajaj Auto, Hero MotoCorp, Eicher Motors, TVS Motor, Bosch India.',why:'Auto sales are a real-time pulse of Indian consumer confidence. Strong auto sales = people have money and are spending it. Weak sales = economic stress.',movers:'Fuel prices (petrol/diesel directly affects demand), interest rates (auto loans), monsoon (rural demand for two-wheelers), raw material costs (steel, aluminium), and EV policy announcements.',sip:'Auto sector funds do well during economic expansion and consumer boom cycles. Watch monthly SIAM auto sales data as a leading indicator.'},
+    PHARMA:{title:'NIFTY PHARMA',icon:'💊',what:'Tracks India\'s top pharmaceutical companies — Sun Pharma, Dr. Reddy\'s, Cipla, Divi\'s Laboratories. India is the "pharmacy of the world," supplying ~20% of global generic medicines. Pharma is often a defensive sector during market downturns.',who:'Sun Pharma, Dr. Reddy\'s Laboratories, Cipla, Divi\'s Labs, Biocon, Aurobindo Pharma, Lupin, Alkem Laboratories.',why:'Pharma stocks are defensive — people need medicines regardless of the economy. During market crashes, pharma often holds up better than other sectors. US FDA approvals can send a pharma stock surging overnight.',movers:'US FDA inspection outcomes, USFDA drug approvals, currency (many pharma cos earn in USD), API (raw material) prices from China, and domestic pricing policy.',sip:'Pharma sector funds are good for portfolio stability. They don\'t grow as fast as IT or auto in bull markets, but they protect capital during downturns.'},
+    FMCG:{title:'NIFTY FMCG',icon:'🛒',what:'Tracks Fast-Moving Consumer Goods companies — HUL, ITC, Nestle, Britannia, Dabur, Marico. These sell everyday products: soap, shampoo, biscuits, noodles, cigarettes. Revenues are stable and predictable since people buy these regardless of the market.',who:'Hindustan Unilever (HUL), ITC, Nestle India, Britannia, Dabur, Marico, Colgate-Palmolive, Emami.',why:'FMCG is the most defensive sector. It barely falls during market crashes — because demand for soap and biscuits doesn\'t disappear in a recession. But it also grows slowly in bull markets.',movers:'Rural income (50% of FMCG sales come from rural India), monsoon (good rains = more rural cash = more FMCG spending), inflation (input cost: palm oil, wheat prices), and urban consumption trends.',sip:'FMCG sector funds are ideal for conservative investors. Low growth ceiling but strong downside protection. Good to hold alongside a more aggressive equity fund.'},
+  };
+  let _idxHomeLive: Record<string,{price:number,pct:number}> = {};
+
+  function showHomePillModal(idxKey: string) {
+    const info = _IDX_INFO[idxKey]; if(!info) return;
+    const live = _idxHomeLive[idxKey];
+    const up = (live?.pct??0) >= 0;
+    const color = up ? '#22c55e' : '#ef4444';
+    const priceHtml = live ? `<div style="display:flex;align-items:baseline;gap:14px;margin:14px 0 20px"><span style="font-size:1.9rem;font-weight:800;color:var(--gold)">${live.price.toLocaleString('en-IN',{maximumFractionDigits:2})}</span><span style="font-weight:700;color:${color}">${up?'▲':'▼'} ${Math.abs(live.pct).toFixed(2)}% today</span></div>` : '';
+    document.getElementById('idxModalContent')!.innerHTML = `
+      <div style="font-size:26px;margin-bottom:6px">${info.icon}</div>
+      <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:2px">${info.title}</div>
+      ${priceHtml}
+      <div style="margin-bottom:14px"><div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--gold);margin-bottom:4px">WHAT IS IT?</div><p style="font-size:13px;color:var(--text-muted);line-height:1.8;margin:0">${info.what}</p></div>
+      <div style="margin-bottom:14px"><div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--gold);margin-bottom:4px">WHO'S INSIDE?</div><p style="font-size:13px;color:var(--text-muted);line-height:1.8;margin:0">${info.who}</p></div>
+      <div style="margin-bottom:14px"><div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--gold);margin-bottom:4px">WHAT DOES IT SIGNAL?</div><p style="font-size:13px;color:var(--text-muted);line-height:1.8;margin:0">${info.why}</p></div>
+      <div style="margin-bottom:14px"><div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--gold);margin-bottom:4px">WHAT MOVES IT?</div><p style="font-size:13px;color:var(--text-muted);line-height:1.8;margin:0">${info.movers}</p></div>
+      <div style="background:rgba(212,169,64,0.08);border:1px solid rgba(212,169,64,0.22);border-radius:10px;padding:14px 16px">
+        <div style="font-size:9px;font-weight:800;letter-spacing:1px;color:var(--gold);margin-bottom:5px">💡 WHAT IT MEANS FOR YOUR SIP</div>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.8;margin:0">${info.sip}</p>
+      </div>
+      <p style="font-size:10px;color:var(--text-dim);margin-top:14px;text-align:center">⚠️ Educational context only — not financial advice. Always DYOR.</p>`;
+    document.getElementById('idxModal')!.style.display = 'block';
+  }
+
+  document.querySelectorAll('[data-idx]').forEach(el => {
+    el.addEventListener('click', () => showHomePillModal((el as HTMLElement).dataset.idx || ''));
+  });
 
   loadMarkets();
   loadIndiaIndices();
