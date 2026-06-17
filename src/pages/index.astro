@@ -1,5 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Load news JSON
+let newsData: any = { articles: [] };
+try {
+  const newsPath = path.resolve('./public/data/news.json');
+  if (fs.existsSync(newsPath)) {
+    newsData = JSON.parse(fs.readFileSync(newsPath, 'utf-8'));
+  }
+} catch (e) {}
+const featuredArticle = newsData.articles?.[0] || null;
+const sideArticles = newsData.articles?.slice(1, 13) || [];
 
 const posts = await Astro.glob('./blog/*.md').catch(() => []);
 const sorted = posts.sort((a: any, b: any) =>
@@ -308,6 +321,61 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </section>
 
+
+  <!-- ── Financial News ───────────────────────────────── -->
+  {featuredArticle && (
+    <section class="content-section reveal" id="news">
+      <div class="section-head">
+        <h2 class="section-title">📰 Market News</h2>
+        <span class="section-live">LIVE</span>
+      </div>
+
+      <div class="news-grid">
+        <!-- Featured article (left) -->
+        <a href={featuredArticle.url} target="_blank" rel="noopener" class="news-featured">
+          {featuredArticle.image && (
+            <div class="news-feat-img-wrap">
+              <img src={featuredArticle.image} alt={featuredArticle.title} class="news-feat-img" loading="lazy" />
+            </div>
+          )}
+          <div class="news-feat-body">
+            <span class="news-source-tag">{featuredArticle.source}</span>
+            <h3 class="news-feat-title">{featuredArticle.title}</h3>
+            <p class="news-feat-excerpt">{featuredArticle.excerpt?.slice(0, 160)}</p>
+            <span class="news-feat-time">
+              {new Date(featuredArticle.publishedAt).toLocaleString('en-IN', {
+                day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+              })}
+            </span>
+          </div>
+        </a>
+
+        <!-- Side article list (right) -->
+        <div class="news-side">
+          {sideArticles.map((article: any) => (
+            <a href={article.url} target="_blank" rel="noopener" class="news-side-item">
+              {article.image && (
+                <img src={article.image} alt="" class="news-side-img" loading="lazy" />
+              )}
+              <div class="news-side-body">
+                <span class="news-side-source">{article.source}</span>
+                <p class="news-side-title">{article.title}</p>
+                <span class="news-side-time">
+                  {new Date(article.publishedAt).toLocaleString('en-IN', {
+                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                  })}
+                </span>
+              </div>
+            </a>
+          ))}
+          <div class="news-footer">
+            <span class="news-updated">Updated: {new Date(newsData.lastUpdated).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
+            <a href="https://www.moneycontrol.com/news/" target="_blank" rel="noopener" class="news-more">More news →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
 
   <!-- ── Morning Market Briefing ──────────────────────── -->
   <section class="content-section reveal" id="from-ledger">
@@ -697,6 +765,127 @@ const SECTOR_TAGS: Record<string, string> = {
   font-size: 14px;
   padding: 18px 0;
   font-style: italic;
+}
+
+/* ── News Section ─────────────────────────────────── */
+.news-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+}
+.news-featured {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(212,169,64,0.10) 0%, rgba(184,134,11,0.05) 100%);
+  border: 1px solid rgba(212,169,64,0.22);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.news-featured:hover { border-color: rgba(212,169,64,0.5); transform: translateY(-2px); }
+.news-feat-img-wrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; }
+.news-feat-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.news-feat-body { padding: 18px 20px 20px; }
+.news-source-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(212,169,64,0.12);
+  border: 1px solid rgba(212,169,64,0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-bottom: 10px;
+}
+.news-feat-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+  margin: 0 0 10px;
+}
+.news-feat-excerpt {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+.news-feat-time { font-size: 11px; color: var(--muted); opacity: 0.7; }
+
+/* Side list */
+.news-side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: linear-gradient(135deg, rgba(212,169,64,0.07) 0%, rgba(184,134,11,0.03) 100%);
+  border: 1px solid rgba(212,169,64,0.18);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.news-side-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 11px 14px;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(212,169,64,0.08);
+  transition: background 0.15s;
+}
+.news-side-item:last-of-type { border-bottom: none; }
+.news-side-item:hover { background: rgba(212,169,64,0.07); }
+.news-side-img {
+  width: 64px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+.news-side-body { flex: 1; min-width: 0; }
+.news-side-source {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.8;
+  display: block;
+  margin-bottom: 3px;
+}
+.news-side-title {
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text);
+  margin: 0 0 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.news-side-time { font-size: 10px; color: var(--muted); opacity: 0.6; }
+.news-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-top: 1px solid rgba(212,169,64,0.12);
+}
+.news-updated { font-size: 10px; color: var(--muted); opacity: 0.55; }
+.news-more { font-size: 11px; font-weight: 600; color: var(--gold); text-decoration: none; }
+.news-more:hover { opacity: 0.75; }
+
+@media (max-width: 900px) {
+  .news-grid { grid-template-columns: 1fr; }
+  .news-side { display: none; } /* show only featured on mobile */
+}
+@media (max-width: 600px) {
+  .news-feat-title { font-size: 17px; }
 }
 
 .tl-item {
