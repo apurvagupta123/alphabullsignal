@@ -1,15 +1,176 @@
 {
-  "lastUpdated": "2026-06-17T23:26:20+05:30",
+  "lastUpdated": "2026-06-18T00:26:12+05:30",
   "count": 25,
   "articles": [
     {
-      "title": "How India, UK Worked Around Steel Trade Curbs For FTA Breakthrough",
-      "excerpt": "India secures safeguards for steel exports as London's new trade measures loom, clearing a key hurdle for the India-UK FTA rollout.",
-      "url": "https://www.ndtvprofit.com/economy/how-india-uk-worked-around-steel-trade-curbs-for-fta-breakthrough-11650896#publisher=newsstand",
+      "title": "Warsh Era Begins: Fed Keeps Rates On Hold, Hints At Hawkish Tilt With Possible 2026 Hike",
+      "excerpt": "The Federal Open Market Committee unanimously decided to keep rates steady in the 3.5%-3.75% target range.",
+      "url": "https://www.ndtvprofit.com/economy/fed-rate-decision-warsh-era-starts-with-a-hold-as-global-headwinds-push-inflation-up-11651390#publisher=newsstand",
       "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-02/tjl2623s_tata-steel_625x300_04_February_26.jpg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T22:23:24+05:30",
-      "category": "Markets"
+      "image": "https://c.ndtvimg.com/2026-05/t3anuo9_a_625x300_19_May_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-18T00:06:30+05:30",
+      "category": "Markets",
+      "summary": "The Federal Open Market Committee unanimously decided to keep rates steady in the 3.5%-3.75% target range."
+    },
+    {
+      "title": "US Fed Meeting Live Updates: New Chair Kevin Warsh Begins Address After Rates Held Steady",
+      "excerpt": "Rate hike may be on cards for 2026 according to some Fed officials.",
+      "url": "https://www.ndtvprofit.com/economy/us-fed-meeting-june-2026-live-updates-kevin-warsh-speech-fomc-rate-cut-announcement-iran-israel-war-donald-trump-news-11650079#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-01/9ctg4gt4_warsh_625x300_30_January_26.jpeg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-18T00:02:48+05:30",
+      "category": "Markets",
+      "summary": "Rate hike may be on cards for 2026 according to some Fed officials."
+    },
+    {
+      "title": "US Unveils Iran MoU: 60-Day Hormuz Window, New Uranium Limits And Lebanon Protections",
+      "excerpt": "Iran has not yet released its version of the document or publicly confirmed the details disclosed by Washington.",
+      "url": "https://www.ndtvprofit.com/world/us-unveils-iran-mou-60-hormuz-window-new-uranium-limits-and-lebanon-protections-11651302#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-06/umim0an_us-iran-funds_625x300_16_June_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T23:55:32+05:30",
+      "category": "Markets",
+      "summary": "Iran has not yet released its version of the document or publicly confirmed the details disclosed by Washington."
+    },
+    {
+      "title": "Yoane Wissa Scores DR Congo's First-Ever World Cup Goal Against Portugal At FIFA World Cup 2026",
+      "excerpt": "The 29-year-old forward who plays for Newcastle United ends a 52-year wait as the Leopards draw level in their Group K opener.",
+      "url": "https://www.ndtvprofit.com/sports/yoane-wissa-dr-congo-first-ever-world-cup-goal-portugal-fifa-world-cup-2026-11651410#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-06/doqn45h_wissa_625x300_17_June_26.png?im=FitAndFill,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T23:35:42+05:30",
+      "category": "Markets",
+      "summary": "The 29-year-old forward who plays for Newcastle United ends a 52-year wait as the Leopards draw level in their Group K opener."
+    },
+    {
+      "title": "US Fed keeps rates unchanged for fourth straight meeting at 3.5%–3.75%: 5 key takeaways",
+      "excerpt": "The Federal Reserve has held its interest rates steady as it assesses inflation and growth dynamics. The recent surge in inflation, driven by energy prices, raises expectations for a possible rate hike later this year am",
+      "url": "https://www.livemint.com/market/stock-market-news/us-fed-keeps-rates-unchanged-for-fourth-straight-meeting-at-3-5-3-75-5-key-takeaways-11781716912119.html",
+      "source": "Mint",
+      "image": "https://www.livemint.com/lm-img/img/2026/06/17/1600x900/2-0-99427245-FederalReserve-4C--0_1681710281513_1781716932883_4600226d-fda2-4c52-9c2d-ff24295a3a1c.jpg",
+      "publishedAt": "2026-06-17T23:34:22+05:30",
+      "category": "Markets",
+      "summary": "The Federal Reserve has held its interest rates steady as it assesses inflation and growth dynamics. The recent surge in inflation, driven by energy prices, raises expectations for a possible rate hike later this year am"
+    },
+    {
+      "title": "India's remittance inflows stay resilient despite West Asia conflict",
+      "excerpt": "India's remittance inflows stay resilient despite West Asia conflict Business Standard",
+      "url": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOc2FLRlRwUlFZSkJCQi1NcXJLSHRjbUVBUWFPUEVWV3NmakxpdHlob3J4b3FYVG13aEo3bHlUS3VPME5mMWhCaG14Rm9DUjVVQVRJbTlxcFhZQ2lzUG1jWTlVZHpfTThXR2xmUnlGaDV2U2VtUnlwRjYwSUJLY0dOQzZ4RDNnMDRMQmd3dlVOdjk5V21KNXo5X0ZodmphcjRrTkV4c0FDLTJvbjZuTFQ5UTFGTzVHNDE5NnE2SGJHQWNvbnVMcklZa2pvRFRGU3Ji0gHWAUFVX3lxTE5ha0VCSXdJazdfSFFaNXB3TUhfWTFCSGlOQVI1SFdOSjZJZUNMSVllWW1hamZ2TUkxdUtyMllzTFVwYTdVdGVzaVQyOGctWUJmMFZpOWh0eDkydEZic3lrWExsekhuTmYwQVJmSGxUWVVaWnRDVEtKX0RIZkhNaTJfOXJiSXBiLW5jeFdNbTlxTGtabHRia215aHFfdkJudmhBLTZidTJCa3FqUGFGZThDNHlSRlN4RFlGNHdCVHgwbTdUZTZuTWhjVTFUeW16ZlVvTUhtUnc?oc=5",
+      "source": "Business Standard",
+      "image": null,
+      "publishedAt": "2026-06-17T23:32:45+05:30",
+      "category": "Economy",
+      "summary": "India's remittance inflows stay resilient despite West Asia conflict Business Standard"
+    },
+    {
+      "title": "At G7, PM Modi Warns Of AI Risks; Calls For Global Action Against Deepfakes And Misinformation",
+      "excerpt": "Speaking at an outreach session of the G7 summit in this French commune, PM Modi also called for strengthening global cooperation against deepfakes, misinformation, and cyber fraud.",
+      "url": "https://www.ndtvprofit.com/world/at-g7-pm-modi-warns-of-ai-risks-calls-for-global-action-against-deepfakes-and-misinformation-11651383#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-06/2n5ofikk_pm-modi_625x300_17_June_26.jpg?im=FitAndFill,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T23:31:55+05:30",
+      "category": "Markets",
+      "summary": "Speaking at an outreach session of the G7 summit in this French commune, PM Modi also called for strengthening global cooperation against deepfakes, misinformation, and cyber fraud."
+    },
+    {
+      "title": "US-Iran Deal Details Highlights: MoU Secures Toll Free Passage Via Hormuz Only For 60 Days",
+      "excerpt": "An interim agreement expected to be signed on Friday would allow Tehran to resume crude sales immediately.",
+      "url": "https://www.ndtvprofit.com/world/us-iran-deal-details-live-updates-trump-to-publicly-share-mou-elements-shortly-11650352#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-04/hmsltej_trump-hormuz_625x300_11_April_26.jpg?im=FitAndFill,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T23:23:36+05:30",
+      "category": "Markets",
+      "summary": "An interim agreement expected to be signed on Friday would allow Tehran to resume crude sales immediately."
+    },
+    {
+      "title": "Ola Hits A Roadblock: Chandigarh Suspends Aggregator License For Six Months",
+      "excerpt": "Licence suspended after repeated notices, compliance reviews and alleged failure to respond to regulatory directives.",
+      "url": "https://www.ndtvprofit.com/business/ola-hits-a-roadblock-chandigarh-suspends-aggregator-license-for-six-months-11651322#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://i.ndtvimg.com/i/2016-09/ola-cabs-650-400_650x400_61473270137.jpg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T23:23:11+05:30",
+      "category": "Markets",
+      "summary": "Licence suspended after repeated notices, compliance reviews and alleged failure to respond to regulatory directives."
+    },
+    {
+      "title": "Smriti Mandhana, Shafali Verma Star As India Crush Netherlands By 95 Runs In T20 World Cup",
+      "excerpt": "The Indian opening duo of Mandhana (74 off 47 balls) and Shafali (55 off 38 balls) slayed a hapless Netherlands attack to fire India to 209/5, their highest total in the tournament history.",
+      "url": "https://www.ndtvprofit.com/sports/smriti-mandhana-shafali-verma-star-as-india-crush-netherlands-by-95-runs-in-t20-world-cup-11651345#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-06/vrehh2fk_smriti-mandhana_625x300_17_June_26.jpg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T23:23:10+05:30",
+      "category": "Markets",
+      "summary": "The Indian opening duo of Mandhana (74 off 47 balls) and Shafali (55 off 38 balls) slayed a hapless Netherlands attack to fire India to 209/5, their highest total in the tournament history."
+    },
+    {
+      "title": "Trade Setup For June 18: Nifty Bulls Eye 24,200 Breakout On US",
+      "excerpt": "Any sustainable move above this zone could result inNiftyextending its rally towards 24,400, followed by 24,550 in the short term, note analysts.",
+      "url": "https://www.ndtvprofit.com/markets/trade-setup-for-june-18-nifty-bulls-eye-24-200-breakout-on-us-iran-deal-optimism-11651314#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-06/8fq6v2fk_f_625x300_17_June_26.jpg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T23:15:20+05:30",
+      "category": "Markets",
+      "summary": "Any sustainable move above this zone could result inNiftyextending its rally towards 24,400, followed by 24,550 in the short term, note analysts."
+    },
+    {
+      "title": "Shubman Gill, Ishan Kishan Smash Tons As India Thrash Afghanistan By 170 Runs To Seal ODI Series",
+      "excerpt": "Gill and Kishan put the visiting bowlers to the sword with a blistering 224-run stand for the third wicket off just 141 deliveries, completely taking the game away from the opposition.",
+      "url": "https://www.ndtvprofit.com/sports/shubman-gill-ishan-kishan-smash-tons-as-india-thrash-afghanistan-by-170-runs-to-seal-odi-series-11651306#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-06/b96tllf_shubman-gill-ishan-kishan_625x300_17_June_26.jpg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T23:14:30+05:30",
+      "category": "Markets",
+      "summary": "Gill and Kishan put the visiting bowlers to the sword with a blistering 224-run stand for the third wicket off just 141 deliveries, completely taking the game away from the opposition."
+    },
+    {
+      "title": "Trump Tells NDTV: US Reviewing Russian Oil Import Sanctions As Crude Prices Slide",
+      "excerpt": "\"We're seeing how far the price of oil comes down. It's really tumbling,\" Trump said, noting that crude rates would soon come to pre-war levels.",
+      "url": "https://www.ndtvprofit.com/world/trump-tells-ndtv-us-reviewing-russian-oil-import-sanctions-as-crude-prices-slide-11651132#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-06/sh2npgu_modi_625x300_17_June_26.jpg?im=FaceCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T23:09:12+05:30",
+      "category": "Markets",
+      "summary": "\"We're seeing how far the price of oil comes down. It's really tumbling,\" Trump said, noting that crude rates would soon come to pre-war levels."
+    },
+    {
+      "title": "NSE Flags Hit From Derivatives Curbs, Technology Risks In IPO Filing",
+      "excerpt": "Ahead of its IPO, NSE cautioned that SEBI's measures to curb speculative derivatives trading could continue to impact earnings and growth.",
+      "url": "https://www.ndtvprofit.com/markets/nse-ipo-drhp-flags-hit-from-derivatives-curbs-technology-risks-11651221#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-06/gi30hlu4_nse-ipo_625x300_17_June_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T23:04:06+05:30",
+      "category": "Markets",
+      "summary": "Ahead of its IPO, NSE cautioned that SEBI's measures to curb speculative derivatives trading could continue to impact earnings and growth."
+    },
+    {
+      "title": "NSE Files IPO Draft Papers, OFS Comprises 14.89 Crore Shares; LIC Not Among Sellers",
+      "excerpt": "Notably, NSE's largest shareholder, Life Insurance Corporation will not partake in the offer. NDTV Profit had earlier reported that LIC will not be divesting stake in the OFS.",
+      "url": "https://www.ndtvprofit.com/markets/nse-files-ipo-draft-papers-ofs-comprises-14-89-crore-shares-sbi-largest-seller-11651007#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA25DZqt.img?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T22:53:17+05:30",
+      "category": "Markets",
+      "summary": "Notably, NSE's largest shareholder, Life Insurance Corporation will not partake in the offer. NDTV Profit had earlier reported that LIC will not be divesting stake in the OFS."
+    },
+    {
+      "title": "UK FTA: How Indian Exporters Will Benefit From Enhanced Market Access",
+      "excerpt": "Tariffs on processed food, textiles, leather, marine and engineering goods to be scrapped as India safeguards key agricultural sectors under CETA.",
+      "url": "https://www.ndtvprofit.com/economy/uk-fta-how-indian-exporters-will-benefit-from-enhanced-market-access-11650861#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-06/udfhlo1s_indiauk-fta_625x300_17_June_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T22:42:49+05:30",
+      "category": "Markets",
+      "summary": "Tariffs on processed food, textiles, leather, marine and engineering goods to be scrapped as India safeguards key agricultural sectors under CETA."
+    },
+    {
+      "title": "Buy, Sell Or Hold: L&T, Vedanta, Varun Beverages, Coforge And Zydus Lifesciences — Ask Profit",
+      "excerpt": "Market experts shared their insights on fundamentals and technical levels for key stocks, including and more.",
+      "url": "https://www.ndtvprofit.com/markets/buy-sell-or-hold-l-t-vedanta-varun-beverages-coforge-and-zydus-lifesciences-ask-profit-11651082#publisher=newsstand",
+      "source": "NDTV Profit",
+      "image": "https://c.ndtvimg.com/2026-06/h0lnrep4_ask-profit-june-17-2026_625x300_17_June_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T22:42:17+05:30",
+      "category": "Markets",
+      "summary": "Market experts shared their insights on fundamentals and technical levels for key stocks, including and more."
     },
     {
       "title": "NSE Vs BSE: Which exchange wins the ultimate valuation battle after market giant files DRHP - financialexpress.com",
@@ -18,25 +179,38 @@
       "source": "financialexpress.com",
       "image": null,
       "publishedAt": "2026-06-17T22:32:09+05:30",
-      "category": "Markets"
+      "category": "Markets",
+      "summary": "NSE Vs BSE: Which exchange wins the ultimate valuation battle after market giant files DRHP financialexpress.com"
     },
     {
-      "title": "NSE Files IPO Draft Papers, OFS Comprises 14.89 Crore Shares; SBI Largest Seller",
-      "excerpt": "Canada Pension Plan, Bank of Baroda, and GIC are among the key sellers as NSE files its much-awaited IPO DRHP with the SEBI.",
-      "url": "https://www.ndtvprofit.com/markets/nse-files-ipo-draft-papers-ofs-comprises-14-89-crore-shares-sbi-largest-seller-11651007#publisher=newsstand",
+      "title": "How India, UK Worked Around Steel Trade Curbs For FTA Breakthrough",
+      "excerpt": "India secures safeguards for steel exports as London's new trade measures loom, clearing a key hurdle for the India-UK FTA rollout.",
+      "url": "https://www.ndtvprofit.com/economy/how-india-uk-worked-around-steel-trade-curbs-for-fta-breakthrough-11650896#publisher=newsstand",
       "source": "NDTV Profit",
-      "image": "https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA25DZqt.img?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T22:19:50+05:30",
-      "category": "Markets"
+      "image": "https://c.ndtvimg.com/2026-02/tjl2623s_tata-steel_625x300_04_February_26.jpg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
+      "publishedAt": "2026-06-17T22:23:24+05:30",
+      "category": "Markets",
+      "summary": "India secures safeguards for steel exports as London's new trade measures loom, clearing a key hurdle for the India-UK FTA rollout."
     },
     {
-      "title": "NSE files DRHP for IPO; may be valued at  ₹5 trillion on listing",
-      "excerpt": "While LIC will not sell any stake in NSE, selling shareholders include SBI, CPPIB, affiliates of Morgan Stanley, Temasek, Bank of Baroda, Stock Holding Corp. of India, GIC, New India Assurance, National Insurance and Uni",
+      "title": "NSE files DRHP for potentially India’s biggest-ever IPO, valuation seen at  ₹5 trillion",
+      "excerpt": "The NSE IPO is pegged at roughly ₹29,780 crore in the grey market. At that size, the IPO valuation is seen at over ₹5 trillion.",
       "url": "https://www.livemint.com/market/ipo/nse-ipo-drhp-stock-markets-india-sebi-institutional-investors-stock-exchanges-11781681388287.html",
       "source": "Mint",
       "image": "https://www.livemint.com/lm-img/img/2026/06/17/1600x900/logo/COFORGE-STOCKS--0_1781542526592_1781542540540_deb5d779-9230-4cf5-a52b-ecf64a6a4a68_1781682159941_363f8c91-42a3-408d-9497-23a006902b7e.JPG",
       "publishedAt": "2026-06-17T22:16:43+05:30",
-      "category": "Markets"
+      "category": "Markets",
+      "summary": "The NSE IPO is pegged at roughly ₹29,780 crore in the grey market. At that size, the IPO valuation is seen at over ₹5 trillion."
+    },
+    {
+      "title": "Stock market: Sensex, Nifty outlook for tomorrow as NSE, BSE closed today for Bakri Id - MSN",
+      "excerpt": "Stock market: Sensex, Nifty outlook for tomorrow as NSE, BSE closed today for Bakri Id MSN",
+      "url": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxPTl9CWVBfcmw4RmFRbFNuc21IWTNQbXdwemFmdXdINGJvOTlwLUJlTHY0Y2FiSkU3OXVLMnpwc3dLbEc5aEllRXVibVd4UEhLZkJHRlg5bEFkNmxYdlgxSWIwci1wdzJXVlc3dkpwendpNjJGRnFmd0hnSmN6LS1VOFVRQmdaaE92bjVuTXhmNnVPTDZ3amhzcG1qd1ZNSk9oVWdwSnFPRkJvNXhKVmIwUDYxaU10LTFwd3JiTTRqbVlIM3RveVJ6QlJsTVgzXzkzQmFTNg?oc=5",
+      "source": "MSN",
+      "image": null,
+      "publishedAt": "2026-06-17T22:11:09+05:30",
+      "category": "Markets",
+      "summary": "Stock market: Sensex, Nifty outlook for tomorrow as NSE, BSE closed today for Bakri Id MSN"
     },
     {
       "title": "Trump Tells NDTV: US Will Back India 'If Attacked'",
@@ -45,7 +219,8 @@
       "source": "NDTV Profit",
       "image": "https://c.ndtvimg.com/2026-06/u0mbtrec_moditrump_625x300_17_June_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
       "publishedAt": "2026-06-17T22:07:34+05:30",
-      "category": "Markets"
+      "category": "Markets",
+      "summary": "\"Now, if there is a new leader, I am not sure about it. But if they are attacked and he is the leader, we are going to be there to help,\" Trump said."
     },
     {
       "title": "Multibagger defence stock NIBE to be in focus on Thursday after demonstrating Garudastra to Indian Army",
@@ -54,7 +229,8 @@
       "source": "Mint",
       "image": "https://www.livemint.com/lm-img/img/2026/06/17/1600x900/logo/gbcb6b736b5e0a503f1fc15715d084fe9c44819053b82b9eae_1750069076879_1781713447269_d5af0af1-a769-40b8-ad6f-1236d6872fcf.jpg",
       "publishedAt": "2026-06-17T22:05:54+05:30",
-      "category": "Markets"
+      "category": "Markets",
+      "summary": "NIBE's defence stock garners attention after showcasing the Garudastra mortar system to the Indian Army, demonstrating advanced capabilities in GPS and laser-guided precision strikes. The system can rapidly engage target"
     },
     {
       "title": "With Iran-US peace deal in sight, IEA projects oil supply surplus in 2027",
@@ -63,7 +239,8 @@
       "source": "Mint",
       "image": "https://www.livemint.com/lm-img/img/2026/06/17/1600x900/logo/FILES-CYPRUS-IRAN-US-ISRAEL-WAR-HORMUZ-0_1781713953131_1781713964826_aa3f45e3-9129-4a2e-9933-7169db460250.jpg",
       "publishedAt": "2026-06-17T22:03:35+05:30",
-      "category": "Economy"
+      "category": "Economy",
+      "summary": "Global crude oil supply is set to fall by 3.9 million barrels per day (bpd) to 102.4 million bpd this year amid trade disruptions due to the West Asia war, before rebounding by 8 million bpd next year, the International "
     },
     {
       "title": "England vs Croatia Live Streaming: Team News, Likely Lineups; Where To Watch FIFA World Cup Match?",
@@ -72,160 +249,8 @@
       "source": "NDTV Profit",
       "image": "https://c.ndtvimg.com/2026-06/o7olgg08_england_625x300_17_June_26.jpg?im=FitAndFill,algorithm=dnn,width=1280,height=720",
       "publishedAt": "2026-06-17T22:00:01+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "US-Iran Deal Details LIVE Updates: Deal To Be Signed On Thursday Or Friday; Iran Agreed Not To Produce Nuclear Weapon",
-      "excerpt": "An interim agreement expected to be signed on Friday would allow Tehran to resume crude sales immediately.",
-      "url": "https://www.ndtvprofit.com/world/us-iran-deal-details-live-updates-trump-to-publicly-share-mou-elements-shortly-11650352#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-04/hmsltej_trump-hormuz_625x300_11_April_26.jpg?im=FitAndFill,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T21:52:56+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "US, Iran May Prepone Peace Deal Signing To As Early As Today: Report",
-      "excerpt": "The MoU for the deal might be signed by US and Iran via remote and electronic means today.",
-      "url": "https://www.ndtvprofit.com/world/us-iran-may-prepone-peace-deal-signing-to-as-early-as-today-report-11650757#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-06/su4360vk_donald-trump_625x300_15_June_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T21:47:00+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "CBI Arrests Indian Forest Service Officer In 'Misappropriation' Of CREST Funds Case",
-      "excerpt": "Srivastava was produced before the special judge, CBI, Chandigarh, and remanded to police custody for three days, a CBI spokesperson said in a statement.",
-      "url": "https://www.ndtvprofit.com/india/cbi-arrests-indian-forest-service-officer-in-misappropriation-of-crest-funds-case-11650878#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-06/85o9m3g_cbi_625x300_01_June_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T21:46:03+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "Indian Man In Poland Reveals Rs 2.1 Lakh Monthly Budget, Sparks Debate Over Grocery Costs | Watch Viral Video",
-      "excerpt": "An Indian man explained his monthly expenses in Poland, including rent, leisure and groceries, after a viral video sparked online debate.",
-      "url": "https://www.ndtvprofit.com/trending/indian-man-in-poland-reveals-rs-2-1-lakh-monthly-budget-sparks-debate-over-grocery-costs-watch-viral-video-11650731#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-06/m2ah8pak_poland_625x300_17_June_26.jpg?im=FaceCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T21:30:31+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "Outlaw Water Over Drowning Risks: Telegram Takes Swipe At Indian Govt Over NEET",
-      "excerpt": "Telegram escalates its criticism of India's temporary ban, comparing the move to outlawing water over drowning risks as debate over digital freedoms intensifies",
-      "url": "https://www.ndtvprofit.com/india/outlaw-water-over-drowning-risks-telegram-takes-swipe-at-indian-govt-over-neet-linked-interim-ban-11650766#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-06/7qla65es_telegram_625x300_17_June_26.jpg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T21:28:02+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "HDFC Bank Board Meets Thursday Amid Focus On Mistry's Tenure, Legal Findings On Chakraborty's Exit",
-      "excerpt": "HDFC Bank's board is set to meet on Thursday amid focus on Keki Mistry's tenure and findings of a legal review linked to Atanu Chakraborty's exit.",
-      "url": "https://www.ndtvprofit.com/business/hdfc-bank-board-meets-thursday-amid-focus-on-mistrys-tenure-legal-findings-on-chakrabortys-exit-11650614#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-05/gq56oig_hdfc-bank_625x300_07_May_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T21:19:09+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "Centre Mulls Carbon Capture Tech Promotion Framework With Rs 20,000 Crore Outlay",
-      "excerpt": "The proposal aligns with India's commitment to achieving net-zero emissions by 2070.",
-      "url": "https://www.ndtvprofit.com/economy/centre-mulls-carbon-capture-tech-promotion-framework-with-rs-20-000-crore-outlay-11650720#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2025-12/19e35a12_pexels-pixabay-257775.jpg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T21:14:57+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "Gold, silver rates today: Comex gold and silver remain steady ahead of US Fed policy decision",
-      "excerpt": "Precious metals showed little movement as traders awaited the US Federal Reserve's interest-rate decision. Gold futures rose slightly to $4,369, while silver gained to over $70, amid geopolitical tensions and inflation c",
-      "url": "https://www.livemint.com/market/commodities/gold-silver-rates-today-comex-gold-and-silver-remain-steady-ahead-of-us-fed-policy-decision-11781705291245.html",
-      "source": "Mint",
-      "image": "https://www.livemint.com/lm-img/img/2026/06/17/1600x900/logo/2-0-1446757421-RTX3SM5B-0_1679738599550_1781705647895_ce0a76d6-0251-4dbc-b2d0-a4f8cdf553cf.jpg",
-      "publishedAt": "2026-06-17T21:13:35+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "InCred Money gets Sebi nod for MF licence, plans launch in 6-9 months",
-      "excerpt": "InCred Money has secured Sebi's in-principle approval for a mutual fund licence, marking a key step toward launching its asset management business. The company plans to build a digital-first AMC and expects to go live af",
-      "url": "https://economictimes.indiatimes.com/mf/mf-news/incred-money-gets-sebi-in-principle-nod-for-mutual-fund-licence-plans-launch-in-6-9-months/articleshow/131805195.cms",
-      "source": "Economic Times",
-      "image": null,
-      "publishedAt": "2026-06-17T21:06:00+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "India-UK FTA To Come Into Force On July 15, 'Massive Tariff Cuts' To Roll Out",
-      "excerpt": "The confirmation came shortly after PM Modi and his UK counterpart Keir Starmer were heard discussing the breakthrough in trade talks.",
-      "url": "https://www.ndtvprofit.com/economy/india-uk-fta-to-come-into-force-on-july-15-11650396#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-01/c5beb592_AP07242025000214B.jpg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T21:00:23+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "Wall Street edges higher ahead of Federal Reserve rate decision, Broadcom jumps 4.4%, Applied Materials surges 8.6%",
-      "excerpt": "At 10:15 a.m. Eastern Time, the S&amp;P 500 gained 0.2%, while the Dow Jones Industrial Average advanced 0.5%. The Nasdaq Composite also rose 0.2%",
-      "url": "https://www.livemint.com/market/stock-market-news/wall-street-edges-higher-ahead-of-federal-reserve-rate-decision-broadcom-jumps-4-4-applied-materials-surges-86-11781707074178.html",
-      "source": "Mint",
-      "image": "https://www.livemint.com/lm-img/img/2026/06/17/1600x900/Financial-Markets-Wall-Street-2_1781707180447_1781707218890_11b53202-67be-4a4a-a598-80e3aa661fbe.jpg",
-      "publishedAt": "2026-06-17T20:50:50+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "US Stock Market Today: S&P 500, Dow Jones Rise Ahead Of Fed Decision; Nasdaq Recovers From Tech Rout",
-      "excerpt": "S&P 500 opened 0.9% higher at 7,524.50, Dow Jones was stable at 52,013.52 after a record high closing.",
-      "url": "https://www.ndtvprofit.com/markets/us-stock-market-today-s-p-500-dow-jones-little-changed-ahead-of-fed-decision-nasdaq-recovers-from-tech-rout-11649984#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-05/bnbcavic_s_625x300_22_May_26.jpg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T20:42:09+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "US Fed Meeting Live Updates: Wall Street Rises Ahead Of New Chair Kevin Warsh's First FOMC",
-      "excerpt": "The FOMC's latest statement will be released at 2 p.m. EDT or 11:30 p.m. (IST) on Wednesday, June 17.",
-      "url": "https://www.ndtvprofit.com/economy/us-fed-meeting-june-2026-live-updates-kevin-warsh-speech-fomc-rate-cut-announcement-iran-israel-war-donald-trump-news-11650079#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-01/9ctg4gt4_warsh_625x300_30_January_26.jpeg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T20:39:38+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "Warner Music India, SVF Entertainment Team Up To Take Bengali Music Worldwide",
-      "excerpt": "The partnership brings together Warner Music India's international network and SVF Entertainment's strong position in Bengal's entertainment industry.",
-      "url": "https://www.ndtvprofit.com/business/warner-music-india-svf-entertainment-team-up-to-take-bengali-songs-worldwide-11650415#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-06/0m51d584_music_625x300_17_June_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T20:37:46+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "SpaceX Shares Turn Negative, Erase Up To 6% Of Gains",
-      "excerpt": "Shares of SpaceX started trading in the negative thirty minutes after US markets opened.",
-      "url": "https://www.ndtvprofit.com/world/spacex-shares-turn-negative-erase-upto-6-of-gains-11650139#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-06/8ggkmads_spacex_625x300_12_June_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T20:25:06+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "US Fed Rate Decision: June FOMC Meeting Date, Time, What To Expect And Where To Watch Kevin Warsh's Speech",
-      "excerpt": "The meeting comes after the US President Donald Trump announced a preliminary agreement with Iran to end their conflict.",
-      "url": "https://www.ndtvprofit.com/economy/us-fed-rate-decision-june-fomc-meeting-date-time-what-to-expect-and-where-to-watch-kevin-warsh-speech-11647013#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-05/t3anuo9_a_625x300_19_May_26.png?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T20:24:40+05:30",
-      "category": "Markets"
-    },
-    {
-      "title": "Govt Launches PM Research Chair 2026 Scheme To Bring Top Indian",
-      "excerpt": "Selected fellows will get funding support of up to 5 crore, along with fellowship and relocation support.",
-      "url": "https://www.ndtvprofit.com/india/govt-launches-pm-research-chair-2026-scheme-to-bring-top-indian-origin-researchers-home-11650425#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-06/vdhju8cc_g_625x300_17_June_26.jpeg?im=FeatureCrop,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-17T20:22:57+05:30",
-      "category": "Markets"
+      "category": "Markets",
+      "summary": "The Croatia vs England game will kick off at 1:30 a.m. IST on Thursday. The match will be played at the Dallas Stadium in Arlington."
     }
   ]
 }
