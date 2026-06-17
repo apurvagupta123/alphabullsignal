@@ -171,7 +171,6 @@ const SECTOR_TAGS: Record<string, string> = {
       <div class="pie-chart-wrap">
         <canvas id="stockPieChart" width="260" height="260"></canvas>
         <div class="pie-center" id="pieCenter">
-          <span class="pie-center-sym" id="pieSym">NSE</span>
           <span class="pie-center-price" id="piePrice">—</span>
           <span class="pie-center-chg" id="pieChg">—</span>
         </div>
@@ -310,24 +309,6 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </section>
 
-  <!-- ── Company Spotlight ─────────────────────────────── -->
-  <section class="content-section reveal reveal-d2">
-    <div class="section-head">
-      <h2 class="section-title">Company Spotlight</h2>
-    </div>
-    <div class="spotlight-box">
-      <div class="spotlight-search" style="position:relative">
-        <input id="slInput" type="text" class="sl-input" placeholder="Search company name or ticker (e.g. RELIANCE, HDFC Bank, TCS)" autocomplete="off" />
-        <button id="slBtn" class="sl-btn">Analyze →</button>
-        <div id="slDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1a1509;border:1px solid rgba(212,169,64,0.35);border-radius:10px;margin-top:4px;z-index:200;max-height:240px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.5)"></div>
-      </div>
-      <div id="slResult">
-        <p class="sl-hint">Search for any NSE company — by name or ticker symbol.</p>
-      </div>
-    </div>
-  </section>
-
-
   <!-- ── Financial News ───────────────────────────────── -->
   {featuredArticle && (
     <section class="content-section reveal" id="news">
@@ -409,6 +390,23 @@ const SECTOR_TAGS: Record<string, string> = {
       </div>
     </div>
   )}
+
+  <!-- ── Company Spotlight ─────────────────────────────── -->
+  <section class="content-section reveal reveal-d2">
+    <div class="section-head">
+      <h2 class="section-title">Company Spotlight</h2>
+    </div>
+    <div class="spotlight-box">
+      <div class="spotlight-search" style="position:relative">
+        <input id="slInput" type="text" class="sl-input" placeholder="Search company name or ticker (e.g. RELIANCE, HDFC Bank, TCS)" autocomplete="off" />
+        <button id="slBtn" class="sl-btn">Analyze →</button>
+        <div id="slDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1a1509;border:1px solid rgba(212,169,64,0.35);border-radius:10px;margin-top:4px;z-index:200;max-height:240px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.5)"></div>
+      </div>
+      <div id="slResult">
+        <p class="sl-hint">Search for any NSE company — by name or ticker symbol.</p>
+      </div>
+    </div>
+  </section>
 
   <!-- ── Morning Market Briefing ──────────────────────── -->
   <section class="content-section reveal" id="from-ledger">
@@ -1395,10 +1393,8 @@ const SECTOR_TAGS: Record<string, string> = {
     const pct = q.regularMarketChangePercent ?? 0;
     const up  = chg >= 0;
 
-    const symEl   = document.getElementById('pieSym');
     const priceEl = document.getElementById('piePrice');
     const chgEl   = document.getElementById('pieChg');
-    if (symEl) symEl.textContent = q.symbol.replace('.NS','');
     if (priceEl) priceEl.textContent = `₹${(q.regularMarketPrice||0).toLocaleString('en-IN',{maximumFractionDigits:2})}`;
     if (chgEl) {
       chgEl.textContent = `${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`;
