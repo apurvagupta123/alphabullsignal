@@ -742,10 +742,10 @@ const SECTOR_TAGS: Record<string, string> = {
 /* ── News Section ─────────────────────────────────── */
 .news-grid {
   display: grid;
-  grid-template-columns: 1fr 240px;
-  gap: 16px;
+  grid-template-columns: 520px 220px;
+  gap: 14px;
   align-items: start;
-  max-width: 860px;
+  max-width: 760px;
 }
 
 /* ── Featured article — horizontal: image left, text right */
@@ -854,13 +854,13 @@ const SECTOR_TAGS: Record<string, string> = {
 .news-updated { font-size: 9.5px; color: var(--muted); opacity: 0.5; }
 .news-more { font-size: 10.5px; font-weight: 600; color: var(--gold); text-decoration: none; }
 .news-more:hover { opacity: 0.75; }
-@media (max-width: 860px) {
+@media (max-width: 760px) {
   .news-grid { grid-template-columns: 1fr; max-width: 100%; }
   .news-side { display: none; }
 }
 .news-loading { color: var(--muted); font-size: 13px; padding: 16px 0; opacity: 0.5; }
 
-/* news card buttons — reset browser button styles, preserve card CSS */
+/* news card buttons — reset browser button styles only */
 .news-card-btn {
   background: none;
   border: none;
@@ -870,10 +870,9 @@ const SECTOR_TAGS: Record<string, string> = {
   color: inherit;
   text-align: left;
   cursor: pointer;
-  display: block;
   width: 100%;
+  /* do NOT set display here — let each card class control it */
 }
-.news-featured.news-card-btn { display: flex; flex-direction: row; }
 
 /* ── News Modal ─────────────────────────────────────────── */
 .nmodal-overlay {
