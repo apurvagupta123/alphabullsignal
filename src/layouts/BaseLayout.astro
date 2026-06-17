@@ -1,6 +1,15 @@
 ---
 const { title } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+// Find latest India Market Briefing post for nav link
+const allPosts = await Astro.glob('../pages/blog/*.md');
+const latestBriefing = allPosts
+  .filter((p: any) => p.file?.includes('india-market-briefing'))
+  .sort((a: any, b: any) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime())[0];
+const briefingUrl = latestBriefing
+  ? '/blog/' + latestBriefing.file.split('/blog/')[1].replace('.md','')
+  : '/blog/2026-06-17-india-market-briefing';
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -131,6 +140,8 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
           <a href="/" class={`nav-link${path === '/' ? ' active' : ''}`}>Home</a>
           <a href="/markets" class={`nav-link${path.startsWith('/markets') ? ' active' : ''}`}>Markets</a>
           <a href="/news" class={`nav-link${path.startsWith('/news') ? ' active' : ''}`}>News</a>
+          <a href="/#from-ledger" class={`nav-link${path.startsWith('/blog') ? ' active' : ''}`}>Ledger</a>
+          <a href={briefingUrl} class={`nav-link${path.includes('india-market-briefing') ? ' active' : ''}`}>Daily Briefing</a>
           <a href="/comparison" class={`nav-link${path.startsWith('/comparison') ? ' active' : ''}`}>Compare</a>
           <a href="/economic-calendar" class={`nav-link${path.startsWith('/economic') ? ' active' : ''}`}>Economy</a>
           <a href="/tools" class={`nav-link${path.startsWith('/tools') ? ' active' : ''}`}>Tools</a>
