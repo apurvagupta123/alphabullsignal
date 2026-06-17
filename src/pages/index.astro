@@ -742,52 +742,66 @@ const SECTOR_TAGS: Record<string, string> = {
 /* ── News Section ─────────────────────────────────── */
 .news-grid {
   display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 20px;
+  grid-template-columns: 1fr 240px;
+  gap: 16px;
   align-items: start;
+  max-width: 860px;
 }
 
-/* ── Featured article (left) */
+/* ── Featured article — horizontal: image left, text right */
 .news-featured {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(212,169,64,0.18);
   background: rgba(212,169,64,0.04);
   transition: border-color 0.2s;
   cursor: pointer;
+  min-height: 0;
 }
 .news-featured:hover { border-color: rgba(212,169,64,0.4); }
-.news-feat-body { padding: 14px 16px; }
+.news-feat-img-wrap {
+  width: 140px;
+  min-width: 140px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.news-feat-img { width: 140px; height: 100%; object-fit: cover; display: block; min-height: 110px; }
+.news-feat-body { padding: 10px 13px; flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
 .news-source-tag {
   display: inline-block;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.7px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
   color: var(--gold);
-  opacity: 0.85;
-  margin-bottom: 6px;
+  opacity: 0.8;
+  margin-bottom: 5px;
 }
 .news-feat-title {
-  font-size: 17px;
+  font-size: 13.5px;
   font-weight: 700;
   line-height: 1.4;
   color: var(--text);
-  margin: 0 0 8px;
-}
-.news-feat-img-wrap {
-  width: 100%;
-  max-height: 130px;
+  margin: 0 0 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.news-feat-img { width: 100%; height: 130px; object-fit: cover; display: block; }
 .news-feat-excerpt {
-  font-size: 12.5px;
-  line-height: 1.55;
+  font-size: 11.5px;
+  line-height: 1.5;
   color: var(--muted);
-  margin: 8px 0 6px;
+  margin: 0 0 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-.news-feat-time { font-size: 10.5px; color: var(--muted); opacity: 0.6; }
+.news-feat-time { font-size: 10px; color: var(--muted); opacity: 0.6; }
 
 /* ── Side list (right) — compact text only */
 .news-side {
@@ -801,26 +815,26 @@ const SECTOR_TAGS: Record<string, string> = {
 .news-side-item {
   display: flex;
   flex-direction: column;
-  padding: 9px 13px;
-  border-bottom: 1px solid rgba(212,169,64,0.08);
+  padding: 7px 11px;
+  border-bottom: 1px solid rgba(212,169,64,0.07);
   cursor: pointer;
   transition: background 0.15s;
 }
 .news-side-item:last-of-type { border-bottom: none; }
 .news-side-item:hover { background: rgba(212,169,64,0.06); }
 .news-side-source {
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
   color: var(--gold);
-  opacity: 0.75;
-  margin-bottom: 3px;
+  opacity: 0.7;
+  margin-bottom: 2px;
 }
 .news-side-title {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.35;
   color: var(--text);
   margin: 0;
   display: -webkit-box;
@@ -828,23 +842,23 @@ const SECTOR_TAGS: Record<string, string> = {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.news-side-time { display: none; } /* hidden for compactness */
+.news-side-time { display: none; }
 .news-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 13px;
+  padding: 7px 11px;
   border-top: 1px solid rgba(212,169,64,0.1);
-  margin-top: 6px;
+  margin-top: 4px;
 }
-.news-updated { font-size: 10px; color: var(--muted); opacity: 0.5; }
-.news-more { font-size: 11px; font-weight: 600; color: var(--gold); text-decoration: none; }
+.news-updated { font-size: 9.5px; color: var(--muted); opacity: 0.5; }
+.news-more { font-size: 10.5px; font-weight: 600; color: var(--gold); text-decoration: none; }
 .news-more:hover { opacity: 0.75; }
-@media (max-width: 900px) {
-  .news-grid { grid-template-columns: 1fr; }
+@media (max-width: 860px) {
+  .news-grid { grid-template-columns: 1fr; max-width: 100%; }
   .news-side { display: none; }
 }
-.news-loading { color: var(--muted); font-size: 13px; padding: 20px 0; opacity: 0.5; }
+.news-loading { color: var(--muted); font-size: 13px; padding: 16px 0; opacity: 0.5; }
 
 /* news card buttons — reset browser button styles, preserve card CSS */
 .news-card-btn {
@@ -859,6 +873,7 @@ const SECTOR_TAGS: Record<string, string> = {
   display: block;
   width: 100%;
 }
+.news-featured.news-card-btn { display: flex; flex-direction: row; }
 
 /* ── News Modal ─────────────────────────────────────────── */
 .nmodal-overlay {
@@ -1782,17 +1797,15 @@ const SECTOR_TAGS: Record<string, string> = {
       const featured = articles[0];
       const sides = articles.slice(1, 13);
 
-      // Featured card — title first, then image, then excerpt (MoneyControl style)
+      // Featured card — horizontal: image left, text right
       const featTime = new Date(featured.publishedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       const featHtml = `
         <button class="news-featured news-card-btn" data-idx="0">
+          ${featured.image ? `<div class="news-feat-img-wrap"><img src="${featured.image}" alt="" class="news-feat-img" loading="lazy"/></div>` : ''}
           <div class="news-feat-body">
             <span class="news-source-tag">${featured.source}</span>
             <h3 class="news-feat-title">${featured.title}</h3>
-            <p class="news-feat-excerpt">${(featured.excerpt||'').slice(0,140)}</p>
-          </div>
-          ${featured.image ? `<div class="news-feat-img-wrap"><img src="${featured.image}" alt="" class="news-feat-img" loading="lazy"/></div>` : ''}
-          <div style="padding:8px 16px 12px">
+            <p class="news-feat-excerpt">${(featured.excerpt||'').slice(0,110)}</p>
             <span class="news-feat-time">${featTime}</span>
           </div>
         </button>`;
