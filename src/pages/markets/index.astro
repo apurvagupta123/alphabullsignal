@@ -298,8 +298,6 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
     if (descEl) descEl.textContent = SECTORS[sectorKey].desc;
     const dd = document.getElementById('sectorDropdown');
     if (dd) dd.value = sectorKey;
-      b.classList.toggle('active', b.dataset.sector === sectorKey);
-    });
     buildGrid(sectorKey);
   }
 
@@ -310,8 +308,6 @@ const SECTORS: Record<string, { label: string; icon: string; desc: string; stock
     const validSector = SECTORS[initSector] ? initSector : 'banking';
 
     document.getElementById('sectorDropdown')?.addEventListener('change', (e) => switchSector(e.target.value));
-      btn.addEventListener('click', () => switchSector(btn.dataset.sector || 'banking'));
-    });
     document.getElementById('refreshBtn')?.addEventListener('click', async () => {
       await loadAllQuotes();
       buildGrid(currentSector);
