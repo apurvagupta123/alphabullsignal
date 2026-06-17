@@ -520,48 +520,120 @@ def main():
     total_kb = sum(os.path.getsize(os.path.join(company_dir, f)) for f in os.listdir(company_dir)) / 1024
     print(f"  Saved {saved_count} company files ({total_kb:.0f} KB total) → public/data/company/")
 
-    # 7. FII / DII flow from NSE India
+    # 6b. Quotes JSON for screener page (symbol, name, price, changePercent, 52W high/low)
+    print("\n[6b] Screener Quotes JSON")
+    quotes_list = []
+    for sym in COMPANY_SYMBOLS:
+        info  = info_map.get(sym, {})
+        sq    = sector_q.get(sym, {})
+        price = sq.get('regularMarketPrice') or info.get('regularMarketPrice') or 0
+        pct   = sq.get('regularMarketChangePercent') or info.get('regularMarketChangePercent') or 0
+        w52h  = info.get('fiftyTwoWeekHigh')
+        w52l  = info.get('fiftyTwoWeekLow')
+        if not w52h:
+            hist   = history_map.get(sym, [])
+            prices = [d['close'] for d in hist if d.get('close')]
+            w52h   = max(prices) if prices else 0
+            w52l   = min(prices) if prices else 0
+        name = info.get('longName') or sym.replace('.NS', '').replace('.BO', '')
+        quotes_list.append({
+            'symbol':        sym,
+            'name':          name,
+            'price':         round(float(price), 2) if price else 0,
+            'changePercent': round(float(pct),   2) if pct   else 0,
+            'week52Low':     round(float(w52l),  2) if w52l  else 0,
+            'week52High':    round(float(w52h),  2) if w52h  else 0,
+        })
+    save('quotes.json', {
+        'lastUpdated': NOW,
+        'quotes': sorted(quotes_list, key=lambda x: x['name']),
+    })
+    print(f"  Saved quotes.json — {len(quotes_list)} stocks with 52W data")
+
+    # 7. FII / DII flow from NSE India (session-based to bypass IP restrictions)
     print("\n[7/7] FII / DII Flow")
     try:
-        import urllib.request
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://www.nseindia.com/',
-        }
-        req = urllib.request.Request('https://www.nseindia.com/api/fiidiiTradeReact', headers=headers)
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            import json as _json
+        import urllib.request, http.cookiejar, json as _json, time as _time
+        _cj     = http.cookiejar.CookieJar()
+        _opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(_cj))
+        _opener.addheaders = [
+            ('User-Agent',      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'),
+            ('Accept-Language', 'en-US,en;q=0.9'),
+            ('Accept',          'text/html,application/xhtml+xml,*/*;q=0.8'),
+        ]
+        # Step 1: visit NSE homepage to pick up session cookies
+        try:
+            _opener.open('https://www.nseindia.com/', timeout=12)
+            _time.sleep(1.5)
+        except Exception:
+            pass
+        # Step 2: fetch FII/DII API with established session
+        _req = urllib.request.Request(
+            'https://www.nseindia.com/api/fiidiiTradeReact',
+            headers={
+                'User-Agent':  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'Accept':      'application/json, text/plain, */*',
+                'Referer':     'https://www.nseindia.com/market-data/fii-dii-data',
+                'Accept-Language': 'en-US,en;q=0.9',
+            }
+        )
+        with _opener.open(_req, timeout=15) as resp:
             raw = _json.loads(resp.read().decode())
         if raw and isinstance(raw, list) and len(raw) > 0:
-            rows = []
-            for row in raw[:10]:  # last 10 trading days
-                rows.append({
-                    'date':   row.get('date', ''),
-                    'fiiNet': float(row.get('fiiNet', row.get('fii_net', 0)) or 0),
-                    'diiNet': float(row.get('diiNet', row.get('dii_net', 0)) or 0),
-                })
+            # NSE API returns separate rows per category (FII/DII) per date
+            # Group by date, merge FII and DII into one row each
+            by_date = {}
+            for row in raw:
+                date = row.get('date', '')
+                cat  = row.get('category', '').upper()
+                net  = float(row.get('netValue', row.get('fiiNet', row.get('fii_net', 0))) or 0)
+                if date not in by_date:
+                    by_date[date] = {'date': date, 'fiiNet': 0, 'diiNet': 0}
+                if cat.startswith('FII'):   # covers 'FII', 'FII/FPI', etc.
+                    by_date[date]['fiiNet'] = net
+                elif cat == 'DII':
+                    by_date[date]['diiNet'] = net
+                elif not cat:
+                    # Old format: single row with both fiiNet and diiNet
+                    by_date[date]['fiiNet'] = float(row.get('fiiNet', 0) or 0)
+                    by_date[date]['diiNet'] = float(row.get('diiNet', 0) or 0)
+            rows = sorted(by_date.values(), key=lambda x: x['date'], reverse=True)[:10]
+            if not rows:
+                raise ValueError('no usable rows after parsing')
             save('fii-dii.json', {'lastUpdated': NOW, 'data': rows})
             print(f"  Saved fii-dii.json — latest: FII={rows[0]['fiiNet']:.0f}Cr DII={rows[0]['diiNet']:.0f}Cr")
         else:
-            raise ValueError('empty response')
+            raise ValueError('empty or unexpected response')
     except Exception as e:
         print(f"  FII/DII fetch failed: {e} — saving empty fallback")
         save('fii-dii.json', {'lastUpdated': NOW, 'data': [], 'error': str(e)})
 
-    # 8. India IPO data from NSE
+    # 8. India IPO data from NSE (reuse the session opener from FII/DII step)
     print("\n[8/9] India IPO Data (NSE)")
     try:
-        import urllib.request as _ur, json as _j
-        _h = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'application/json',
-            'Referer': 'https://www.nseindia.com/',
-            'Accept-Language': 'en-US,en;q=0.9',
-        }
-        req = _ur.Request('https://www.nseindia.com/api/allIpo', headers=_h)
-        with _ur.urlopen(req, timeout=15) as resp:
+        import urllib.request as _ur, json as _j, http.cookiejar as _hcj
+        _cj2     = http.cookiejar.CookieJar()
+        _opener2 = _ur.build_opener(_ur.HTTPCookieProcessor(_cj2))
+        _opener2.addheaders = [
+            ('User-Agent',      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'),
+            ('Accept-Language', 'en-US,en;q=0.9'),
+        ]
+        try:
+            _opener2.open('https://www.nseindia.com/', timeout=12)
+            _time.sleep(1)
+        except Exception:
+            pass
+        # Try current NSE IPO endpoints (NSE changes these periodically)
+        _ipo_req = _ur.Request(
+            'https://www.nseindia.com/api/allIpo?category=ipo',
+            headers={
+                'User-Agent':  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'Accept':      'application/json, text/plain, */*',
+                'Referer':     'https://www.nseindia.com/market-data/upcoming-issues',
+                'Accept-Language': 'en-US,en;q=0.9',
+            }
+        )
+        with _opener2.open(_ipo_req, timeout=15) as resp:
             raw = _j.loads(resp.read().decode())
         upcoming = raw.get('upcoming', [])
         ongoing  = raw.get('ongoing', [])
