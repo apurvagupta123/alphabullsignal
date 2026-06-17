@@ -293,7 +293,7 @@ const SECTOR_TAGS: Record<string, string> = {
   </section>
 
   <!-- ── Financial News (client-rendered, auto-refreshes every 30 min) ── -->
-  <section class="content-section reveal" id="news">
+  <section class="content-section" id="news">
     <div class="section-head">
       <h2 class="section-title">📰 Market News</h2>
       <span class="section-live">LIVE</span>
@@ -1837,9 +1837,13 @@ const SECTOR_TAGS: Record<string, string> = {
 
     // ── fetch /data/news.json and render
     async function fetchAndRenderNews() {
+      const grid = document.getElementById('newsGrid');
       try {
         const res = await fetch('/data/news.json', { cache: 'no-store' });
-        if (!res.ok) return;
+        if (!res.ok) {
+          if (grid) grid.innerHTML = '<div class="news-loading">Could not load news (HTTP ' + res.status + ')</div>';
+          return;
+        }
         const data = await res.json();
         renderNews(data.articles || []);
         const updEl = document.getElementById('newsUpdatedAt');
@@ -1848,6 +1852,7 @@ const SECTOR_TAGS: Record<string, string> = {
         }
       } catch (e) {
         console.warn('News fetch failed:', e);
+        if (grid) grid.innerHTML = '<div class="news-loading">News unavailable — will retry shortly.</div>';
       }
     }
 
