@@ -1,0 +1,141 @@
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
+  <defs>
+    <!-- Navy to deep navy gradient background -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a1628;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0d1f3c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#071020;stop-opacity:1" />
+    </linearGradient>
+    <!-- Gold accent gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#c9952a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#f0c040;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c9952a;stop-opacity:1" />
+    </linearGradient>
+    <!-- Sunrise glow gradient -->
+    <radialGradient id="sunriseGlow" cx="75%" cy="20%" r="50%">
+      <stop offset="0%" style="stop-color:#f0c040;stop-opacity:0.15" />
+      <stop offset="60%" style="stop-color:#c9952a;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#0a1628;stop-opacity:0" />
+    </radialGradient>
+    <!-- Chart line glow -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)" />
+
+  <!-- Sunrise ambient glow top-right -->
+  <rect width="1200" height="630" fill="url(#sunriseGlow)" />
+
+  <!-- Grid lines (subtle) -->
+  <g opacity="0.06" stroke="#f0c040" stroke-width="1">
+    <line x1="0" y1="157" x2="1200" y2="157"/>
+    <line x1="0" y1="314" x2="1200" y2="314"/>
+    <line x1="0" y1="471" x2="1200" y2="471"/>
+    <line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="900" y1="0" x2="900" y2="630"/>
+  </g>
+
+  <!-- Decorative candlestick chart (right side, subtle) -->
+  <g opacity="0.12" transform="translate(700, 80)">
+    <!-- Candle bodies -->
+    <rect x="0" y="120" width="18" height="60" fill="#f0c040" rx="2"/>
+    <rect x="35" y="100" width="18" height="80" fill="#f0c040" rx="2"/>
+    <rect x="70" y="140" width="18" height="50" fill="#ef4444" rx="2"/>
+    <rect x="105" y="90" width="18" height="100" fill="#f0c040" rx="2"/>
+    <rect x="140" y="70" width="18" height="120" fill="#f0c040" rx="2"/>
+    <rect x="175" y="110" width="18" height="40" fill="#ef4444" rx="2"/>
+    <rect x="210" y="60" width="18" height="130" fill="#f0c040" rx="2"/>
+    <rect x="245" y="50" width="18" height="140" fill="#f0c040" rx="2"/>
+    <!-- Wicks -->
+    <line x1="9" y1="100" x2="9" y2="195" stroke="#f0c040" stroke-width="2"/>
+    <line x1="44" y1="80" x2="44" y2="195" stroke="#f0c040" stroke-width="2"/>
+    <line x1="79" y1="125" x2="79" y2="205" stroke="#ef4444" stroke-width="2"/>
+    <line x1="114" y1="70" x2="114" y2="205" stroke="#f0c040" stroke-width="2"/>
+    <line x1="149" y1="50" x2="149" y2="205" stroke="#f0c040" stroke-width="2"/>
+    <line x1="184" y1="95" x2="184" y2="165" stroke="#ef4444" stroke-width="2"/>
+    <line x1="219" y1="40" x2="219" y2="205" stroke="#f0c040" stroke-width="2"/>
+    <line x1="254" y1="30" x2="254" y2="205" stroke="#f0c040" stroke-width="2"/>
+  </g>
+
+  <!-- Rising market line (right side) -->
+  <g filter="url(#glow)">
+    <polyline
+      points="680,520 740,490 800,470 860,440 920,400 980,360 1040,310 1100,260 1160,200 1200,170"
+      fill="none" stroke="#f0c040" stroke-width="3" opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Sun/Sunrise circle top right -->
+  <circle cx="1050" cy="120" r="70" fill="none" stroke="#f0c040" stroke-width="1.5" opacity="0.12"/>
+  <circle cx="1050" cy="120" r="50" fill="none" stroke="#f0c040" stroke-width="1" opacity="0.18"/>
+  <circle cx="1050" cy="120" r="30" fill="#f0c040" opacity="0.08" filter="url(#softGlow)"/>
+  <!-- Sun rays -->
+  <g transform="translate(1050,120)" opacity="0.15" stroke="#f0c040" stroke-width="1.5">
+    <line x1="0" y1="-85" x2="0" y2="-95"/>
+    <line x1="60" y1="-60" x2="67" y2="-67"/>
+    <line x1="85" y1="0" x2="95" y2="0"/>
+    <line x1="60" y1="60" x2="67" y2="67"/>
+    <line x1="-60" y1="-60" x2="-67" y2="-67"/>
+    <line x1="-85" y1="0" x2="-95" y2="0"/>
+  </g>
+
+  <!-- Gold top accent bar -->
+  <rect x="0" y="0" width="1200" height="5" fill="url(#goldGrad)"/>
+
+  <!-- Left accent vertical line -->
+  <rect x="72" y="140" width="4" height="280" fill="url(#goldGrad)" rx="2"/>
+
+  <!-- BULLSIGNAL brand tag -->
+  <text x="96" y="168" font-family="'Arial', sans-serif" font-weight="700" font-size="13" letter-spacing="4" fill="#f0c040" opacity="0.9">BULLSIGNAL</text>
+  <text x="96" y="186" font-family="'Arial', sans-serif" font-weight="400" font-size="11" letter-spacing="2" fill="#8899bb" opacity="0.8">thebusinessledger.theapurva.com</text>
+
+  <!-- Main Headline -->
+  <text x="96" y="270" font-family="'Georgia', 'Times New Roman', serif" font-weight="700" font-size="62" fill="#ffffff" letter-spacing="-1">Morning</text>
+  <text x="96" y="345" font-family="'Georgia', 'Times New Roman', serif" font-weight="700" font-size="62" fill="#ffffff" letter-spacing="-1">Market</text>
+  <text x="96" y="420" font-family="'Georgia', 'Times New Roman', serif" font-weight="700" font-size="62" fill="url(#goldGrad)" letter-spacing="-1">Watch</text>
+
+  <!-- Date badge -->
+  <rect x="96" y="448" width="290" height="42" rx="4" fill="#f0c040" opacity="0.12"/>
+  <rect x="96" y="448" width="4" height="42" fill="#f0c040" rx="2"/>
+  <text x="112" y="474" font-family="'Arial', sans-serif" font-weight="600" font-size="16" letter-spacing="1" fill="#f0c040">WEDNESDAY, JUNE 17, 2026</text>
+
+  <!-- NIFTY & SENSEX stats row -->
+  <g transform="translate(96, 530)">
+    <!-- NIFTY -->
+    <rect x="0" y="-24" width="140" height="54" rx="6" fill="#ffffff" opacity="0.05"/>
+    <text x="10" y="-4" font-family="'Arial', sans-serif" font-weight="600" font-size="11" fill="#8899bb" letter-spacing="1">NIFTY 50</text>
+    <text x="10" y="18" font-family="'Arial', sans-serif" font-weight="700" font-size="16" fill="#ffffff">23,989</text>
+    <text x="90" y="18" font-family="'Arial', sans-serif" font-weight="700" font-size="13" fill="#22c55e">+1.55%</text>
+    <!-- SENSEX -->
+    <rect x="155" y="-24" width="160" height="54" rx="6" fill="#ffffff" opacity="0.05"/>
+    <text x="165" y="-4" font-family="'Arial', sans-serif" font-weight="600" font-size="11" fill="#8899bb" letter-spacing="1">SENSEX</text>
+    <text x="165" y="18" font-family="'Arial', sans-serif" font-weight="700" font-size="16" fill="#ffffff">76,793</text>
+    <text x="270" y="18" font-family="'Arial', sans-serif" font-weight="700" font-size="13" fill="#22c55e">+1.68%</text>
+    <!-- VIX -->
+    <rect x="330" y="-24" width="140" height="54" rx="6" fill="#ffffff" opacity="0.05"/>
+    <text x="340" y="-4" font-family="'Arial', sans-serif" font-weight="600" font-size="11" fill="#8899bb" letter-spacing="1">INDIA VIX</text>
+    <text x="340" y="18" font-family="'Arial', sans-serif" font-weight="700" font-size="16" fill="#ffffff">13.39</text>
+    <text x="405" y="18" font-family="'Arial', sans-serif" font-weight="700" font-size="13" fill="#22c55e">-6.67%</text>
+  </g>
+
+  <!-- Bottom gold bar -->
+  <rect x="0" y="625" width="1200" height="5" fill="url(#goldGrad)"/>
+
+  <!-- Authored by -->
+  <text x="1180" y="615" font-family="'Arial', sans-serif" font-size="11" fill="#4466aa" text-anchor="end" letter-spacing="0.5">by Apurva Gupta · Created with Claude AI</text>
+</svg>

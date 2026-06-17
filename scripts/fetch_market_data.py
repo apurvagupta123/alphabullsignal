@@ -320,6 +320,72 @@ def fetch_all_info_parallel(symbols, workers=12):
                 print(f"    {done}/{len(symbols)} done...")
     return results
 
+# ── Conglomerate Stats ───────────────────────────────────────────────────────
+
+# Map: which yfinance symbol to use as the "revenue proxy" for each group entry
+# and how to format it into a human-readable stat string.
+CONGLOMERATE_SYMBOLS = {
+    'RELIANCE.NS': 'RELIANCE.NS',
+    'TMCV.NS':     'TMCV.NS',
+    'TCS.NS':      'TCS.NS',
+    'HDFCBANK.NS': 'HDFCBANK.NS',
+}
+
+def fmt_inr_cr(val):
+    """Format a raw INR value (from yfinance, in rupees) into ₹X.XL Cr."""
+    if not val or val <= 0:
+        return None
+    cr = val / 1e7          # 1 Cr = 10^7
+    if cr >= 100000:
+        return f'₹{cr/100000:.1f}L Cr'
+    elif cr >= 1000:
+        return f'₹{cr/1000:.0f}K Cr'
+    else:
+        return f'₹{cr:.0f} Cr'
+
+def fmt_inr_mcap(val):
+    """Format market cap from yfinance (INR rupees) to ₹X.X L Cr."""
+    return fmt_inr_cr(val)
+
+def fetch_conglomerate_stats():
+    """
+    Read public/data/conglomerate.json, refresh autoStats (marketCap, revenue)
+    from yfinance for each group's primary symbol, then save the file back.
+    This runs as part of the daily data fetch so stats stay current.
+    """
+    path = os.path.join(OUT, 'conglomerate.json')
+    if not os.path.exists(path):
+        print("  conglomerate.json not found — skipping")
+        return
+
+    with open(path) as f:
+        data = json.load(f)
+
+    updated = 0
+    for group_sym, yf_sym in CONGLOMERATE_SYMBOLS.items():
+        if group_sym not in data:
+            continue
+        try:
+            info = yf.Ticker(yf_sym).info
+            mcap = info.get('marketCap')
+            rev  = info.get('totalRevenue')
+            data[group_sym]['autoStats'] = {
+                'marketCap': fmt_inr_mcap(mcap),
+                'revenue':   fmt_inr_cr(rev),
+            }
+            print(f"  {group_sym}: mcap={fmt_inr_mcap(mcap)}, rev={fmt_inr_cr(rev)}")
+            updated += 1
+        except Exception as e:
+            print(f"  {group_sym} autoStats failed: {e}")
+
+    data['lastUpdated'] = NOW
+
+    with open(path, 'w') as f:
+        json.dump(data, f, separators=(',', ':'))
+    size = os.path.getsize(path)
+    print(f"  Saved conglomerate.json ({size/1024:.1f} KB) — {updated} groups refreshed")
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -568,6 +634,10 @@ def main():
     earnings_entries.sort(key=lambda x: x['earningsDate'])
     save('earnings.json', {'lastUpdated': NOW, 'earnings': earnings_entries})
     print(f"  Saved earnings.json — {len(earnings_entries)} companies with upcoming dates")
+
+    # 10. Conglomerate stats (refreshes autoStats fields from yfinance)
+    print("\n[10/10] Conglomerate Stats (yfinance refresh)")
+    fetch_conglomerate_stats()
 
     # Meta file (for "last updated" display on site)
     save('meta.json', {'lastUpdated': NOW, 'status': 'ok'})
