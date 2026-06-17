@@ -5,9 +5,10 @@ Sources: NDTV Profit, Livemint, Economic Times, Google News (all verified live)
 Runs every 30 minutes via GitHub Actions
 """
 
-import json, re, html, os
+import json, re, html, os, time
 from datetime import datetime, timezone, timedelta
 from urllib.request import Request, urlopen
+from urllib.error import URLError
 from xml.etree import ElementTree as ET
 
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -214,10 +215,85 @@ def parse_feed(cfg):
     return articles
 
 
+# ── Claude AI summarisation ────────────────────────────────────────────────
+
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+
+def ai_summarise(title: str, excerpt: str) -> str:
+    """Call Claude Haiku to generate a 4-5 sentence plain-English summary."""
+    if not ANTHROPIC_API_KEY:
+        return excerpt  # fallback: use RSS excerpt
+
+    prompt = (
+        f"You are a financial news summariser for an Indian market dashboard. "
+        f"Write a clear, engaging 4-5 sentence summary of this news article for retail investors. "
+        f"Use plain English. No bullet points. No markdown. Focus on what it means for markets/investors.\n\n"
+        f"Headline: {title}\n"
+        f"Excerpt: {excerpt}"
+    )
+
+    body = json.dumps({
+        "model": "claude-haiku-4-5-20251001",
+        "max_tokens": 300,
+        "messages": [{"role": "user", "content": prompt}]
+    }).encode()
+
+    req = Request(
+        "https://api.anthropic.com/v1/messages",
+        data=body,
+        headers={
+            "x-api-key": ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urlopen(req, timeout=15) as r:
+            resp = json.loads(r.read())
+        return resp["content"][0]["text"].strip()
+    except Exception as e:
+        print(f"    ⚠ AI summarise failed: {e}")
+        return excerpt
+
+
+def add_summaries(articles: list, prev_cache: dict) -> list:
+    """Add AI summaries to articles, reusing cache for already-summarised URLs."""
+    api_calls = 0
+    for a in articles:
+        url = a.get("url", "")
+        # Reuse cached summary if article already processed
+        if url in prev_cache and prev_cache[url].get("summary"):
+            a["summary"] = prev_cache[url]["summary"]
+            continue
+        # Only summarise if we have meaningful content
+        if len(a.get("excerpt", "")) > 40:
+            print(f"    ✨ Summarising: {a['title'][:55]}…")
+            a["summary"] = ai_summarise(a["title"], a["excerpt"])
+            api_calls += 1
+            time.sleep(0.3)  # gentle rate limit
+        else:
+            a["summary"] = a.get("excerpt", "")
+
+    print(f"  AI calls made: {api_calls} (cached: {len(articles)-api_calls})")
+    return articles
+
+
 # ── main ───────────────────────────────────────────────────────────────────
 
 def main():
     print(f"📰 Fetching news  [{NOW}]")
+
+    # ── Load previous news.json to reuse AI summaries (avoid re-calling API)
+    out_path = os.path.join(os.path.dirname(__file__), "..", "public", "data", "news.json")
+    prev_cache: dict = {}
+    try:
+        with open(out_path, encoding="utf-8") as f:
+            prev_data = json.load(f)
+        prev_cache = {a["url"]: a for a in prev_data.get("articles", []) if a.get("url")}
+        print(f"  Loaded {len(prev_cache)} cached summaries")
+    except Exception:
+        pass
 
     all_articles, seen = [], set()
     for cfg in FEEDS:
@@ -237,8 +313,7 @@ def main():
     # ── sort by date desc
     all_articles.sort(key=lambda a: a.get("publishedAt", ""), reverse=True)
 
-    # ── Ensure featured (first) article has an image:
-    #    pull the first article-with-image to position 0, keep rest in date order
+    # ── Ensure featured (first) article has an image
     with_img    = [a for a in all_articles if a.get("image")]
     without_img = [a for a in all_articles if not a.get("image")]
 
@@ -252,13 +327,16 @@ def main():
 
     final = final[:25]
 
+    # ── Add AI summaries (cached where possible)
+    print(f"\n🤖 Adding AI summaries…")
+    final = add_summaries(final, prev_cache)
+
     out = {
         "lastUpdated": NOW,
         "count": len(final),
         "articles": final,
     }
 
-    out_path = os.path.join(os.path.dirname(__file__), "..", "public", "data", "news.json")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
@@ -266,8 +344,8 @@ def main():
     print(f"\n✅ {len(final)} articles saved → public/data/news.json")
     if final:
         print(f"   Featured [{final[0]['source']}]: {final[0]['title'][:65]}")
-        print(f"   Image: {final[0].get('image', 'NONE')[:70] if final[0].get('image') else 'NONE'}")
     print(f"   With image: {sum(1 for a in final if a.get('image'))}/{len(final)}")
+    print(f"   With summary: {sum(1 for a in final if a.get('summary'))}/{len(final)}")
 
 
 if __name__ == "__main__":

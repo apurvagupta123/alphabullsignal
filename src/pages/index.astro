@@ -336,9 +336,12 @@ const SECTOR_TAGS: Record<string, string> = {
         <span class="section-live">LIVE</span>
       </div>
 
+      <!-- Embed all article data for JS -->
+      <script type="application/json" id="newsJsonData" set:html={JSON.stringify(newsData.articles || [])} />
+
       <div class="news-grid">
-        <!-- Featured article (left) -->
-        <a href={featuredArticle.url} target="_blank" rel="noopener" class="news-featured">
+        <!-- Featured article (left) — opens modal -->
+        <button class="news-featured news-card-btn" data-idx="0">
           {featuredArticle.image && (
             <div class="news-feat-img-wrap">
               <img src={featuredArticle.image} alt={featuredArticle.title} class="news-feat-img" loading="lazy" />
@@ -354,12 +357,12 @@ const SECTOR_TAGS: Record<string, string> = {
               })}
             </span>
           </div>
-        </a>
+        </button>
 
-        <!-- Side article list (right) -->
+        <!-- Side article list (right) — each opens modal -->
         <div class="news-side">
-          {sideArticles.map((article: any) => (
-            <a href={article.url} target="_blank" rel="noopener" class="news-side-item">
+          {sideArticles.map((article: any, i: number) => (
+            <button class="news-side-item news-card-btn" data-idx={i + 1}>
               {article.image && (
                 <img src={article.image} alt="" class="news-side-img" loading="lazy" />
               )}
@@ -372,7 +375,7 @@ const SECTOR_TAGS: Record<string, string> = {
                   })}
                 </span>
               </div>
-            </a>
+            </button>
           ))}
           <div class="news-footer">
             <span class="news-updated">Updated: {new Date(newsData.lastUpdated).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
@@ -381,6 +384,30 @@ const SECTOR_TAGS: Record<string, string> = {
         </div>
       </div>
     </section>
+
+    <!-- ── News Article Modal ──────────────────────────────────────── -->
+    <div id="newsModal" class="nmodal-overlay" role="dialog" aria-modal="true" aria-label="Article Summary" style="display:none">
+      <div class="nmodal-box">
+        <button class="nmodal-close" id="nmodalClose" aria-label="Close">✕</button>
+        <div class="nmodal-img-wrap" id="nmodalImgWrap">
+          <img id="nmodalImg" src="" alt="" class="nmodal-img" />
+        </div>
+        <div class="nmodal-body">
+          <div class="nmodal-meta">
+            <span class="nmodal-source" id="nmodalSource"></span>
+            <span class="nmodal-time" id="nmodalTime"></span>
+          </div>
+          <h2 class="nmodal-title" id="nmodalTitle"></h2>
+          <div class="nmodal-summary-wrap">
+            <span class="nmodal-ai-badge">✦ AI Summary</span>
+            <p class="nmodal-summary" id="nmodalSummary"></p>
+          </div>
+          <a class="nmodal-read-btn" id="nmodalReadBtn" href="#" target="_blank" rel="noopener">
+            Read full article →
+          </a>
+        </div>
+      </div>
+    </div>
   )}
 
   <!-- ── Morning Market Briefing ──────────────────────── -->
@@ -892,6 +919,136 @@ const SECTOR_TAGS: Record<string, string> = {
 }
 @media (max-width: 600px) {
   .news-feat-title { font-size: 17px; }
+}
+
+/* news card buttons — make them look like the old <a> tags */
+.news-card-btn {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+.news-side-item.news-card-btn {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(212,169,64,0.1);
+}
+.news-side-item.news-card-btn:hover { background: rgba(212,169,64,0.05); }
+.news-featured.news-card-btn { width: 100%; }
+
+/* ── News Modal ─────────────────────────────────────────── */
+.nmodal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+.nmodal-box {
+  background: #0f0f0f;
+  border: 1px solid rgba(212,169,64,0.25);
+  border-radius: 16px;
+  max-width: 620px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.8);
+}
+.nmodal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: rgba(255,255,255,0.06);
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.nmodal-close:hover { background: rgba(212,169,64,0.25); }
+.nmodal-img-wrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px 16px 0 0; }
+.nmodal-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nmodal-body { padding: 20px 24px 28px; }
+.nmodal-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.nmodal-source {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(212,169,64,0.12);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.nmodal-time { font-size: 11px; color: var(--muted); opacity: 0.6; }
+.nmodal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.35;
+  margin: 0 0 18px;
+}
+.nmodal-summary-wrap {
+  background: rgba(212,169,64,0.06);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 16px;
+  margin-bottom: 22px;
+}
+.nmodal-ai-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+  opacity: 0.85;
+}
+.nmodal-summary {
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.82);
+  margin: 0;
+}
+.nmodal-read-btn {
+  display: inline-block;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, var(--gold), #b8922a);
+  color: #000;
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.nmodal-read-btn:hover { opacity: 0.85; }
+@media (max-width: 600px) {
+  .nmodal-title { font-size: 17px; }
+  .nmodal-body { padding: 16px 16px 22px; }
 }
 
 .tl-item {
@@ -1665,4 +1822,71 @@ const SECTOR_TAGS: Record<string, string> = {
     }
   }
   updateHeroChips();
+
+  // ── News Modal ──────────────────────────────────────────
+  (function () {
+    const rawEl = document.getElementById('newsJsonData');
+    if (!rawEl) return;
+    let articles: any[] = [];
+    try { articles = JSON.parse(rawEl.textContent || '[]'); } catch (_) { return; }
+
+    const overlay   = document.getElementById('newsModal')!;
+    const closeBtn  = document.getElementById('nmodalClose')!;
+    const imgWrap   = document.getElementById('nmodalImgWrap')!;
+    const img       = document.getElementById('nmodalImg') as HTMLImageElement;
+    const source    = document.getElementById('nmodalSource')!;
+    const time      = document.getElementById('nmodalTime')!;
+    const title     = document.getElementById('nmodalTitle')!;
+    const summary   = document.getElementById('nmodalSummary')!;
+    const readBtn   = document.getElementById('nmodalReadBtn') as HTMLAnchorElement;
+
+    function openModal(idx: number) {
+      const a = articles[idx];
+      if (!a) return;
+
+      // Image
+      if (a.image) {
+        img.src = a.image;
+        img.alt = a.title;
+        imgWrap.style.display = '';
+      } else {
+        imgWrap.style.display = 'none';
+      }
+
+      // Meta
+      source.textContent = a.source || '';
+      time.textContent = new Date(a.publishedAt).toLocaleString('en-IN', {
+        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+      });
+
+      // Content
+      title.textContent = a.title;
+      summary.textContent = a.summary || a.excerpt || '';
+      readBtn.href = a.url;
+
+      overlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    // Wire up all news card buttons
+    document.querySelectorAll<HTMLButtonElement>('.news-card-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx || '0', 10);
+        openModal(idx);
+      });
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  })();
 </script>
