@@ -1,5 +1,6 @@
 ---
 const { title } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -7,18 +8,18 @@ const { title } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title} | BullSignal</title>
-    <meta name="description" content="Live market moves, trending stocks, and investor-focused news delivered in one clean, fast dashboard." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content="NSE & BSE data updated twice daily, trending stocks, and investor-focused insights — all in one clean dashboard." />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="BullSignal" />
     <meta property="og:title" content={`${title} | BullSignal`} />
-    <meta property="og:description" content="Live market moves, trending stocks, and investor-focused news delivered in one clean, fast dashboard." />
+    <meta property="og:description" content="NSE & BSE data updated twice daily, trending stocks, and investor-focused insights — all in one clean dashboard." />
     <meta property="og:image" content="https://thebusinessledger.theapurva.com/og-image.png" />
     <meta property="og:url" content="https://thebusinessledger.theapurva.com" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${title} | BullSignal`} />
-    <meta name="twitter:description" content="Live market moves, trending stocks, and investor-focused news delivered in one clean, fast dashboard." />
+    <meta name="twitter:description" content="NSE & BSE data updated twice daily, trending stocks, and investor-focused insights — all in one clean dashboard." />
     <meta name="twitter:image" content="https://thebusinessledger.theapurva.com/og-image.png" />
     <!-- Sitemap -->
     <link rel="sitemap" href="/sitemap-index.xml" />
@@ -32,8 +33,8 @@ const { title } = Astro.props;
       .news-bar {
         top: 0 !important;
         z-index: 999 !important;
-        background: #030609 !important;
-        border-bottom: 1px solid rgba(0,212,255,0.12) !important;
+        background: #060414 !important;
+        border-bottom: 1px solid rgba(212,169,64,0.12) !important;
       }
       .ticker-bar:not(.news-bar) {
         top: 36px !important;
@@ -41,12 +42,12 @@ const { title } = Astro.props;
       }
       body { padding-top: 128px !important; }
       .site-nav { top: 72px !important; }
-      body { background: #05080f !important; }
+      body { background: #07061a !important; }
       body::before { display: none !important; }
       /* News ticker text — cyan to match new accent */
-      .news-bar .ti { color: #00d4ff !important; }
-      .news-bar .ti strong { color: #66e8ff !important; }
-      .news-bar .ti-sep { color: rgba(0,212,255,0.3) !important; }
+      .news-bar .ti { color: #d4a940 !important; }
+      .news-bar .ti strong { color: #fde68a !important; }
+      .news-bar .ti-sep { color: rgba(212,169,64,0.3) !important; }
     </style>
   </head>
   <body>
@@ -69,23 +70,22 @@ const { title } = Astro.props;
     <nav class="site-nav">
       <div class="nav-inner">
         <a href="/" class="nav-brand">
-          <div class="nav-logo-box"><img src="/bull-logo.svg" alt="BullSignal" style="width:100%;height:100%;object-fit:contain;display:block;" /></div>
+          <div class="nav-logo-box"><img src="/logo.svg" alt="BullSignal" style="width:100%;height:100%;object-fit:contain;display:block;border-radius:7px;" /></div>
           <div class="nav-brand-text">
             <span class="nav-brand-name">BullSignal</span>
-            <span class="nav-brand-sub">LIVE MARKET INTELLIGENCE</span>
+            <span class="nav-brand-sub">MARKET INTELLIGENCE</span>
           </div>
         </a>
         <div class="nav-links">
-          <a href="/" class="nav-link active">Home</a>
-          <a href="/markets" class="nav-link">Markets</a>
-          <a href="/news" class="nav-link">News</a>
-          <a href="/screener" class="nav-link">Screener</a>
-          <a href="/heatmap" class="nav-link">Heat Map</a>
-          <a href="/earnings-calendar" class="nav-link">Earnings</a>
-          <a href="/economic-calendar" class="nav-link">Economy</a>
-          <a href="/ipo-tracker" class="nav-link">IPOs</a>
-          <a href="/tools" class="nav-link">Tools</a>
-          <a href="/about" class="nav-link">About</a>
+          <a href="/" class={`nav-link${path === '/' ? ' active' : ''}`}>Home</a>
+          <a href="/markets" class={`nav-link${path.startsWith('/markets') ? ' active' : ''}`}>Markets</a>
+          <a href="/news" class={`nav-link${path.startsWith('/news') ? ' active' : ''}`}>News</a>
+          <a href="/comparison" class={`nav-link${path.startsWith('/comparison') ? ' active' : ''}`}>Compare</a>
+          <a href="/earnings-calendar" class={`nav-link${path.startsWith('/earnings') ? ' active' : ''}`}>Earnings</a>
+          <a href="/economic-calendar" class={`nav-link${path.startsWith('/economic') ? ' active' : ''}`}>Economy</a>
+          <a href="/ipo-tracker" class={`nav-link${path.startsWith('/ipo') ? ' active' : ''}`}>IPOs</a>
+          <a href="/tools" class={`nav-link${path.startsWith('/tools') ? ' active' : ''}`}>Tools</a>
+          <a href="/about" class={`nav-link${path.startsWith('/about') ? ' active' : ''}`}>About</a>
         </div>
         <div class="nav-search">
           <span class="nav-search-icon">🔍</span>
@@ -102,13 +102,13 @@ const { title } = Astro.props;
       <div class="footer-inner">
         <div class="footer-top">
           <div class="footer-brand">
-            <div class="nav-logo-box"><img src="/bull-logo.svg" alt="BullSignal" style="width:100%;height:100%;object-fit:contain;display:block;" /></div>
+            <div class="nav-logo-box"><img src="/logo.svg" alt="BullSignal" style="width:100%;height:100%;object-fit:contain;display:block;border-radius:7px;" /></div>
             <div class="nav-brand-text">
               <span class="nav-brand-name">BullSignal</span>
-              <span class="nav-brand-sub">LIVE MARKET INTELLIGENCE</span>
+              <span class="nav-brand-sub">MARKET INTELLIGENCE</span>
             </div>
           </div>
-          <p class="footer-desc">Live market moves, trending stocks, and investor-focused news delivered in one clean, fast dashboard.</p>
+          <p class="footer-desc">NSE & BSE data updated twice daily, trending stocks, and investor-focused insights — all in one clean dashboard.</p>
         </div>
         <div class="footer-bottom">
           <p class="footer-copy">&copy; {new Date().getFullYear()} BullSignal. Market data for informational purposes only.</p>
@@ -121,71 +121,30 @@ const { title } = Astro.props;
     </footer>
 
     <script>
-      // ── Ticker ────────────────────────────────────────────────────────
-      const TICKER_SYMS = ['NVDA','META','TSLA','JPM','AAPL','MSFT','GOOGL','AMZN','SPY','QQQ','GS','NFLX','AMD','INTC','BRK-B'];
-      const FMP_KEY  = 'phURcaq2LTL75pvNfsEL2Lf0GUG8Az2B';
-      const FH_KEY   = 'd81lae1r01qrojfc2i2gd81lae1r01qrojfc2i30';
-      const PROXY    = 'https://corsproxy.io/?';
-
-      // Normalise any source's response into {symbol,price,change,pct}
-      function normFMP(d)  { return d.map(q => ({symbol:q.symbol, price:q.price, change:q.change??0, pct:q.changesPercentage??0})); }
-      function normFH(syms,res) { return syms.map((s,i) => ({symbol:s, price:res[i].c||0, change:res[i].d||0, pct:res[i].dp||0})); }
-      function normNQ(syms,res) {
-        return syms.map((s,i) => {
-          const pd = res[i]?.data?.primaryData || {};
-          return {symbol:s, price:parseFloat((pd.lastSalePrice||'').replace(/[^0-9.]/g,''))||0,
-                  change:parseFloat((pd.netChange||'').replace(/[^0-9.-]/g,''))||0,
-                  pct:parseFloat((pd.percentageChange||'').replace(/[^0-9.-]/g,''))||0};
-        });
-      }
-      function normYF(res)  { return (res?.quoteResponse?.result||[]).map(q=>({symbol:q.symbol,price:q.regularMarketPrice||0,change:q.regularMarketChange||0,pct:q.regularMarketChangePercent||0})); }
-
-      async function fetchQuotes(syms) {
-        // 1️⃣ FMP — batch, one request
-        try {
-          const r = await fetch(`https://financialmodelingprep.com/api/v3/quote/${syms.join(',')}?apikey=${FMP_KEY}`);
-          const d = await r.json();
-          if (Array.isArray(d) && d.some(q=>q.price>0)) return normFMP(d);
-          throw new Error('fmp empty');
-        } catch {}
-        // 2️⃣ Finnhub — parallel, official API
-        try {
-          const res = await Promise.all(syms.map(s=>fetch(`https://finnhub.io/api/v1/quote?symbol=${s}&token=${FH_KEY}`).then(r=>r.json())));
-          const q = normFH(syms, res);
-          if (q.some(x=>x.price>0)) return q;
-          throw new Error('fh empty');
-        } catch {}
-        // 3️⃣ NASDAQ — official exchange data
-        try {
-          const res = await Promise.all(syms.map(s=>fetch(PROXY+encodeURIComponent(`https://api.nasdaq.com/api/quote/${s}/info?assetclass=stocks`)).then(r=>r.json())));
-          const q = normNQ(syms, res);
-          if (q.some(x=>x.price>0)) return q;
-          throw new Error('nq empty');
-        } catch {}
-        // 4️⃣ Yahoo Finance — final fallback
-        const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms.join(',')}&fields=symbol,regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-        const r = await fetch(PROXY+encodeURIComponent(url));
-        return normYF(await r.json());
-      }
-
+      // ── India Market Ticker — reads from local JSON (no external API) ──────
       async function loadTicker() {
         const track = document.getElementById('tickerTrack');
         if (!track) return;
         try {
-          const quotes = await fetchQuotes(TICKER_SYMS);
-          if (!quotes.length) throw new Error('empty');
-          const html = quotes.map(q => {
-            const up = q.change >= 0;
-            return `<span class="ti ${up?'up':'dn'}"><strong>${q.symbol}</strong> $${q.price?.toFixed(2)} <em>${up?'▲':'▼'} ${Math.abs(q.pct).toFixed(2)}%</em></span>`;
+          const r    = await fetch('/data/india-stocks.json');
+          const data = await r.json();
+          const stocks = (data.nse || []).slice(0, 20); // top 20 NSE stocks
+          if (!stocks.length) throw new Error('empty');
+          const html = stocks.map(q => {
+            const sym  = q.symbol.replace('.NS','').replace('.BO','');
+            const pct  = parseFloat(q.regularMarketChangePercent) || 0;
+            const up   = pct >= 0;
+            const color = up ? '#22c55e' : '#ef4444';
+            return `<span class="ti"><strong style="color:var(--gold)">${sym}</strong> <span style="color:#fff">₹${Number(q.regularMarketPrice).toLocaleString('en-IN',{maximumFractionDigits:2})}</span> <em style="color:${color}">${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</em></span>`;
           }).join('<span class="ti-sep">·</span>');
-          track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
+          track.innerHTML = html + '<span class="ti-sep" style="padding:0 32px"> </span>' + html;
         } catch {
-          track.innerHTML = TICKER_SYMS.map(s => `<span class="ti"><strong>${s}</strong> —</span>`).join('');
+          // Silent fail — placeholder stays
         }
       }
 
       loadTicker();
-      setInterval(loadTicker, 60000);
+      setInterval(loadTicker, 120000);
 
       // ── Scroll-reveal IntersectionObserver ──────────────────────
       const revealObserver = new IntersectionObserver((entries) => {
@@ -198,43 +157,117 @@ const { title } = Astro.props;
       }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
       document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-      // ── News Ticker ───────────────────────────────────────────────────
+      // ── India News Ticker ─────────────────────────────────────────────────
       async function loadNewsTicker() {
         const track = document.getElementById('newsTickerTrack');
         if (!track) return;
+        // India-focused RSS feeds
         const feeds = [
-          'https://feeds.reuters.com/reuters/businessNews',
-          'https://feeds.bbci.co.uk/news/business/rss.xml',
+          'https://economictimes.indiatimes.com/markets/rss.cms',
+          'https://www.business-standard.com/rss/markets-106.rss',
+          'https://www.moneycontrol.com/rss/marketsnews.xml',
         ];
         for (const rss of feeds) {
           try {
-            const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=12`);
+            const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=14`);
             const d = await r.json();
-            const items = (d?.items || []).filter((i: any) => i.title);
+            const items = (d?.items || []).filter((i: any) => i.title && i.title.length > 10);
             if (!items.length) continue;
             const html = items.map((item: any) =>
-              `<a class="ti" style="text-decoration:none;cursor:pointer;color:#c9a84c;" href="${item.link}" target="_blank" rel="noopener noreferrer"><strong style="color:#e8c97a;">◆</strong> ${item.title}</a>`
-            ).join('<span class="ti-sep" style="color:rgba(201,168,76,0.35);">·</span>');
+              `<a class="ti" style="text-decoration:none;color:#f0c040;" href="${item.link}" target="_blank" rel="noopener noreferrer"><strong style="color:#fde68a;">◆</strong> ${item.title}</a>`
+            ).join('<span class="ti-sep" style="color:rgba(212,169,64,0.35);">·</span>');
             track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
             return;
           } catch { continue; }
         }
+        // India fallback headlines
         const fallback = [
-          ['Fed holds rates as inflation nears 2% target','https://www.reuters.com/business/'],
-          ['S&P 500 hits record high on strong earnings','https://www.bloomberg.com/markets'],
-          ['Apple unveils new AI features at WWDC','https://www.cnbc.com/finance/'],
-          ['Oil climbs on Middle East supply concerns','https://www.reuters.com/business/'],
-          ['Tesla beats delivery estimates, stock surges 8%','https://www.wsj.com/finance'],
-          ['Goldman Sachs raises S&P 500 year-end target','https://www.ft.com/markets'],
+          ['Nifty 50 edges higher as RBI holds repo rate steady','https://economictimes.indiatimes.com/markets/'],
+          ['Sensex gains 200 pts led by banking and IT stocks','https://www.moneycontrol.com/'],
+          ['FII inflows strengthen as India macro outlook improves','https://www.business-standard.com/markets'],
+          ['RBI MPC minutes signal cautious stance on inflation','https://economictimes.indiatimes.com/'],
+          ['HDFC Bank, Reliance Industries lift index to new high','https://www.moneycontrol.com/'],
+          ['Q1 FY27 earnings season begins — TCS reports first','https://www.business-standard.com/'],
+          ['Rupee firms against dollar amid strong FII buying','https://economictimes.indiatimes.com/markets/'],
         ];
         const html = fallback.map(([t,u]) =>
-          `<a class="ti" style="text-decoration:none;cursor:pointer;color:#c9a84c;" href="${u}" target="_blank" rel="noopener noreferrer"><strong style="color:#e8c97a;">◆</strong> ${t}</a>`
-        ).join('<span class="ti-sep" style="color:rgba(201,168,76,0.35);">·</span>');
+          `<a class="ti" style="text-decoration:none;color:#f0c040;" href="${u}" target="_blank" rel="noopener noreferrer"><strong style="color:#fde68a;">◆</strong> ${t}</a>`
+        ).join('<span class="ti-sep" style="color:rgba(212,169,64,0.35);">·</span>');
         track.innerHTML = html + '<span class="ti-sep" style="padding:0 20px"> </span>' + html;
       }
 
       loadNewsTicker();
       setInterval(loadNewsTicker, 300000);
+
+      // ── Nav Search ────────────────────────────────────────────────────────
+      (function() {
+        const input = document.querySelector('.nav-search-input');
+        if (!input) return;
+
+        // Build search index from sector + india-stocks JSON
+        let searchIndex = [];
+        async function buildIndex() {
+          try {
+            const [sRes, iRes] = await Promise.all([
+              fetch('/data/india-sectors.json'),
+              fetch('/data/india-stocks.json'),
+            ]);
+            const sData = await sRes.json();
+            const iData = await iRes.json();
+            const seen = new Set();
+            const add = (sym, name) => {
+              if (!sym || seen.has(sym)) return;
+              seen.add(sym);
+              const code = sym.replace(/\.(NS|BO)$/, '');
+              searchIndex.push({ sym, code, name: name || code, url: `/company/${sym.toLowerCase().replace(/\./g,'-')}` });
+            };
+            // From sectors
+            Object.entries(sData.quotes || {}).forEach(([sym, q]) => add(sym, q.shortName || q.longName || ''));
+            // From india-stocks
+            [...(iData.nse || []), ...(iData.bse || [])].forEach(q => add(q.symbol, q.name));
+          } catch {}
+        }
+        buildIndex();
+
+        // Dropdown
+        const wrap = input.closest('.nav-search');
+        const dropdown = document.createElement('div');
+        dropdown.className = 'nav-search-dd';
+        wrap.appendChild(dropdown);
+
+        function showResults(q) {
+          if (!q || q.length < 1) { dropdown.style.display = 'none'; return; }
+          const ql = q.toLowerCase();
+          const hits = searchIndex.filter(s =>
+            s.code.toLowerCase().startsWith(ql) ||
+            s.name.toLowerCase().includes(ql)
+          ).slice(0, 8);
+          if (!hits.length) { dropdown.style.display = 'none'; return; }
+          dropdown.innerHTML = hits.map(h =>
+            `<a class="nsd-item" href="${h.url}">
+              <span class="nsd-code">${h.code}</span>
+              <span class="nsd-name">${h.name}</span>
+            </a>`
+          ).join('');
+          dropdown.style.display = 'block';
+        }
+
+        input.addEventListener('input', (e) => showResults(e.target.value.trim()));
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const first = dropdown.querySelector('.nsd-item');
+            if (first) window.location.href = first.getAttribute('href');
+            else {
+              const q = e.target.value.trim();
+              if (q) window.location.href = `/company/${q.toLowerCase().replace(/\./g,'-')}.ns`;
+            }
+          }
+          if (e.key === 'Escape') { dropdown.style.display = 'none'; input.blur(); }
+        });
+        document.addEventListener('click', (e) => {
+          if (!wrap.contains(e.target)) dropdown.style.display = 'none';
+        });
+      })();
     </script>
   </body>
 </html>
