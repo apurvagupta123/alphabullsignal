@@ -6,15 +6,16 @@ const sorted = posts.sort((a: any, b: any) =>
   new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
 );
 
-const INDIA_TAGS = ['india-market-briefing', 'market-briefing', 'today-indian-market'];
-const allIndiaPosts = sorted.filter((p: any) =>
-  (p.frontmatter.tags || []).some((t: string) => INDIA_TAGS.includes(t))
+// Morning posts: filename contains "morning-market-watch"
+const allMorningPosts = sorted.filter((p: any) =>
+  (p.file || '').includes('morning-market-watch')
 );
-const allLedgerPosts = sorted.filter((p: any) =>
-  !(p.frontmatter.tags || []).some((t: string) => INDIA_TAGS.includes(t))
+// Evening posts: filename contains "india-market-briefing"
+const allEveningPosts = sorted.filter((p: any) =>
+  (p.file || '').includes('india-market-briefing')
 );
-const indiaPosts  = allIndiaPosts.slice(0, 5);
-const ledgerPosts = allLedgerPosts.slice(0, 5);
+const morningPosts = allMorningPosts.slice(0, 5);
+const eveningPosts = allEveningPosts.slice(0, 5);
 
 const SECTOR_TAGS: Record<string, string> = {
   'RELIANCE.NS':   '⚡ Energy',
@@ -308,15 +309,15 @@ const SECTOR_TAGS: Record<string, string> = {
   </section>
 
 
-  <!-- ── Blog Posts — From the Ledger (timeline) ──────── -->
-  {ledgerPosts.length > 0 && (
+  <!-- ── Morning Market Briefing ──────────────────────── -->
+  {morningPosts.length > 0 && (
     <section class="content-section reveal" id="from-ledger">
       <div class="section-head">
-        <h2 class="section-title">From the Ledger</h2>
-        <span class="section-live">MARKET SUMMARIES</span>
+        <h2 class="section-title">🌅 Morning Market Briefing</h2>
+        <span class="section-live">MORNING</span>
       </div>
       <div class="tl-list">
-        {ledgerPosts.map((post: any) => {
+        {morningPosts.map((post: any) => {
           const d = new Date(post.frontmatter.date);
           const day   = d.toLocaleDateString('en-IN', { day: 'numeric' });
           const month = d.toLocaleDateString('en-IN', { month: 'short' });
@@ -333,30 +334,30 @@ const SECTOR_TAGS: Record<string, string> = {
               </div>
               <div class="tl-body">
                 <h3 class="tl-title">{post.frontmatter.title}</h3>
-                {post.frontmatter.description && <p class="tl-desc">{post.frontmatter.description}</p>}
+                {post.frontmatter.excerpt && <p class="tl-desc">{post.frontmatter.excerpt}</p>}
                 <span class="tl-read">Read more →</span>
               </div>
             </a>
           );
         })}
       </div>
-      {allLedgerPosts.length > 5 && (
+      {allMorningPosts.length > 5 && (
         <div class="tl-viewall-wrap">
-          <a href="/blog/?section=ledger" class="tl-viewall">View all market summaries →</a>
+          <a href="/blog" class="tl-viewall">View all morning briefings →</a>
         </div>
       )}
     </section>
   )}
 
-  <!-- ── Blog Posts — Daily India Insights (timeline) ──── -->
-  {indiaPosts.length > 0 && (
-    <section class="content-section reveal" id="daily-india">
+  <!-- ── Evening Indian Market Briefing ─────────────────── -->
+  {eveningPosts.length > 0 && (
+    <section class="content-section reveal" id="evening-briefing">
       <div class="section-head">
-        <h2 class="section-title">Daily India Insights</h2>
-        <span class="section-live">INDIA BRIEFINGS</span>
+        <h2 class="section-title">🌆 Evening Indian Market Briefing</h2>
+        <span class="section-live">EVENING</span>
       </div>
       <div class="tl-list">
-        {indiaPosts.map((post: any) => {
+        {eveningPosts.map((post: any) => {
           const d = new Date(post.frontmatter.date);
           const day   = d.toLocaleDateString('en-IN', { day: 'numeric' });
           const month = d.toLocaleDateString('en-IN', { month: 'short' });
@@ -373,16 +374,16 @@ const SECTOR_TAGS: Record<string, string> = {
               </div>
               <div class="tl-body">
                 <h3 class="tl-title">{post.frontmatter.title}</h3>
-                {post.frontmatter.description && <p class="tl-desc">{post.frontmatter.description}</p>}
+                {post.frontmatter.excerpt && <p class="tl-desc">{post.frontmatter.excerpt}</p>}
                 <span class="tl-read">Read more →</span>
               </div>
             </a>
           );
         })}
       </div>
-      {allIndiaPosts.length > 5 && (
+      {allEveningPosts.length > 5 && (
         <div class="tl-viewall-wrap">
-          <a href="/blog/?section=india" class="tl-viewall">View all India briefings →</a>
+          <a href="/blog" class="tl-viewall">View all evening briefings →</a>
         </div>
       )}
     </section>
