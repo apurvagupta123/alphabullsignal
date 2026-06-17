@@ -136,7 +136,7 @@ const briefingUrl = latestBriefing
             <span class="nav-brand-sub">MARKET INTELLIGENCE</span>
           </div>
         </a>
-        <div class="nav-links">
+        <div class="nav-links" id="navLinks">
           <a href="/" class={`nav-link${path === '/' ? ' active' : ''}`}>Home</a>
           <a href="/markets" class={`nav-link${path.startsWith('/markets') ? ' active' : ''}`}>Markets</a>
           <a href="/news" class={`nav-link${path.startsWith('/news') ? ' active' : ''}`}>News</a>
@@ -147,6 +147,9 @@ const briefingUrl = latestBriefing
           <a href="/tools" class={`nav-link${path.startsWith('/tools') ? ' active' : ''}`}>Tools</a>
           <a href="/about" class={`nav-link${path.startsWith('/about') ? ' active' : ''}`}>About</a>
         </div>
+        <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
         <div class="nav-search">
           <span class="nav-search-icon">🔍</span>
           <input type="text" class="nav-search-input" placeholder="Search companies, news…" />
@@ -406,6 +409,23 @@ const briefingUrl = latestBriefing
           if (!wrap.contains(e.target)) dropdown.style.display = 'none';
         });
       })();
+
+      // ── Hamburger menu ────────────────────────────────────────────────────
+      const hamburger = document.getElementById('navHamburger');
+      const navLinks  = document.getElementById('navLinks');
+      hamburger?.addEventListener('click', () => {
+        const open = navLinks?.classList.toggle('nav-open');
+        hamburger.classList.toggle('is-open', open);
+        document.body.style.overflow = open ? 'hidden' : '';
+      });
+      // Close on nav link click
+      navLinks?.querySelectorAll('.nav-link').forEach(l =>
+        l.addEventListener('click', () => {
+          navLinks.classList.remove('nav-open');
+          hamburger?.classList.remove('is-open');
+          document.body.style.overflow = '';
+        })
+      );
     </script>
   </body>
 </html>
