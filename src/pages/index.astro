@@ -862,26 +862,23 @@ const SECTOR_TAGS: Record<string, string> = {
 
 .news-loading { color: var(--muted); font-size: 14px; padding: 24px 0; opacity: 0.5; }
 
-/* news card buttons — make them look like the old <a> tags */
+/* news card buttons — preserve card styles, just reset button chrome */
 .news-card-btn {
-  all: unset;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
+  display: block;
+  width: 100%;
+}
+.news-featured.news-card-btn {
   display: flex;
   flex-direction: column;
 }
-.news-side-item.news-card-btn {
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 10px 8px;
-  border-radius: 8px;
-  transition: background 0.15s;
-  width: 100%;
-  box-sizing: border-box;
-  border-bottom: 1px solid rgba(212,169,64,0.1);
-}
-.news-side-item.news-card-btn:hover { background: rgba(212,169,64,0.05); }
-.news-featured.news-card-btn { width: 100%; }
 
 /* ── News Modal ─────────────────────────────────────────── */
 .nmodal-overlay {
