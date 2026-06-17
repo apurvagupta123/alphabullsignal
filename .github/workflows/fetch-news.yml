@@ -2,8 +2,12 @@ name: Fetch News (30 min)
 
 on:
   schedule:
-    - cron: '*/30 * * * *'   # every 30 minutes, all day
-  workflow_dispatch:           # manual trigger from GitHub Actions tab
+    - cron: '*/30 * * * *'   # every 30 minutes
+  workflow_dispatch:           # manual trigger
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'public/data/news.json'  # prevent infinite loop when workflow itself pushes
 
 jobs:
   fetch-news:
