@@ -29,6 +29,39 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/styles/global.css" />
     <style is:global>
+
+      /* ── Global Orbital (right-side decoration) ── */
+      .global-orbital {
+        position: fixed;
+        right: -90px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 320px;
+        height: 320px;
+        opacity: 0.35;
+        pointer-events: none;
+        z-index: 0;
+        filter: drop-shadow(0 0 24px rgba(212,169,64,0.25));
+        animation: goBreath 6s ease-in-out infinite;
+      }
+      .global-orbital svg { width: 100%; height: 100%; }
+      .go-ring-mid   { transform-origin: 160px 160px; animation: goSpinCW  20s linear infinite; }
+      .go-ring-inner { transform-origin: 160px 160px; animation: goSpinCCW 12s linear infinite; }
+      .go-bars       { transform-origin: 163px 165px; animation: goSpinCW  40s linear infinite; }
+      .go-pulse      { animation: goPulse 3.5s ease-out infinite; }
+      @keyframes goSpinCW  { to { transform: rotate(360deg);  } }
+      @keyframes goSpinCCW { to { transform: rotate(-360deg); } }
+      @keyframes goPulse {
+        0%   { stroke-opacity: 0.07; stroke-width: 20; }
+        50%  { stroke-opacity: 0.18; stroke-width: 10; }
+        100% { stroke-opacity: 0.07; stroke-width: 20; }
+      }
+      @keyframes goBreath {
+        0%, 100% { opacity: 0.35; transform: translateY(-50%) scale(1);    }
+        50%       { opacity: 0.50; transform: translateY(-50%) scale(1.04); }
+      }
+      @media (max-width: 900px) { .global-orbital { display: none; } }
+
       /* Ticker positioning — inline to avoid CDN cache delay */
       .news-bar {
         top: 0 !important;
@@ -91,6 +124,46 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
         </div>
       </div>
     </nav>
+
+
+    <!-- ── Global Orbital Decoration ─────────────────── -->
+    <div class="global-orbital" aria-hidden="true">
+      <svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer ring solid -->
+        <circle cx="160" cy="160" r="148" fill="none" stroke="rgba(212,169,64,0.12)" stroke-width="1.2"/>
+        <!-- Middle ring dashed - rotates CW -->
+        <g class="go-ring-mid">
+          <circle cx="160" cy="160" r="108" fill="none" stroke="rgba(212,169,64,0.22)" stroke-width="1" stroke-dasharray="7 5"/>
+          <circle cx="160" cy="52"  r="4.5" fill="#d4a940" opacity="0.85"/>
+          <circle cx="256" cy="206" r="3.5" fill="#fde68a" opacity="0.7"/>
+          <circle cx="70"  cy="228" r="3"   fill="#d4a940" opacity="0.65"/>
+        </g>
+        <!-- Inner ring dashed - rotates CCW -->
+        <g class="go-ring-inner">
+          <circle cx="160" cy="160" r="70" fill="none" stroke="rgba(212,169,64,0.32)" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <circle cx="160" cy="90"  r="5"   fill="#fde68a" opacity="0.9"/>
+          <circle cx="222" cy="198" r="3.5" fill="#d4a940" opacity="0.7"/>
+          <circle cx="102" cy="212" r="3"   fill="#fde68a" opacity="0.6"/>
+        </g>
+        <!-- Candlestick bars in centre -->
+        <g class="go-bars">
+          <!-- Wicks -->
+          <line x1="145" y1="152" x2="145" y2="186" stroke="#d4a940" stroke-width="1.2" opacity="0.7"/>
+          <line x1="157" y1="145" x2="157" y2="182" stroke="#fde68a" stroke-width="1.2" opacity="0.8"/>
+          <line x1="169" y1="150" x2="169" y2="188" stroke="#d4a940" stroke-width="1.2" opacity="0.7"/>
+          <line x1="181" y1="143" x2="181" y2="180" stroke="#fde68a" stroke-width="1.2" opacity="0.8"/>
+          <!-- Candle bodies -->
+          <rect x="141" y="162" width="8" height="18" rx="1.5" fill="rgba(212,169,64,0.75)"/>
+          <rect x="153" y="155" width="8" height="22" rx="1.5" fill="rgba(253,230,138,0.88)"/>
+          <rect x="165" y="160" width="8" height="20" rx="1.5" fill="rgba(212,169,64,0.65)"/>
+          <rect x="177" y="150" width="8" height="25" rx="1.5" fill="rgba(253,230,138,0.80)"/>
+        </g>
+        <!-- Pulse ring -->
+        <circle cx="160" cy="160" r="148" fill="none" stroke="rgba(212,169,64,0.07)" stroke-width="20" class="go-pulse"/>
+        <!-- Centre glow -->
+        <circle cx="160" cy="160" r="36" fill="rgba(212,169,64,0.07)"/>
+      </svg>
+    </div>
 
     <main>
       <slot />
