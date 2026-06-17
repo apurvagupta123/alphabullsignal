@@ -1,18 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import fs from 'node:fs';
-import path from 'node:path';
-
-// Load news JSON
-let newsData: any = { articles: [] };
-try {
-  const newsPath = path.resolve('./public/data/news.json');
-  if (fs.existsSync(newsPath)) {
-    newsData = JSON.parse(fs.readFileSync(newsPath, 'utf-8'));
-  }
-} catch (e) {}
-const featuredArticle = newsData.articles?.[0] || null;
-const sideArticles = newsData.articles?.slice(1, 13) || [];
 
 const posts = await Astro.glob('./blog/*.md').catch(() => []);
 const sorted = posts.sort((a: any, b: any) =>
@@ -170,10 +157,6 @@ const SECTOR_TAGS: Record<string, string> = {
       <!-- Donut chart -->
       <div class="pie-chart-wrap">
         <canvas id="stockPieChart" width="260" height="260"></canvas>
-        <div class="pie-center" id="pieCenter">
-          <span class="pie-center-price" id="piePrice">—</span>
-          <span class="pie-center-chg" id="pieChg">—</span>
-        </div>
       </div>
       <!-- Legend / clickable list -->
       <div class="pie-legend" id="pieLegend">
@@ -309,87 +292,45 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </section>
 
-  <!-- ── Financial News ───────────────────────────────── -->
-  {featuredArticle && (
-    <section class="content-section reveal" id="news">
-      <div class="section-head">
-        <h2 class="section-title">📰 Market News</h2>
-        <span class="section-live">LIVE</span>
+  <!-- ── Financial News (client-rendered, auto-refreshes every 30 min) ── -->
+  <section class="content-section reveal" id="news">
+    <div class="section-head">
+      <h2 class="section-title">📰 Market News</h2>
+      <span class="section-live">LIVE</span>
+    </div>
+    <!-- JS renders the grid here -->
+    <div id="newsGrid" class="news-grid">
+      <div class="news-loading">Loading latest news…</div>
+    </div>
+    <div class="news-footer" id="newsFooter" style="display:none">
+      <span class="news-updated" id="newsUpdatedAt"></span>
+      <a href="https://www.moneycontrol.com/news/" target="_blank" rel="noopener" class="news-more">More news →</a>
+    </div>
+  </section>
+
+  <!-- ── News Article Modal ──────────────────────────────────────── -->
+  <div id="newsModal" class="nmodal-overlay" role="dialog" aria-modal="true" aria-label="Article Summary" style="display:none">
+    <div class="nmodal-box">
+      <button class="nmodal-close" id="nmodalClose" aria-label="Close">✕</button>
+      <div class="nmodal-img-wrap" id="nmodalImgWrap">
+        <img id="nmodalImg" src="" alt="" class="nmodal-img" />
       </div>
-
-      <!-- Embed all article data for JS -->
-      <script type="application/json" id="newsJsonData" set:html={JSON.stringify(newsData.articles || [])} />
-
-      <div class="news-grid">
-        <!-- Featured article (left) — opens modal -->
-        <button class="news-featured news-card-btn" data-idx="0">
-          {featuredArticle.image && (
-            <div class="news-feat-img-wrap">
-              <img src={featuredArticle.image} alt={featuredArticle.title} class="news-feat-img" loading="lazy" />
-            </div>
-          )}
-          <div class="news-feat-body">
-            <span class="news-source-tag">{featuredArticle.source}</span>
-            <h3 class="news-feat-title">{featuredArticle.title}</h3>
-            <p class="news-feat-excerpt">{featuredArticle.excerpt?.slice(0, 160)}</p>
-            <span class="news-feat-time">
-              {new Date(featuredArticle.publishedAt).toLocaleString('en-IN', {
-                day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-              })}
-            </span>
-          </div>
-        </button>
-
-        <!-- Side article list (right) — each opens modal -->
-        <div class="news-side">
-          {sideArticles.map((article: any, i: number) => (
-            <button class="news-side-item news-card-btn" data-idx={i + 1}>
-              {article.image && (
-                <img src={article.image} alt="" class="news-side-img" loading="lazy" />
-              )}
-              <div class="news-side-body">
-                <span class="news-side-source">{article.source}</span>
-                <p class="news-side-title">{article.title}</p>
-                <span class="news-side-time">
-                  {new Date(article.publishedAt).toLocaleString('en-IN', {
-                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-                  })}
-                </span>
-              </div>
-            </button>
-          ))}
-          <div class="news-footer">
-            <span class="news-updated">Updated: {new Date(newsData.lastUpdated).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
-            <a href="https://www.moneycontrol.com/news/" target="_blank" rel="noopener" class="news-more">More news →</a>
-          </div>
+      <div class="nmodal-body">
+        <div class="nmodal-meta">
+          <span class="nmodal-source" id="nmodalSource"></span>
+          <span class="nmodal-time" id="nmodalTime"></span>
         </div>
-      </div>
-    </section>
-
-    <!-- ── News Article Modal ──────────────────────────────────────── -->
-    <div id="newsModal" class="nmodal-overlay" role="dialog" aria-modal="true" aria-label="Article Summary" style="display:none">
-      <div class="nmodal-box">
-        <button class="nmodal-close" id="nmodalClose" aria-label="Close">✕</button>
-        <div class="nmodal-img-wrap" id="nmodalImgWrap">
-          <img id="nmodalImg" src="" alt="" class="nmodal-img" />
+        <h2 class="nmodal-title" id="nmodalTitle"></h2>
+        <div class="nmodal-summary-wrap">
+          <span class="nmodal-ai-badge">✦ AI Summary</span>
+          <p class="nmodal-summary" id="nmodalSummary"></p>
         </div>
-        <div class="nmodal-body">
-          <div class="nmodal-meta">
-            <span class="nmodal-source" id="nmodalSource"></span>
-            <span class="nmodal-time" id="nmodalTime"></span>
-          </div>
-          <h2 class="nmodal-title" id="nmodalTitle"></h2>
-          <div class="nmodal-summary-wrap">
-            <span class="nmodal-ai-badge">✦ AI Summary</span>
-            <p class="nmodal-summary" id="nmodalSummary"></p>
-          </div>
-          <a class="nmodal-read-btn" id="nmodalReadBtn" href="#" target="_blank" rel="noopener">
-            Read full article →
-          </a>
-        </div>
+        <a class="nmodal-read-btn" id="nmodalReadBtn" href="#" target="_blank" rel="noopener">
+          Read full article →
+        </a>
       </div>
     </div>
-  )}
+  </div>
 
   <!-- ── Company Spotlight ─────────────────────────────── -->
   <section class="content-section reveal reveal-d2">
@@ -918,6 +859,8 @@ const SECTOR_TAGS: Record<string, string> = {
 @media (max-width: 600px) {
   .news-feat-title { font-size: 17px; }
 }
+
+.news-loading { color: var(--muted); font-size: 14px; padding: 24px 0; opacity: 0.5; }
 
 /* news card buttons — make them look like the old <a> tags */
 .news-card-btn {
@@ -1819,70 +1762,100 @@ const SECTOR_TAGS: Record<string, string> = {
   }
   updateHeroChips();
 
-  // ── News Modal ──────────────────────────────────────────
+  // ── News: client-side fetch + render + auto-refresh every 30 min ──────
   (function () {
-    const rawEl = document.getElementById('newsJsonData');
-    if (!rawEl) return;
-    let articles: any[] = [];
-    try { articles = JSON.parse(rawEl.textContent || '[]'); } catch (_) { return; }
+    let _articles: any[] = [];
 
-    const overlay   = document.getElementById('newsModal')!;
-    const closeBtn  = document.getElementById('nmodalClose')!;
-    const imgWrap   = document.getElementById('nmodalImgWrap')!;
-    const img       = document.getElementById('nmodalImg') as HTMLImageElement;
-    const source    = document.getElementById('nmodalSource')!;
-    const time      = document.getElementById('nmodalTime')!;
-    const title     = document.getElementById('nmodalTitle')!;
-    const summary   = document.getElementById('nmodalSummary')!;
-    const readBtn   = document.getElementById('nmodalReadBtn') as HTMLAnchorElement;
+    const overlay  = document.getElementById('newsModal')!;
+    const closeBtn = document.getElementById('nmodalClose')!;
+    const imgWrap  = document.getElementById('nmodalImgWrap')!;
+    const img      = document.getElementById('nmodalImg') as HTMLImageElement;
+    const msource  = document.getElementById('nmodalSource')!;
+    const mtime    = document.getElementById('nmodalTime')!;
+    const mtitle   = document.getElementById('nmodalTitle')!;
+    const msummary = document.getElementById('nmodalSummary')!;
+    const readBtn  = document.getElementById('nmodalReadBtn') as HTMLAnchorElement;
 
+    // ── modal open/close
     function openModal(idx: number) {
-      const a = articles[idx];
+      const a = _articles[idx];
       if (!a) return;
-
-      // Image
-      if (a.image) {
-        img.src = a.image;
-        img.alt = a.title;
-        imgWrap.style.display = '';
-      } else {
-        imgWrap.style.display = 'none';
-      }
-
-      // Meta
-      source.textContent = a.source || '';
-      time.textContent = new Date(a.publishedAt).toLocaleString('en-IN', {
-        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-      });
-
-      // Content
-      title.textContent = a.title;
-      summary.textContent = a.summary || a.excerpt || '';
+      if (a.image) { img.src = a.image; img.alt = a.title; imgWrap.style.display = ''; }
+      else imgWrap.style.display = 'none';
+      msource.textContent = a.source || '';
+      mtime.textContent = new Date(a.publishedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      mtitle.textContent = a.title;
+      msummary.textContent = a.summary || a.excerpt || '';
       readBtn.href = a.url;
-
       overlay.style.display = 'flex';
       document.body.style.overflow = 'hidden';
     }
+    function closeModal() { overlay.style.display = 'none'; document.body.style.overflow = ''; }
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    function closeModal() {
-      overlay.style.display = 'none';
-      document.body.style.overflow = '';
+    // ── render news grid from articles array
+    function renderNews(articles: any[]) {
+      _articles = articles;
+      const grid = document.getElementById('newsGrid')!;
+      const footer = document.getElementById('newsFooter')! as HTMLElement;
+      if (!articles.length) { grid.innerHTML = '<div class="news-loading">No news available.</div>'; return; }
+
+      const featured = articles[0];
+      const sides = articles.slice(1, 13);
+
+      // Featured card
+      const featHtml = `
+        <button class="news-featured news-card-btn" data-idx="0">
+          ${featured.image ? `<div class="news-feat-img-wrap"><img src="${featured.image}" alt="" class="news-feat-img" loading="lazy"/></div>` : ''}
+          <div class="news-feat-body">
+            <span class="news-source-tag">${featured.source}</span>
+            <h3 class="news-feat-title">${featured.title}</h3>
+            <p class="news-feat-excerpt">${(featured.excerpt||'').slice(0,160)}</p>
+            <span class="news-feat-time">${new Date(featured.publishedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+          </div>
+        </button>`;
+
+      // Side cards
+      const sidesHtml = sides.map((a, i) => `
+        <button class="news-side-item news-card-btn" data-idx="${i+1}">
+          ${a.image ? `<img src="${a.image}" alt="" class="news-side-img" loading="lazy"/>` : ''}
+          <div class="news-side-body">
+            <span class="news-side-source">${a.source}</span>
+            <p class="news-side-title">${a.title}</p>
+            <span class="news-side-time">${new Date(a.publishedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+          </div>
+        </button>`).join('');
+
+      grid.innerHTML = featHtml + `<div class="news-side">${sidesHtml}</div>`;
+
+      // Wire click handlers
+      grid.querySelectorAll<HTMLButtonElement>('.news-card-btn').forEach(btn => {
+        btn.addEventListener('click', () => openModal(parseInt(btn.dataset.idx||'0', 10)));
+      });
+
+      footer.style.display = '';
     }
 
-    // Wire up all news card buttons
-    document.querySelectorAll<HTMLButtonElement>('.news-card-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.idx || '0', 10);
-        openModal(idx);
-      });
-    });
+    // ── fetch /data/news.json and render
+    async function fetchAndRenderNews() {
+      try {
+        const res = await fetch('/data/news.json', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        renderNews(data.articles || []);
+        const updEl = document.getElementById('newsUpdatedAt');
+        if (updEl && data.lastUpdated) {
+          updEl.textContent = 'Updated: ' + new Date(data.lastUpdated).toLocaleString('en-IN',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'});
+        }
+      } catch (e) {
+        console.warn('News fetch failed:', e);
+      }
+    }
 
-    closeBtn.addEventListener('click', closeModal);
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeModal();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
-    });
+    // Load immediately, then refresh every 30 minutes
+    fetchAndRenderNews();
+    setInterval(fetchAndRenderNews, 30 * 60 * 1000);
   })();
 </script>
