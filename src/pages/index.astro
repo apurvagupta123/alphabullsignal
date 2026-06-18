@@ -746,98 +746,130 @@ const SECTOR_TAGS: Record<string, string> = {
   gap: 14px;
 }
 
-/* ── Featured card: image top, title + meta below */
-.news-featured {
-  display: block;
-  max-width: 500px;
+/* ── News grid wrapper: featured left + list right ── */
+.news-grid-wrap {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 0;
+  border: 1px solid rgba(212,169,64,0.18);
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid rgba(212,169,64,0.2);
   background: #0d0d0d;
+}
+
+/* ── Featured card: small image with title overlay at bottom ── */
+.news-featured {
+  display: block;
+  position: relative;
+  overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.2s;
   -webkit-appearance: none;
   appearance: none;
   padding: 0;
   font: inherit;
   color: inherit;
   text-align: left;
+  border: none;
+  background: #000;
+  height: 100%;
+  min-height: 200px;
 }
-.news-featured:hover { border-color: rgba(212,169,64,0.45); }
 .news-feat-img {
   display: block;
   width: 100%;
-  height: 190px;
+  height: 100%;
   object-fit: cover;
+  transition: transform .3s ease;
 }
-.news-feat-body { padding: 10px 14px 4px; }
+.news-featured:hover .news-feat-img { transform: scale(1.04); }
+
+/* Title + meta overlaid at bottom of image */
+.news-feat-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 32px 12px 12px;
+  background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.55) 65%, transparent 100%);
+}
 .news-feat-title {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.4;
-  color: var(--text);
-  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #fff;
+  margin: 0 0 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .news-feat-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 14px 12px;
+  gap: 8px;
 }
 .news-source-tag {
   display: inline-block;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: #000;
   background: var(--gold);
-  border-radius: 4px;
-  padding: 2px 7px;
+  border-radius: 3px;
+  padding: 2px 6px;
+  flex-shrink: 0;
 }
-.news-feat-time { font-size: 10.5px; color: var(--muted); opacity: 0.6; }
+.news-feat-time { font-size: 10px; color: rgba(255,255,255,.55); }
 
-/* ── Cards row: horizontal grid below featured */
+/* ── Cards: vertical single-line list to the right ── */
 .news-cards-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-  gap: 10px;
-}
-.news-small-card {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 10px 12px;
-  border: 1px solid rgba(212,169,64,0.12);
-  border-radius: 8px;
-  background: #0d0d0d;
+  border-left: 1px solid rgba(212,169,64,0.12);
+  overflow: hidden;
+}
+.news-small-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: background .1s;
   -webkit-appearance: none;
   appearance: none;
   font: inherit;
   color: inherit;
   text-align: left;
+  background: transparent;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
 }
-.news-small-card:hover { border-color: rgba(212,169,64,0.35); }
+.news-small-card:last-child { border-bottom: none; }
+.news-small-card:hover { background: rgba(255,255,255,.03); }
 .news-card-source {
   font-size: 8px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--gold);
-  opacity: 0.75;
+  opacity: 0.8;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .news-card-title {
   font-size: 12px;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--text);
   margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .news-footer {
@@ -1779,28 +1811,28 @@ const SECTOR_TAGS: Record<string, string> = {
       const featured = _articles[0];
       const sides = _articles.slice(1, 11);
 
-      // Featured card: image → title → meta
+      // Featured card: small image with title + meta overlaid at bottom
       const featTime = new Date(featured.publishedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       const featHtml = `
         <button class="news-featured" data-idx="0">
           ${featured.image ? `<img src="${featured.image}" class="news-feat-img" alt="" loading="lazy"/>` : ''}
-          <div class="news-feat-body">
+          <div class="news-feat-overlay">
             <h3 class="news-feat-title">${featured.title}</h3>
-          </div>
-          <div class="news-feat-meta">
-            <span class="news-source-tag">${featured.source}</span>
-            <span class="news-feat-time">${featTime}</span>
+            <div class="news-feat-meta">
+              <span class="news-source-tag">${featured.source}</span>
+              <span class="news-feat-time">${featTime}</span>
+            </div>
           </div>
         </button>`;
 
-      // Side articles — horizontal card grid
+      // Side articles — vertical single-line list
       const cardsHtml = sides.map((a: any, i: number) => `
         <button class="news-small-card" data-idx="${i+1}">
           <span class="news-card-source">${a.source}</span>
           <p class="news-card-title">${a.title}</p>
         </button>`).join('');
 
-      grid.innerHTML = featHtml + `<div class="news-cards-row">${cardsHtml}</div>`;
+      grid.innerHTML = `<div class="news-grid-wrap">${featHtml}<div class="news-cards-row">${cardsHtml}</div></div>`;
 
       // Wire click handlers
       grid.querySelectorAll<HTMLButtonElement>('[data-idx]').forEach(btn => {

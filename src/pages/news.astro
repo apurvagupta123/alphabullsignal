@@ -155,11 +155,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const d   = await r.json();
       if (d.status !== 'ok' || !d.items?.length) return [];
       const items = d.items.map(item => ({
-        title:   item.title || '',
-        link:    item.link  || item.guid || '#',
-        pubDate: item.pubDate || '',
-        _source: feedDef.source,
-        _color:  feedDef.color,
+        title:     item.title || '',
+        link:      item.link  || item.guid || '#',
+        pubDate:   item.pubDate || '',
+        thumbnail: item.thumbnail || (item.enclosure && item.enclosure.link) || '',
+        _source:   feedDef.source,
+        _color:    feedDef.color,
       }));
       setCache(cacheKey, items.map(({ _source, _color, ...rest }) => rest));
       return items;
@@ -179,13 +180,36 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   // ─── Render: By Time (flat sorted list) ──────────────────────────────────
   function renderByTime(items, limit) {
     if (!items.length) return '<div class="news-empty">No articles found.</div>';
-    return items.slice(0, limit).map(item => `
+    const visible = items.slice(0, limit);
+    const [first, ...rest] = visible;
+
+    const rowHtml = (item) => `
       <a class="ni" href="${escHtml(item.link)}" target="_blank" rel="noopener noreferrer">
         <span class="ni-src" style="background:${item._color}20;color:${item._color};border-color:${item._color}40">${escHtml(item._source)}</span>
         <span class="ni-time">${relTime(item.pubDate)}</span>
         <div class="ni-title">${escHtml(item.title)}</div>
-      </a>
-    `).join('');
+      </a>`;
+
+    if (first && first.thumbnail) {
+      return `
+        <div class="news-featured-wrapper" id="nfw-${Date.now()}">
+          <a class="nf-hero" href="${escHtml(first.link)}" target="_blank" rel="noopener noreferrer">
+            <div class="nf-hero-img-wrap">
+              <img class="nf-hero-img" src="${escHtml(first.thumbnail)}" alt="" loading="lazy"
+                   onerror="this.closest('.news-featured-wrapper').classList.add('nfw-no-img')">
+              <div class="nf-hero-overlay">
+                <span class="ni-src" style="background:${first._color}20;color:${first._color};border-color:${first._color}40">${escHtml(first._source)}</span>
+                <div class="nf-hero-title">${escHtml(first.title)}</div>
+                <span class="nf-hero-time">${relTime(first.pubDate)}</span>
+              </div>
+            </div>
+          </a>
+          <div class="nf-list">${rest.map(rowHtml).join('')}</div>
+        </div>`;
+    }
+
+    // No thumbnail — render all as plain rows
+    return visible.map(rowHtml).join('');
   }
 
   // ─── Render: By Source (grouped) ─────────────────────────────────────────
@@ -441,6 +465,71 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   /* ── News Feed ── */
   .news-feed { padding: 0; }
 
+  /* ── Featured first-item layout ── */
+  .news-featured-wrapper {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+  /* If image fails to load, collapse the hero column */
+  .news-featured-wrapper.nfw-no-img {
+    grid-template-columns: 1fr;
+  }
+  .news-featured-wrapper.nfw-no-img .nf-hero { display: none; }
+
+  .nf-hero {
+    display: block;
+    text-decoration: none;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .nf-hero-img-wrap {
+    position: relative;
+    height: 100%;
+    min-height: 180px;
+  }
+  .nf-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .3s ease;
+  }
+  .nf-hero:hover .nf-hero-img { transform: scale(1.04); }
+
+  .nf-hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 32px 12px 10px;
+    background: linear-gradient(to top, rgba(0,0,0,.9) 0%, rgba(0,0,0,.5) 65%, transparent 100%);
+  }
+  .nf-hero-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.35;
+    margin-top: 5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .nf-hero-time {
+    display: block;
+    font-size: 10px;
+    color: rgba(255,255,255,.55);
+    margin-top: 4px;
+  }
+
+  .nf-list {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .nf-list .ni:last-child { border-bottom: none; }
+
   /* Single news item — row layout */
   .ni {
     display: grid;
@@ -587,6 +676,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .news-topbar { padding: 10px 16px 0; }
     .ntab { padding: 10px 14px; font-size: 12px; }
     .ni { padding: 10px 16px; }
+    .news-featured-wrapper { grid-template-columns: 180px 1fr; }
+    .nf-hero-img-wrap { min-height: 140px; }
+  }
+  @media (max-width: 500px) {
+    .news-featured-wrapper { grid-template-columns: 1fr; }
+    .nf-hero { border-right: none; border-bottom: 1px solid var(--border); }
+    .nf-hero-img-wrap { min-height: 160px; }
   }
 </style>
 
