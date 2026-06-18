@@ -1834,7 +1834,6 @@ const SECTOR_TAGS: Record<string, string> = {
           <button class="mn-feat-btn" data-idx="0">
             <h2 class="mn-feat-title">${hero.title}</h2>
             ${hero.excerpt ? `<p class="mn-feat-excerpt">${hero.excerpt}</p>` : ''}
-            ${hero.image   ? `<div class="mn-feat-img-box"><img src="${hero.image}" alt="" loading="lazy"></div>` : ''}
           </button>
           <ul class="mn-bullets">
             ${bullets.map((a: any) => `<li><button class="mn-bullet-btn" data-idx="${_articles.indexOf(a)}">${a.title}</button></li>`).join('')}
