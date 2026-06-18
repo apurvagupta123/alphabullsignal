@@ -1280,6 +1280,87 @@ const SECTOR_TAGS: Record<string, string> = {
 @media (max-width: 400px) {
   .idx-strip { grid-template-columns: 1fr 1fr; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — TABLET (≤900px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  /* Pulse: 2-column grid on tablet */
+  .pulse-grid { grid-template-columns: repeat(2, 1fr); }
+  .pulse-card  { padding: 15px 16px; }
+
+  /* Hero: centre-align content once visual is hidden */
+  .hero-split  { flex-direction: column; align-items: flex-start; gap: 0; }
+  .hero-content { width: 100%; }
+
+  /* News section right-panel: cap height so it scrolls */
+  .mn-right { max-height: 300px; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE (≤600px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  /* Pulse: single column */
+  .pulse-grid  { grid-template-columns: 1fr; gap: 12px; }
+  .pulse-card  { padding: 14px 16px; }
+  .pulse-value { font-size: 1.6rem; }
+  .vix-svg     { max-width: 200px; }
+  .mood-wrap   { gap: 10px; }
+  .mood-donut  { width: 86px; height: 86px; }
+  .fii-val     { font-size: 10px; width: 60px; }
+
+  /* News section — tighter text */
+  .mn-feat-title   { font-size: 16px; }
+  .mn-feat-excerpt { font-size: 12px; }
+  .mn-left         { padding: 14px 14px 12px; gap: 10px; }
+  .mn-section      { padding: 11px 13px; }
+  .mn-sec-lead     { font-size: 12.5px; }
+  .mn-right        { max-height: none; }
+
+  /* News modal — full-screen friendly */
+  .nmodal-box {
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    position: fixed !important;
+    bottom: 0; left: 0; right: 0;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .nmodal-overlay { align-items: flex-end !important; }
+
+  /* Spotlight */
+  .sl-price      { font-size: 1.4rem; }
+  .sl-price-row  { flex-wrap: wrap; gap: 6px; }
+  .sl-stats      { grid-template-columns: repeat(2, 1fr); }
+
+  /* Indices strip — 3 pills per row on small mobile */
+  .idx-strip { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .idx-pill  { padding: 10px 10px 8px; }
+  .idx-pill-name  { font-size: 9px; }
+  .idx-pill-price { font-size: 14px; }
+
+  /* Timeline items — date column smaller */
+  .tl-date-col { min-width: 44px; }
+  .tl-day      { font-size: 16px; }
+  .tl-mon      { font-size: 9px; }
+  .tl-title    { font-size: 13px; }
+  .tl-desc     { display: none; }
+
+  /* Guide strip */
+  .guide-strip { padding: 16px; }
+  .gs-grid     { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — VERY SMALL (≤400px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 400px) {
+  .idx-strip  { grid-template-columns: repeat(2, 1fr); }
+  .mn-feat-title { font-size: 14px; }
+  .pulse-card { padding: 12px 13px; }
+  .gs-grid    { grid-template-columns: 1fr; }
+}
 </style>
 
 <script>

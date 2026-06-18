@@ -40,7 +40,6 @@ jobs:
           git diff --staged --quiet || git commit -m "chore: update market data [$(date -u '+%Y-%m-%d %H:%M UTC')]"
 
       - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
+        run: |
+          git pull --rebase origin main
+          git push origin main

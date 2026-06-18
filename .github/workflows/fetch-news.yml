@@ -40,7 +40,6 @@ jobs:
           git diff --staged --quiet || git commit -m "chore: refresh news [$(date -u '+%H:%M UTC')]"
 
       - name: Push
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
+        run: |
+          git pull --rebase origin main
+          git push origin main
