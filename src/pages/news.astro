@@ -53,6 +53,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 </div>
 
+<!-- ── AI Picks Modal ── -->
+<div id="aiModal" class="aimodal-overlay" style="display:none" role="dialog" aria-modal="true">
+  <div class="aimodal-box">
+    <button class="aimodal-close" id="aiModalClose" aria-label="Close">✕</button>
+    <div class="aimodal-img-wrap" id="aiModalImgWrap">
+      <img id="aiModalImg" src="" alt="" class="aimodal-img" />
+    </div>
+    <div class="aimodal-body">
+      <div class="aimodal-meta">
+        <span class="aimodal-src" id="aiModalSrc"></span>
+        <span class="aimodal-time" id="aiModalTime"></span>
+      </div>
+      <h2 class="aimodal-title" id="aiModalTitle"></h2>
+      <div class="aimodal-summary-wrap">
+        <span class="aimodal-ai-badge">✦ AI Summary</span>
+        <p class="aimodal-summary" id="aiModalSummary"></p>
+      </div>
+      <a class="aimodal-read-btn" id="aiModalBtn" href="#" target="_blank" rel="noopener">Read full article →</a>
+    </div>
+  </div>
+</div>
+
 <script>
   // ─── Feed Definitions ────────────────────────────────────────────────────
   // Only feeds confirmed working with rss2json free tier
@@ -201,14 +223,46 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return `${Math.floor(hrs / 24)}d ago`;
   }
 
+  // ─── AI Picks modal ──────────────────────────────────────────────────────
+  let _aiArticles = [];
+
+  function openAIModal(idx) {
+    const a = _aiArticles[idx];
+    if (!a) return;
+    const mo = document.getElementById('aiModal');
+    const mImg     = document.getElementById('aiModalImg');
+    const mImgWrap = document.getElementById('aiModalImgWrap');
+    const mSrc     = document.getElementById('aiModalSrc');
+    const mTime    = document.getElementById('aiModalTime');
+    const mTitle   = document.getElementById('aiModalTitle');
+    const mSummary = document.getElementById('aiModalSummary');
+    const mBtn     = document.getElementById('aiModalBtn');
+    if (a.image) {
+      mImg.src = a.image; mImg.alt = a.title;
+      mImgWrap.style.display = '';
+    } else {
+      mImgWrap.style.display = 'none';
+    }
+    mSrc.textContent   = a.source || '';
+    mTime.textContent  = a.publishedAt ? new Date(a.publishedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+    mTitle.textContent = a.title || '';
+    mSummary.textContent = a.summary || a.excerpt || '';
+    mBtn.href = a.url || '#';
+    mo.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeAIModal() {
+    document.getElementById('aiModal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
   async function loadAIPicks() {
     const mainFeed = document.getElementById('newsMainFeed');
     const blogCol  = document.querySelector('.news-blog-col');
-    const mainCol  = document.querySelector('.news-main-col');
     const body     = document.querySelector('.news-body');
     blogCol.style.display = 'none';
     body.style.gridTemplateColumns = '1fr';
-    mainFeed.innerHTML = '<div class="news-skeleton-list">' + Array(6).fill('<div class="news-skeleton"></div>').join('') + '</div>';
+    mainFeed.innerHTML = '<div class="news-skeleton-list">' + Array(8).fill('<div class="news-skeleton"></div>').join('') + '</div>';
     document.getElementById('newsLoading').style.display = 'block';
     document.getElementById('loadMoreMain').style.display = 'none';
     document.getElementById('loadMoreBlog').style.display = 'none';
@@ -218,27 +272,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const res  = await fetch('/data/news.json?t=' + Date.now(), { cache: 'no-store' });
       const data = await res.json();
       const articles = data.articles || [];
+      _aiArticles = articles;
       document.getElementById('mainCount').textContent = articles.length ? `${articles.length} articles` : '';
 
       if (!articles.length) {
         mainFeed.innerHTML = '<div class="news-empty">No AI picks available yet.</div>';
       } else {
-        mainFeed.innerHTML = `<div class="ai-grid">${articles.map(a => `
-          <a class="ai-card" href="${escHtml(a.url||'#')}" target="_blank" rel="noopener noreferrer">
-            <div class="ai-card-cat">${escHtml(a.category||'News')}</div>
-            <div class="ai-card-meta">
-              <span class="ai-card-src">${escHtml(a.source||'')}</span>
-              <span class="ai-card-dot">·</span>
-              <span class="ai-card-time">${timeAgo(a.publishedAt||'')}</span>
-            </div>
-            <div class="ai-card-title">${escHtml(a.title||'')}</div>
-            ${(a.summary||a.excerpt) ? `
-            <div class="ai-card-summary">
-              <span class="ai-card-label">✦ AI Summary</span>
-              <p class="ai-card-text">${escHtml(a.summary||a.excerpt||'')}</p>
-            </div>` : ''}
-          </a>`).join('')}
+        mainFeed.innerHTML = `<div class="ai-rows">${articles.map((a, i) => `
+          <div class="ai-row" data-idx="${i}">
+            <span class="ai-row-time">${timeAgo(a.publishedAt||'')}</span>
+            <span class="ai-row-title">${escHtml(a.title||'')}</span>
+            <span class="ai-row-arrow">›</span>
+          </div>`).join('')}
         </div>`;
+        mainFeed.querySelectorAll('.ai-row').forEach(row => {
+          row.addEventListener('click', () => openAIModal(parseInt(row.dataset.idx)));
+        });
       }
     } catch {
       mainFeed.innerHTML = '<div class="news-empty">Could not load AI picks.</div>';
@@ -377,6 +426,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     document.getElementById('loadMoreBlog').style.display =
       blogItems.length > blogShown ? 'block' : 'none';
   });
+
+  // ─── AI Modal close handlers ──────────────────────────────────────────────
+  document.getElementById('aiModalClose').addEventListener('click', closeAIModal);
+  document.getElementById('aiModal').addEventListener('click', e => { if (e.target === document.getElementById('aiModal')) closeAIModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAIModal(); });
 
   // ─── Init ─────────────────────────────────────────────────────────────────
   loadTab('ai');
@@ -684,97 +738,110 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
   .news-load-more:hover { background: var(--navy-2); }
 
-  /* ── AI Picks Grid ── */
-  .ai-grid {
+  /* ── AI Picks Rows ── */
+  .ai-rows { display: flex; flex-direction: column; }
+  .ai-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    padding: 20px;
-  }
-  .ai-card {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: #111009;
-    border: 1px solid rgba(212,169,64,0.15);
-    border-radius: 10px;
-    padding: 16px;
-    text-decoration: none;
-    transition: border-color .15s, box-shadow .15s, transform .15s;
-  }
-  .ai-card:hover {
-    border-color: rgba(212,169,64,0.45);
-    box-shadow: 0 8px 28px rgba(0,0,0,0.4);
-    transform: translateY(-2px);
-  }
-  .ai-card-cat {
-    font-size: 8px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .8px;
-    color: #0a0904;
-    background: #d4a940;
-    border-radius: 4px;
-    padding: 2px 8px;
-    align-self: flex-start;
-  }
-  .ai-card-meta {
-    display: flex;
+    grid-template-columns: 52px 1fr 20px;
     align-items: center;
-    gap: 6px;
+    gap: 0 14px;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    cursor: pointer;
+    transition: background .1s;
   }
-  .ai-card-src {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: .4px;
+  .ai-row:hover { background: var(--navy-2); }
+  .ai-row:last-child { border-bottom: none; }
+  .ai-row-time {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: right;
+    white-space: nowrap;
   }
-  .ai-card-dot { font-size: 9px; color: rgba(255,255,255,.2); }
-  .ai-card-time { font-size: 10px; color: rgba(255,255,255,.35); }
-  .ai-card-title {
+  .ai-row-title {
     font-size: 13px;
-    font-weight: 700;
-    color: #fff;
+    font-weight: 500;
+    color: var(--text);
     line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    white-space: nowrap;
     overflow: hidden;
-    transition: color .15s;
+    text-overflow: ellipsis;
+    transition: color .1s;
   }
-  .ai-card:hover .ai-card-title { color: #e8c96a; }
-  .ai-card-summary {
-    background: rgba(212,169,64,0.07);
-    border-left: 2px solid rgba(212,169,64,0.4);
-    border-radius: 0 5px 5px 0;
-    padding: 8px 10px;
-    margin-top: 2px;
+  .ai-row:hover .ai-row-title { color: #fff; }
+  .ai-row-arrow {
+    font-size: 16px;
+    color: rgba(212,169,64,.4);
+    text-align: right;
+    transition: color .1s;
   }
-  .ai-card-label {
-    display: block;
-    font-size: 8px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .8px;
-    color: var(--gold);
-    margin-bottom: 4px;
+  .ai-row:hover .ai-row-arrow { color: var(--gold); }
+
+  /* ── AI Modal ── */
+  .aimodal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.82);
+    z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(4px);
   }
-  .ai-card-text {
-    font-size: 11.5px;
-    color: rgba(255,255,255,.58);
-    line-height: 1.55;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin: 0;
+  .aimodal-box {
+    background: #0f0f0f;
+    border: 1px solid rgba(212,169,64,.25);
+    border-radius: 16px;
+    max-width: 620px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    position: relative;
+    box-shadow: 0 24px 64px rgba(0,0,0,.8);
   }
-  @media (max-width: 860px) {
-    .ai-grid { grid-template-columns: repeat(2, 1fr); padding: 14px; gap: 12px; }
+  .aimodal-close {
+    position: absolute; top: 14px; right: 16px;
+    background: rgba(255,255,255,.06); border: none; color: #fff;
+    font-size: 16px; width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
   }
-  @media (max-width: 500px) {
-    .ai-grid { grid-template-columns: 1fr; padding: 10px; gap: 10px; }
+  .aimodal-close:hover { background: rgba(212,169,64,.25); }
+  .aimodal-img-wrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px 16px 0 0; }
+  .aimodal-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .aimodal-body { padding: 20px 24px 28px; }
+  .aimodal-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .aimodal-src {
+    font-size: 11px; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--gold);
+    background: rgba(212,169,64,.12); padding: 2px 8px; border-radius: 20px;
+  }
+  .aimodal-time { font-size: 11px; color: rgba(255,255,255,.4); }
+  .aimodal-title {
+    font-size: 20px; font-weight: 700; color: #fff;
+    line-height: 1.35; margin: 0 0 18px;
+  }
+  .aimodal-summary-wrap {
+    background: rgba(212,169,64,.06);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px; margin-bottom: 22px;
+  }
+  .aimodal-ai-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: .06em;
+    color: var(--gold); text-transform: uppercase;
+    display: block; margin-bottom: 8px; opacity: .85;
+  }
+  .aimodal-summary { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,.82); margin: 0; }
+  .aimodal-read-btn {
+    display: inline-block; padding: 10px 22px;
+    background: linear-gradient(135deg, var(--gold), #b8922a);
+    color: #000; font-weight: 700; font-size: 13px;
+    border-radius: 8px; text-decoration: none; transition: opacity .2s;
+  }
+  .aimodal-read-btn:hover { opacity: .85; }
+  @media (max-width: 600px) {
+    .aimodal-title { font-size: 17px; }
+    .aimodal-body { padding: 16px 16px 22px; }
+    .ai-row { padding: 11px 14px; }
+    .ai-row-time { font-size: 10px; }
   }
 
   /* ── India Stock Rows (Stocks tab) ── */
