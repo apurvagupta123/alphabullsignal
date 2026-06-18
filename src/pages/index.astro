@@ -292,19 +292,18 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </section>
 
-  <!-- ── Financial News (client-rendered, auto-refreshes every 30 min) ── -->
+  <!-- ── Market News ── -->
   <section class="content-section" id="news">
     <div class="section-head">
       <h2 class="section-title">📰 Market News</h2>
       <span class="section-live">LIVE</span>
     </div>
-    <!-- JS renders the grid here -->
-    <div id="newsGrid" class="news-grid">
-      <div class="news-loading">Loading latest news…</div>
+    <div id="newsGrid" class="mn-shell">
+      <div class="mn-loading">Loading latest news…</div>
     </div>
-    <div class="news-footer" id="newsFooter" style="display:none">
-      <span class="news-updated" id="newsUpdatedAt"></span>
-      <a href="https://www.moneycontrol.com/news/" target="_blank" rel="noopener" class="news-more">More news →</a>
+    <div class="mn-footer" id="newsFooter" style="display:none">
+      <span class="mn-updated" id="newsUpdatedAt"></span>
+      <a href="/news" class="mn-more">All news →</a>
     </div>
   </section>
 
@@ -739,151 +738,101 @@ const SECTOR_TAGS: Record<string, string> = {
   font-style: italic;
 }
 
-/* ── News Section ─────────────────────────────────── */
-.news-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+/* ── Market News ─────────────────────────────────── */
+.mn-shell { }
+.mn-loading { color: var(--muted); font-size: 13px; padding: 16px 0; opacity: 0.5; }
 
-/* ── News grid wrapper: featured left + list right ── */
-.news-grid-wrap {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 0;
+.mn-wrap {
+  display: flex;
   border: 1px solid rgba(212,169,64,0.18);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
   background: #0d0d0d;
 }
 
-/* ── Featured card: small image with title overlay at bottom ── */
-.news-featured {
+/* Hero — hard fixed box, image absolutely fills it */
+.mn-hero {
+  all: unset;
   display: block;
   position: relative;
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
+  height: 280px;
   overflow: hidden;
+  flex-shrink: 0;
   cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  border: none;
-  background: #000;
-  height: 100%;
-  min-height: 200px;
+  border-right: 1px solid rgba(212,169,64,0.12);
+  background: #111;
+  box-sizing: border-box;
 }
-.news-feat-img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform .3s ease;
-}
-.news-featured:hover .news-feat-img { transform: scale(1.04); }
-
-/* Title + meta overlaid at bottom of image */
-.news-feat-overlay {
+.mn-hero-img {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 32px 12px 12px;
-  background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.55) 65%, transparent 100%);
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+  display: block;
 }
-.news-feat-title {
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.35;
-  color: #fff;
-  margin: 0 0 6px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.mn-hero:hover .mn-hero-img { transform: scale(1.05); }
+.mn-hero-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 40px 12px 12px;
+  background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.5) 65%, transparent 100%);
+  pointer-events: none;
 }
-.news-feat-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.mn-hero-title {
+  font-size: 12px; font-weight: 600; color: #fff;
+  line-height: 1.35; margin: 0 0 6px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
-.news-source-tag {
-  display: inline-block;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: #000;
-  background: var(--gold);
-  border-radius: 3px;
-  padding: 2px 6px;
-  flex-shrink: 0;
+.mn-hero-meta { display: flex; align-items: center; gap: 6px; }
+.mn-hero-src {
+  font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  color: #000; background: var(--gold); border-radius: 3px; padding: 1px 5px;
 }
-.news-feat-time { font-size: 10px; color: rgba(255,255,255,.55); }
+.mn-hero-time { font-size: 10px; color: rgba(255,255,255,.5); }
 
-/* ── Cards: vertical single-line list to the right ── */
-.news-cards-row {
-  display: flex;
-  flex-direction: column;
-  border-left: 1px solid rgba(212,169,64,0.12);
-  overflow: hidden;
+/* Side list */
+.mn-list {
+  flex: 1; display: flex; flex-direction: column;
+  overflow-y: auto; height: 280px;
 }
-.news-small-card {
+.mn-row {
+  all: unset;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 88px 46px 1fr;
   align-items: center;
-  gap: 0 10px;
-  padding: 9px 14px;
+  gap: 0 8px;
+  padding: 0 14px;
+  height: 31px; min-height: 31px;
   border-bottom: 1px solid rgba(255,255,255,.04);
-  cursor: pointer;
-  transition: background .1s;
-  -webkit-appearance: none;
-  appearance: none;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  background: transparent;
-  border-radius: 0;
-  border-left: none;
-  border-right: none;
-  border-top: none;
+  cursor: pointer; transition: background .1s; box-sizing: border-box;
 }
-.news-small-card:last-child { border-bottom: none; }
-.news-small-card:hover { background: rgba(255,255,255,.03); }
-.news-card-source {
-  font-size: 8px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--gold);
-  opacity: 0.8;
-  white-space: nowrap;
-  flex-shrink: 0;
+.mn-row:last-child { border-bottom: none; }
+.mn-row:hover { background: rgba(255,255,255,.04); }
+.mn-row-src {
+  font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--gold); opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.news-card-title {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.3;
-  color: var(--text);
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.mn-row-time { font-size: 10px; color: var(--muted); opacity: .5; white-space: nowrap; text-align: right; }
+.mn-row-title { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.news-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 0;
-  border-top: 1px solid rgba(212,169,64,0.1);
+.mn-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0 2px; border-top: 1px solid rgba(212,169,64,0.08); margin-top: 8px;
 }
-.news-updated { font-size: 9.5px; color: var(--muted); opacity: 0.5; }
-.news-more { font-size: 10.5px; font-weight: 600; color: var(--gold); text-decoration: none; }
-.news-more:hover { opacity: 0.75; }
-.news-loading { color: var(--muted); font-size: 13px; padding: 16px 0; opacity: 0.5; }
-.news-card-btn { all: unset; cursor: pointer; display: block; width: 100%; }
+.mn-updated { font-size: 9.5px; color: var(--muted); opacity: .45; }
+.mn-more { font-size: 11px; font-weight: 600; color: var(--gold); text-decoration: none; }
+.mn-more:hover { opacity: .75; }
+
+@media (max-width: 600px) {
+  .mn-hero { width: 130px; min-width: 130px; max-width: 130px; height: 220px; }
+  .mn-list { height: 220px; }
+  .mn-row { grid-template-columns: 70px 1fr; }
+  .mn-row-time { display: none; }
+}
 
 /* ── News Modal ─────────────────────────────────────────── */
 .nmodal-overlay {
@@ -1797,48 +1746,49 @@ const SECTOR_TAGS: Record<string, string> = {
     overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    // ── render news grid from articles array
+    function relTime(iso: string) {
+      const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+      if (m < 1) return 'now';
+      if (m < 60) return m + 'm';
+      const h = Math.floor(m / 60);
+      if (h < 24) return h + 'h';
+      return Math.floor(h / 24) + 'd';
+    }
+
+    // ── render news
     function renderNews(articles: any[]) {
-      _articles = articles;
-      const grid = document.getElementById('newsGrid')!;
+      const grid   = document.getElementById('newsGrid')!;
       const footer = document.getElementById('newsFooter')! as HTMLElement;
-      if (!articles.length) { grid.innerHTML = '<div class="news-loading">No news available.</div>'; return; }
+      if (!articles.length) { grid.innerHTML = '<div class="mn-loading">No news available.</div>'; return; }
 
-      // Always put the article-with-image first; reorder _articles so idx matches
-      const featuredRaw = articles.find((a: any) => a.image) || articles[0];
-      const restArticles = articles.filter((a: any) => a !== featuredRaw);
-      _articles = [featuredRaw, ...restArticles];
-      const featured = _articles[0];
-      const sides = _articles.slice(1, 11);
+      const hero = articles.find((a: any) => a.image) || articles[0];
+      const rest = articles.filter((a: any) => a !== hero).slice(0, 9);
+      _articles  = [hero, ...rest];
 
-      // Featured card: small image with title + meta overlaid at bottom
-      const featTime = new Date(featured.publishedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-      const featHtml = `
-        <button class="news-featured" data-idx="0">
-          ${featured.image ? `<img src="${featured.image}" class="news-feat-img" alt="" loading="lazy"/>` : ''}
-          <div class="news-feat-overlay">
-            <h3 class="news-feat-title">${featured.title}</h3>
-            <div class="news-feat-meta">
-              <span class="news-source-tag">${featured.source}</span>
-              <span class="news-feat-time">${featTime}</span>
+      const heroHtml = `
+        <button class="mn-hero" data-idx="0">
+          ${hero.image ? `<img class="mn-hero-img" src="${hero.image}" alt="" loading="lazy">` : ''}
+          <div class="mn-hero-overlay">
+            <p class="mn-hero-title">${hero.title}</p>
+            <div class="mn-hero-meta">
+              <span class="mn-hero-src">${hero.source}</span>
+              <span class="mn-hero-time">${relTime(hero.publishedAt)}</span>
             </div>
           </div>
         </button>`;
 
-      // Side articles — vertical single-line list
-      const cardsHtml = sides.map((a: any, i: number) => `
-        <button class="news-small-card" data-idx="${i+1}">
-          <span class="news-card-source">${a.source}</span>
-          <p class="news-card-title">${a.title}</p>
+      const rowsHtml = rest.map((a: any, i: number) => `
+        <button class="mn-row" data-idx="${i+1}">
+          <span class="mn-row-src">${a.source}</span>
+          <span class="mn-row-time">${relTime(a.publishedAt)}</span>
+          <span class="mn-row-title">${a.title}</span>
         </button>`).join('');
 
-      grid.innerHTML = `<div class="news-grid-wrap">${featHtml}<div class="news-cards-row">${cardsHtml}</div></div>`;
+      grid.innerHTML = `<div class="mn-wrap">${heroHtml}<div class="mn-list">${rowsHtml}</div></div>`;
 
-      // Wire click handlers
-      grid.querySelectorAll<HTMLButtonElement>('[data-idx]').forEach(btn => {
-        btn.addEventListener('click', () => openModal(parseInt(btn.dataset.idx||'0', 10)));
-      });
-
+      grid.querySelectorAll<HTMLButtonElement>('[data-idx]').forEach(btn =>
+        btn.addEventListener('click', () => openModal(parseInt(btn.dataset.idx||'0', 10)))
+      );
       footer.style.display = '';
     }
 
@@ -1846,24 +1796,18 @@ const SECTOR_TAGS: Record<string, string> = {
     async function fetchAndRenderNews() {
       const grid = document.getElementById('newsGrid');
       try {
-        const res = await fetch('/data/news.json?t=' + Date.now(), { cache: 'no-store' });
-        if (!res.ok) {
-          if (grid) grid.innerHTML = '<div class="news-loading">Could not load news (HTTP ' + res.status + ')</div>';
-          return;
-        }
+        const res  = await fetch('/data/news.json?t=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) { if (grid) grid.innerHTML = '<div class="mn-loading">Could not load news.</div>'; return; }
         const data = await res.json();
         renderNews(data.articles || []);
         const updEl = document.getElementById('newsUpdatedAt');
-        if (updEl && data.lastUpdated) {
+        if (updEl && data.lastUpdated)
           updEl.textContent = 'Updated: ' + new Date(data.lastUpdated).toLocaleString('en-IN',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'});
-        }
       } catch (e) {
-        console.warn('News fetch failed:', e);
-        if (grid) grid.innerHTML = '<div class="news-loading">News unavailable — will retry shortly.</div>';
+        if (grid) grid.innerHTML = '<div class="mn-loading">News unavailable.</div>';
       }
     }
 
-    // Load immediately, then refresh every 30 minutes
     fetchAndRenderNews();
     setInterval(fetchAndRenderNews, 30 * 60 * 1000);
   })();
