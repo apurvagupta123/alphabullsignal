@@ -32,8 +32,15 @@ export async function getStaticPaths() {
     'TATASTEEL.NS','JSWSTEEL.NS','HINDALCO.NS','VEDL.NS','SAIL.NS','NMDC.NS','COALINDIA.NS','MOIL.NS','JSWENERGY.NS','NATIONALUM.NS',
     // Telecom / Media / Others
     'BHARTIARTL.NS','IDEA.NS','HFCL.NS','NETWORK18.NS','ZEEL.NS','SUNTV.NS','INDIAMART.NS','NAUKRI.NS','TATACOMM.NS',
-    // Misc
+    // Misc large cap
     'TITAN.NS','M&M.NS','ADANIENT.NS',
+    // Mid Cap
+    'POLYCAB.NS','DIXON.NS','MPHASIS.NS','PERSISTENT.NS','COFORGE.NS',
+    'ZOMATO.NS','DMART.NS','TRENT.NS','NYKAA.NS','PAYTM.NS','POLICYBZR.NS',
+    'PIDILITIND.NS','HAVELLS.NS','IRCTC.NS',
+    'ADANIPOWER.NS','ADANIENSOL.NS','ADANIWILMAR.NS','AMBUJACEMENT.NS','ACC.NS',
+    // Small Cap
+    'LATENTVIEW.NS','KAYNES.NS','BIKAJI.NS','CAMPUS.NS',
   ];
   const unique = [...new Set(symbols)];
   return unique.map(s => ({ params: { symbol: s.toLowerCase().replace(/\./g, '-') } }));
