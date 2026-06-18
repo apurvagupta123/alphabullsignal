@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-18T19:21:26+05:30",
+  "lastUpdated": "2026-06-18T19:26:51+05:30",
   "count": 25,
   "articles": [
     {
@@ -21,6 +21,16 @@
       "publishedAt": "2026-06-18T19:14:11+05:30",
       "category": "Markets",
       "summary": "The government aims to extend crop insurance coverage to about 1.10 crore farmers across 30 lakh hectares during 2026-27, covering crops valued at around Rs 28,140 crore."
+    },
+    {
+      "title": "Sebi proposes easing margin trading funding rules, tighter broker norms",
+      "excerpt": "SEBI has proposed reforms to the Margin Trading Facility, including increasing broker net-worth requirements to Rs 5 crore, permitting LLPs to offer MTF, and expanding funding avenues. These changes aim to enhance operat",
+      "url": "https://economictimes.indiatimes.com/markets/stocks/news/sebi-proposes-easing-margin-trading-funding-rules-tighter-broker-norms/articleshow/131832861.cms",
+      "source": "Economic Times",
+      "image": null,
+      "publishedAt": "2026-06-18T19:11:48+05:30",
+      "category": "Markets",
+      "summary": "SEBI has proposed reforms to the Margin Trading Facility, including increasing broker net-worth requirements to Rs 5 crore, permitting LLPs to offer MTF, and expanding funding avenues. These changes aim to enhance operat"
     },
     {
       "title": "AI Must Improve Lives, Widen Access, Drive Growth: PM Modi In France",
@@ -173,6 +183,16 @@
       "summary": "Bezos' comments sit awkwardly against the recent track record of the company he founded."
     },
     {
+      "title": "Sebi board to consider reintroducing open-market window for buybacks on Friday",
+      "excerpt": "This Friday, Sebi's board is gearing up for a pivotal meeting focused on several transformative proposals. Among these is the revival of open-market share buybacks, now with a quicker turnaround. Furthermore, the introdu",
+      "url": "https://economictimes.indiatimes.com/markets/stocks/news/sebi-board-to-consider-reintroducing-open-market-window-for-buybacks-on-friday/articleshow/131830346.cms",
+      "source": "Economic Times",
+      "image": null,
+      "publishedAt": "2026-06-18T17:39:49+05:30",
+      "category": "Markets",
+      "summary": "This Friday, Sebi's board is gearing up for a pivotal meeting focused on several transformative proposals. Among these is the revival of open-market share buybacks, now with a quicker turnaround. Furthermore, the introdu"
+    },
+    {
       "title": "SEBI Board To Consider Open",
       "excerpt": "SEBI also proposed retaining the existing requirement that companies should utilise at least 40% of the earmarked buyback amount during the first half of the offer period.",
       "url": "https://www.ndtvprofit.com/markets/sebi-board-to-consider-open-market-buybacks-faster-aif-approvals-on-friday-11654739#publisher=newsstand",
@@ -231,26 +251,6 @@
       "publishedAt": "2026-06-18T17:33:00+05:30",
       "category": "Markets",
       "summary": "The BOE is trying to strike a balance between taming inflation, which at 2.8% is above the bank's 2% target, and supporting growth."
-    },
-    {
-      "title": "US stock market today: S&P 500, Nasdaq futures recover as investors digest hawkish Fed signals; crude extends fall",
-      "excerpt": "US stock futures point to a positive Wall Street start after a previous sell-off. Fed officials signal potential interest rate hikes amid inflation concerns. Oil prices decline with an interim US-Iran agreement, raising ",
-      "url": "https://www.livemint.com/market/stock-market-news/us-stock-market-today-s-p-500-nasdaq-futures-recover-as-investors-digest-hawkish-fed-signals-crude-extends-fall-11781780896567.html",
-      "source": "Mint",
-      "image": "https://www.livemint.com/lm-img/img/2026/06/18/1600x900/logo/im-72913439_1762530034214_1781781045530_a5055d00-a476-4735-8d0f-52772f561baf.jpg",
-      "publishedAt": "2026-06-18T17:32:18+05:30",
-      "category": "Markets",
-      "summary": "US stock futures point to a positive Wall Street start after a previous sell-off. Fed officials signal potential interest rate hikes amid inflation concerns. Oil prices decline with an interim US-Iran agreement, raising "
-    },
-    {
-      "title": "Eye-popping returns for early investors as NSE eyes  ₹5 tn IPO valuation",
-      "excerpt": "The biggest winners are New India Assurance and National Insurance, who stand to gain 6,300 times and 6,442 times returns on their investment. CPPIB, the last to enter, may be the smallest gainer, exiting with 6.3-fold r",
-      "url": "https://www.livemint.com/market/ipo/nse-ipo-drhp-share-price-returns-investors-national-stock-exchange-india-stock-markets-11781777655195.html",
-      "source": "Mint",
-      "image": "https://www.livemint.com/lm-img/img/2026/06/18/1600x900/logo/COFORGE-STOCKS--0_1781542526592_1781542540540_deb5d779-9230-4cf5-a52b-ecf64a6a4a68_1781781636641_330358c7-c141-4c35-9594-768e648f7dbd.JPG",
-      "publishedAt": "2026-06-18T17:04:01+05:30",
-      "category": "Markets",
-      "summary": "The biggest winners are New India Assurance and National Insurance, who stand to gain 6,300 times and 6,442 times returns on their investment. CPPIB, the last to enter, may be the smallest gainer, exiting with 6.3-fold r"
     }
   ]
 }
