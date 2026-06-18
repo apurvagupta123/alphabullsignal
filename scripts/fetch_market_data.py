@@ -150,6 +150,14 @@ COMPANY_SYMBOLS = list(dict.fromkeys([
     'SUNTV.NS','INDIAMART.NS','NAUKRI.NS','TATACOMM.NS',
     # Misc
     'TITAN.NS','M&M.NS','ADANIENT.NS',
+    # Adani Group (extended)
+    'ADANIPOWER.NS','ADANIENSOL.NS','ADANIWILMAR.NS','AMBUJACEMENT.NS','ACC.NS',
+    # Consumer & New-age
+    'ZOMATO.NS','DMART.NS','TRENT.NS','NYKAA.NS','PAYTM.NS','POLICYBZR.NS',
+    # Industrials / Materials
+    'PIDILITIND.NS','HAVELLS.NS','POLYCAB.NS','DIXON.NS','IRCTC.NS',
+    # Small/Mid cap additions
+    'LATENTVIEW.NS','KAYNES.NS','BIKAJI.NS','CAMPUS.NS',
 ]))
 
 US_INDICES = ['^GSPC', '^DJI', '^IXIC', '^RUT']
