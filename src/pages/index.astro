@@ -124,6 +124,8 @@ const SECTOR_TAGS: Record<string, string> = {
         {key:'NSEI',   name:'NIFTY 50',   idx:'NSEI'},
         {key:'BSESN',  name:'SENSEX',     idx:'BSESN'},
         {key:'NSEBANK',name:'NIFTY BANK', idx:'NSEBANK'},
+        {key:'LCAP',   name:'LARGECAP',   idx:'LCAP'},
+        {key:'MCAP',   name:'MIDCAP',     idx:'MCAP'},
         {key:'MID',    name:'SMALLCAP',   idx:'NIFTYMIDCAP'},
         {key:'IT',     name:'NIFTY IT',   idx:'IT'},
         {key:'AUTO',   name:'NIFTY AUTO', idx:'AUTO'},
@@ -147,35 +149,86 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </div>
 
-  <!-- ── Today's Indian Markets ──────────────────────── -->
+  <!-- ── Market Cap Leaders ─────────────────────────── -->
   <section class="content-section reveal" id="markets">
     <div class="section-head">
-      <h2 class="section-title">Top 5 Stocks</h2>
+      <h2 class="section-title">Market Cap Leaders</h2>
       <a href="/markets" class="section-more">View all sectors →</a>
     </div>
-    <div class="pie-layout">
-      <!-- Donut chart -->
-      <div class="pie-chart-wrap">
-        <canvas id="stockPieChart" width="260" height="260"></canvas>
-      </div>
-      <!-- Legend / clickable list -->
-      <div class="pie-legend" id="pieLegend">
-        {['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS'].map((sym, i) => (
-          <a class="pie-leg-item" id={`pl-${sym}`}
-             href={`/company/${sym.toLowerCase().replace(/\./g,'-')}`}
-             data-sym={sym} data-idx={i}>
-            <span class="pie-leg-dot" id={`pld-${i}`}></span>
-            <div class="pie-leg-body">
-              <span class="pie-leg-sym">{sym.replace('.NS','')}</span>
-              <span class="pie-leg-name" id={`pln-${sym}`}>Loading…</span>
-            </div>
-            <div class="pie-leg-right">
-              <span class="pie-leg-price" id={`plp-${sym}`}>—</span>
-              <span class="pie-leg-chg"  id={`plc-${sym}`}>—</span>
-            </div>
-          </a>
-        ))}
-      </div>
+    <!-- Cap tabs -->
+    <div class="cap-tabs" id="capTabs">
+      <button class="cap-tab active" data-cap="large">🔵 Large Cap</button>
+      <button class="cap-tab" data-cap="mid">🟡 Mid Cap</button>
+      <button class="cap-tab" data-cap="small">🟢 Small Cap</button>
+    </div>
+    <!-- Large Cap -->
+    <div class="cap-table" id="capLarge">
+      {[
+        {sym:'RELIANCE.NS', name:'Reliance Industries'},
+        {sym:'TCS.NS',      name:'Tata Consultancy Services'},
+        {sym:'HDFCBANK.NS', name:'HDFC Bank'},
+        {sym:'INFY.NS',     name:'Infosys'},
+        {sym:'ICICIBANK.NS',name:'ICICI Bank'},
+      ].map((s,i) => (
+        <a class="cap-row" id={`cr-${s.sym}`}
+           href={`/company/${s.sym.toLowerCase().replace(/\./g,'-')}`}>
+          <span class="cap-rank">{i+1}</span>
+          <div class="cap-row-info">
+            <span class="cap-row-sym">{s.sym.replace('.NS','')}</span>
+            <span class="cap-row-name">{s.name}</span>
+          </div>
+          <div class="cap-row-right">
+            <span class="cap-row-price" id={`crp-${s.sym}`}>—</span>
+            <span class="cap-row-badge" id={`crb-${s.sym}`}>—</span>
+          </div>
+        </a>
+      ))}
+    </div>
+    <!-- Mid Cap -->
+    <div class="cap-table" id="capMid" style="display:none">
+      {[
+        {sym:'PERSISTENT.NS',name:'Persistent Systems'},
+        {sym:'POLYCAB.NS',   name:'Polycab India'},
+        {sym:'MPHASIS.NS',   name:'Mphasis'},
+        {sym:'DIXON.NS',     name:'Dixon Technologies'},
+        {sym:'COFORGE.NS',   name:'Coforge'},
+      ].map((s,i) => (
+        <a class="cap-row" id={`cr-${s.sym}`}
+           href={`/company/${s.sym.toLowerCase().replace(/\./g,'-')}`}>
+          <span class="cap-rank">{i+1}</span>
+          <div class="cap-row-info">
+            <span class="cap-row-sym">{s.sym.replace('.NS','')}</span>
+            <span class="cap-row-name">{s.name}</span>
+          </div>
+          <div class="cap-row-right">
+            <span class="cap-row-price" id={`crp-${s.sym}`}>—</span>
+            <span class="cap-row-badge" id={`crb-${s.sym}`}>—</span>
+          </div>
+        </a>
+      ))}
+    </div>
+    <!-- Small Cap -->
+    <div class="cap-table" id="capSmall" style="display:none">
+      {[
+        {sym:'LATENTVIEW.NS',name:'LatentView Analytics'},
+        {sym:'KAYNES.NS',    name:'Kaynes Technology'},
+        {sym:'BIKAJI.NS',    name:'Bikaji Foods'},
+        {sym:'IRCTC.NS',     name:'IRCTC'},
+        {sym:'CAMPUS.NS',    name:'Campus Activewear'},
+      ].map((s,i) => (
+        <a class="cap-row" id={`cr-${s.sym}`}
+           href={`/company/${s.sym.toLowerCase().replace(/\./g,'-')}`}>
+          <span class="cap-rank">{i+1}</span>
+          <div class="cap-row-info">
+            <span class="cap-row-sym">{s.sym.replace('.NS','')}</span>
+            <span class="cap-row-name">{s.name}</span>
+          </div>
+          <div class="cap-row-right">
+            <span class="cap-row-price" id={`crp-${s.sym}`}>—</span>
+            <span class="cap-row-badge" id={`crb-${s.sym}`}>—</span>
+          </div>
+        </a>
+      ))}
     </div>
   </section>
 
@@ -838,112 +891,87 @@ const SECTOR_TAGS: Record<string, string> = {
   display: inline-block;
 }
 
-/* ── Top 5 Stocks Pie Chart ──────────────────────────── */
-.pie-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 28px;
-  align-items: center;
-}
-.pie-chart-wrap {
-  position: relative;
-  width: 260px;
-  height: 260px;
-  flex-shrink: 0;
-}
-#stockPieChart { display: block; cursor: pointer; }
-.pie-center {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  pointer-events: none;
-}
-.pie-center-sym {
-  display: block;
-  font-size: 15px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 0.5px;
-}
-.pie-center-price {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--gold);
-  margin: 2px 0;
-}
-.pie-center-chg {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-}
-.pie-center-chg.up { color: #22c55e; }
-.pie-center-chg.dn { color: #ef4444; }
-
-/* Legend */
-.pie-legend {
+/* ── Market Cap Leaders ──────────────────────────────── */
+.cap-tabs {
   display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.cap-tab {
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.3px;
+}
+.cap-tab.active, .cap-tab:hover {
+  background: rgba(212,169,64,0.12);
+  border-color: rgba(212,169,64,0.4);
+  color: var(--gold);
+}
+.cap-table {
   flex-direction: column;
   gap: 6px;
 }
-.pie-leg-item {
+.cap-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: linear-gradient(135deg, rgba(212,169,64,0.08), rgba(184,134,11,0.04));
-  border: 1px solid rgba(212,169,64,0.18);
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid transparent;
   border-radius: 9px;
   text-decoration: none;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
-.pie-leg-item:hover, .pie-leg-item.active {
-  background: rgba(212,169,64,0.15);
-  border-color: rgba(212,169,64,0.4);
-  transform: translateX(3px);
-}
-.pie-leg-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+.cap-row:hover { background: var(--navy-3); border-color: rgba(212,169,64,0.3); }
+.cap-row.up { border-left-color: #22c55e; }
+.cap-row.dn { border-left-color: #ef4444; }
+.cap-rank {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 18px;
+  text-align: center;
   flex-shrink: 0;
 }
-.pie-leg-body { flex: 1; min-width: 0; }
-.pie-leg-sym {
+.cap-row-info { flex: 1; min-width: 0; }
+.cap-row-sym {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   color: #fff;
   letter-spacing: 0.3px;
 }
-.pie-leg-name {
+.cap-row-name {
   display: block;
   font-size: 11px;
-  color: var(--muted);
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.pie-leg-right { text-align: right; flex-shrink: 0; }
-.pie-leg-price {
+.cap-row-right { text-align: right; flex-shrink: 0; }
+.cap-row-price {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #fff;
 }
-.pie-leg-chg {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-}
-.pie-leg-chg.up { color: #22c55e; }
-.pie-leg-chg.dn { color: #ef4444; }
-
-@media (max-width: 700px) {
-  .pie-layout { grid-template-columns: 1fr; justify-items: center; }
-  .pie-chart-wrap { width: 220px; height: 220px; }
+.cap-row-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 5px;
+  margin-top: 3px;
 }
 
 /* keep badge styles for other pages */
@@ -1035,6 +1063,7 @@ const SECTOR_TAGS: Record<string, string> = {
   // ── All data from local JSON files (updated daily by GitHub Actions) ──
   const IDX_MAP: Record<string,string> = {
     '^NSEI':'NSEI','^BSESN':'BSESN','^NSEBANK':'NSEBANK','^CNXSC':'MID',
+    '^CNX100':'LCAP','^CNXMIDCAP':'MCAP',
     '^CNXIT':'IT','^CNXAUTO':'AUTO','^CNXPHARMA':'PHARMA','^CNXFMCG':'FMCG'
   };
 
@@ -1060,116 +1089,54 @@ const SECTOR_TAGS: Record<string, string> = {
     } catch(e) { console.error('indices load failed', e); }
   }
 
-  // ── Pie chart for Top 5 stocks ──────────────────────────
-  const PIE_SYMS = ['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS'];
-  const PIE_COLORS = ['#D4A940','#22c55e','#3b82f6','#a855f7','#f97316'];
-  let _pieChart: any = null;
-  let _pieStocks: any[] = [];
-  let _pieActive = 0;
+  // ── Market Cap Leaders ───────────────────────────────────
+  const CAP_STOCKS = {
+    large: ['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS'],
+    mid:   ['PERSISTENT.NS','POLYCAB.NS','MPHASIS.NS','DIXON.NS','COFORGE.NS'],
+    small: ['LATENTVIEW.NS','KAYNES.NS','BIKAJI.NS','IRCTC.NS','CAMPUS.NS'],
+  };
 
-  function initPieChart(stocks: any[]) {
-    _pieStocks = stocks;
-    const canvas = document.getElementById('stockPieChart') as HTMLCanvasElement;
-    if (!canvas || !(window as any).Chart) return;
-
-    // Colour legend dots
-    PIE_SYMS.forEach((sym, i) => {
-      const dot = document.getElementById(`pld-${i}`);
-      if (dot) (dot as HTMLElement).style.background = PIE_COLORS[i];
-    });
-
-    const prices = stocks.map(s => s.regularMarketPrice || 1);
-    const total  = prices.reduce((a,b)=>a+b,0);
-
-    _pieChart = new (window as any).Chart(canvas, {
-      type: 'doughnut',
-      data: {
-        labels: PIE_SYMS.map(s => s.replace('.NS','')),
-        datasets: [{
-          data: prices.map(p => +((p/total*100).toFixed(2))),
-          backgroundColor: PIE_COLORS,
-          borderColor: '#0a0904',
-          borderWidth: 3,
-          hoverBorderWidth: 0,
-          hoverOffset: 8,
-        }]
-      },
-      options: {
-        cutout: '68%',
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-        animation: { animateRotate: true, duration: 900 },
-        onClick(_e: any, els: any[]) {
-          if (els.length) updatePieCenter(els[0].index);
-        },
-        onHover(_e: any, els: any[]) {
-          (canvas as HTMLElement).style.cursor = els.length ? 'pointer' : 'default';
-        }
-      }
-    });
-
-    updatePieCenter(0);
-  }
-
-  function updatePieCenter(idx: number) {
-    _pieActive = idx;
-    const q = _pieStocks[idx];
-    if (!q) return;
-    const chg = q.regularMarketChange ?? 0;
-    const pct = q.regularMarketChangePercent ?? 0;
-    const up  = chg >= 0;
-
-    const priceEl = document.getElementById('piePrice');
-    const chgEl   = document.getElementById('pieChg');
-    if (priceEl) priceEl.textContent = `₹${(q.regularMarketPrice||0).toLocaleString('en-IN',{maximumFractionDigits:2})}`;
-    if (chgEl) {
-      chgEl.textContent = `${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`;
-      chgEl.className = `pie-center-chg ${up?'up':'dn'}`;
+  function renderCapRow(q: any) {
+    if (!q?.regularMarketPrice) return;
+    const pct    = q.regularMarketChangePercent ?? 0;
+    const up     = pct >= 0;
+    const priceEl = document.getElementById(`crp-${q.symbol}`);
+    const badgeEl = document.getElementById(`crb-${q.symbol}`);
+    const rowEl   = document.getElementById(`cr-${q.symbol}`);
+    if (priceEl) priceEl.textContent = `₹${q.regularMarketPrice.toLocaleString('en-IN',{maximumFractionDigits:2})}`;
+    if (badgeEl) {
+      badgeEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`;
+      badgeEl.className = `cap-row-badge ${up ? 'badge-up' : 'badge-dn'}`;
     }
-
-    // Highlight legend row
-    PIE_SYMS.forEach((sym, i) => {
-      document.getElementById(`pl-${sym}`)?.classList.toggle('active', i === idx);
-    });
-  }
-
-  function renderPieLegend(q: any) {
-    const idx = PIE_SYMS.indexOf(q.symbol);
-    if (idx < 0) return;
-    const chg = q.regularMarketChange ?? 0;
-    const pct = q.regularMarketChangePercent ?? 0;
-    const up  = chg >= 0;
-
-    const nameEl  = document.getElementById(`pln-${q.symbol}`);
-    const priceEl = document.getElementById(`plp-${q.symbol}`);
-    const chgEl   = document.getElementById(`plc-${q.symbol}`);
-    if (nameEl) nameEl.textContent = q.name || q.symbol.replace('.NS','');
-    if (priceEl) priceEl.textContent = `₹${(q.regularMarketPrice||0).toLocaleString('en-IN',{maximumFractionDigits:2})}`;
-    if (chgEl) {
-      chgEl.textContent = `${up?'+':''}${pct.toFixed(2)}%`;
-      chgEl.className = `pie-leg-chg ${up?'up':'dn'}`;
-    }
+    if (rowEl) rowEl.classList.add(up ? 'up' : 'dn');
   }
 
   async function loadMarkets() {
     try {
-      const res = await fetch('/data/india-stocks.json');
+      const res  = await fetch('/data/india-stocks.json');
       const data = await res.json();
-      const top5 = PIE_SYMS.map(sym => data.nse.find((s:any) => s.symbol === sym)).filter(Boolean);
-      top5.forEach(renderPieLegend);
-      initPieChart(top5);
-
-      // Legend click → highlight segment
-      PIE_SYMS.forEach((sym, i) => {
-        document.getElementById(`pl-${sym}`)?.addEventListener('click', (e) => {
-          e.preventDefault();
-          updatePieCenter(i);
-          // Navigate after short delay so user sees highlight
-          setTimeout(() => window.location.href =
-            `/company/${sym.toLowerCase().replace(/\./g,'-')}`, 300);
-        });
+      const nse  = data.nse || [];
+      [...CAP_STOCKS.large, ...CAP_STOCKS.mid, ...CAP_STOCKS.small].forEach(sym => {
+        const q = nse.find((s:any) => s.symbol === sym);
+        if (q) renderCapRow(q);
       });
     } catch(e) { console.error('stocks load failed', e); }
   }
+
+  // Cap tab switching
+  document.querySelectorAll('.cap-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cap = (btn as HTMLElement).dataset.cap;
+      document.querySelectorAll('.cap-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const lg = document.getElementById('capLarge');
+      const md = document.getElementById('capMid');
+      const sm = document.getElementById('capSmall');
+      if (lg) lg.style.display = cap === 'large' ? 'flex' : 'none';
+      if (md) md.style.display = cap === 'mid'   ? 'flex' : 'none';
+      if (sm) sm.style.display = cap === 'small' ? 'flex' : 'none';
+    });
+  });
 
   async function loadMarketPulse() {
     // ── VIX from local JSON ──────────────────────────────
@@ -1438,6 +1405,8 @@ const SECTOR_TAGS: Record<string, string> = {
     AUTO:{title:'NIFTY AUTO',icon:'🚗',what:'Tracks India\'s top automobile companies — from Maruti and Tata Motors to Bajaj Auto and Hero MotoCorp. Reflects consumer spending confidence: when people buy cars and bikes, the economy is doing well.',who:'Maruti Suzuki, Mahindra & Mahindra, Tata Motors, Bajaj Auto, Hero MotoCorp, Eicher Motors, TVS Motor, Bosch India.',why:'Auto sales are a real-time pulse of Indian consumer confidence. Strong auto sales = people have money and are spending it. Weak sales = economic stress.',movers:'Fuel prices (petrol/diesel directly affects demand), interest rates (auto loans), monsoon (rural demand for two-wheelers), raw material costs (steel, aluminium), and EV policy announcements.',sip:'Auto sector funds do well during economic expansion and consumer boom cycles. Watch monthly SIAM auto sales data as a leading indicator.'},
     PHARMA:{title:'NIFTY PHARMA',icon:'💊',what:'Tracks India\'s top pharmaceutical companies — Sun Pharma, Dr. Reddy\'s, Cipla, Divi\'s Laboratories. India is the "pharmacy of the world," supplying ~20% of global generic medicines. Pharma is often a defensive sector during market downturns.',who:'Sun Pharma, Dr. Reddy\'s Laboratories, Cipla, Divi\'s Labs, Biocon, Aurobindo Pharma, Lupin, Alkem Laboratories.',why:'Pharma stocks are defensive — people need medicines regardless of the economy. During market crashes, pharma often holds up better than other sectors. US FDA approvals can send a pharma stock surging overnight.',movers:'US FDA inspection outcomes, USFDA drug approvals, currency (many pharma cos earn in USD), API (raw material) prices from China, and domestic pricing policy.',sip:'Pharma sector funds are good for portfolio stability. They don\'t grow as fast as IT or auto in bull markets, but they protect capital during downturns.'},
     FMCG:{title:'NIFTY FMCG',icon:'🛒',what:'Tracks Fast-Moving Consumer Goods companies — HUL, ITC, Nestle, Britannia, Dabur, Marico. These sell everyday products: soap, shampoo, biscuits, noodles, cigarettes. Revenues are stable and predictable since people buy these regardless of the market.',who:'Hindustan Unilever (HUL), ITC, Nestle India, Britannia, Dabur, Marico, Colgate-Palmolive, Emami.',why:'FMCG is the most defensive sector. It barely falls during market crashes — because demand for soap and biscuits doesn\'t disappear in a recession. But it also grows slowly in bull markets.',movers:'Rural income (50% of FMCG sales come from rural India), monsoon (good rains = more rural cash = more FMCG spending), inflation (input cost: palm oil, wheat prices), and urban consumption trends.',sip:'FMCG sector funds are ideal for conservative investors. Low growth ceiling but strong downside protection. Good to hold alongside a more aggressive equity fund.'},
+    LCAP:{title:'NIFTY 100 — Large Cap',icon:'🔵',what:'NIFTY 100 tracks India\'s 100 largest companies by market cap — the full Large Cap universe. It includes all NIFTY 50 companies plus the next 50 largest. Together they represent ~75% of India\'s total stock market value and are the most liquid, most researched stocks on NSE.',who:'All NIFTY 50 stocks + HCL Tech, Wipro, Adani Enterprises, Tata Motors, Titan, Asian Paints, Bajaj Finserv, Power Grid, Zomato, Jio Financial. Heavy in financials (~35%), IT (~14%), energy (~12%).',why:'NIFTY 100 is the benchmark for large-cap mutual funds. When it rises, India\'s biggest and most stable businesses are performing — signalling broad economic confidence. It\'s less volatile than mid/small cap indices.',movers:'FII inflows (foreign investors focus here), RBI rate decisions, quarterly earnings of heavyweights, US market cues, INR/USD movements, and crude oil prices.',sip:'Large-cap funds benchmarked to NIFTY 100 give lower risk than mid/small cap funds. Best as the core (50–60%) of a long-term portfolio. Outperforms in uncertain or bear markets.'},
+    MCAP:{title:'NIFTY MIDCAP 100',icon:'🟡',what:'NIFTY MIDCAP 100 tracks India\'s 101st to 200th largest companies — the classic Mid Cap zone. Market caps roughly ₹10,000–₹50,000 Cr. These are established, growing businesses not yet large enough for NIFTY 100, but with strong earnings track records. They often become tomorrow\'s large caps.',who:'Persistent Systems, Polycab, Dixon Technologies, Coforge, Max Healthcare, Tata Elxsi, Oberoi Realty, PI Industries, Mphasis, Godrej Properties. Diverse mix: IT, specialty chemicals, healthcare, real estate, FMCG.',why:'Mid caps are the sweet spot of Indian markets — proven businesses with significant room to grow. NIFTY MIDCAP typically outperforms NIFTY 50 in sustained bull markets but falls harder in corrections.',movers:'RBI rate cycle, domestic capex and consumption, sector-specific policy (PLI, infrastructure), retail investor flows (FIIs focus on large caps), earnings momentum and margin trends.',sip:'Mid cap funds work best over 7–10 years. Expect 30–40% drawdowns in bear markets, but they can deliver 15–18% CAGR over long cycles. Good as 20–30% of a diversified portfolio.'},
   };
   let _idxHomeLive: Record<string,{price:number,pct:number}> = {};
 

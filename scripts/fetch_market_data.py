@@ -30,11 +30,13 @@ NOW = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 # ── Symbol lists ──────────────────────────────────────────────────────────────
 
-INDIA_INDICES = ['^NSEI', '^BSESN', '^NSEBANK', '^CNXSC', '^CNXIT', '^CNXAUTO', '^CNXPHARMA', '^CNXFMCG', '^INDIAVIX']
+INDIA_INDICES = ['^NSEI', '^BSESN', '^NSEBANK', '^CNX100', '^CNXMIDCAP', '^CNXSC', '^CNXIT', '^CNXAUTO', '^CNXPHARMA', '^CNXFMCG', '^INDIAVIX']
 INDEX_NAMES   = {
     '^NSEI':      'NIFTY 50',
     '^BSESN':     'SENSEX',
     '^NSEBANK':   'NIFTY BANK',
+    '^CNX100':    'NIFTY 100',
+    '^CNXMIDCAP': 'NIFTY MIDCAP 100',
     '^CNXSC':     'NIFTY SMALLCAP',
     '^CNXIT':     'NIFTY IT',
     '^CNXAUTO':   'NIFTY AUTO',
@@ -62,6 +64,18 @@ NSE_STOCKS = [
     ('HCLTECH.NS',    'HCL Technologies'),
     ('TITAN.NS',      'Titan Company'),
     ('ASIANPAINT.NS', 'Asian Paints'),
+    # Mid Cap leaders
+    ('PERSISTENT.NS', 'Persistent Systems'),
+    ('POLYCAB.NS',    'Polycab India'),
+    ('MPHASIS.NS',    'Mphasis'),
+    ('DIXON.NS',      'Dixon Technologies'),
+    ('COFORGE.NS',    'Coforge'),
+    # Small Cap leaders
+    ('LATENTVIEW.NS', 'LatentView Analytics'),
+    ('KAYNES.NS',     'Kaynes Technology'),
+    ('BIKAJI.NS',     'Bikaji Foods'),
+    ('IRCTC.NS',      'IRCTC'),
+    ('CAMPUS.NS',     'Campus Activewear'),
 ]
 
 BSE_STOCKS = [
