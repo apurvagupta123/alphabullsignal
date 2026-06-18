@@ -8,7 +8,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <!-- ── Top bar: tabs + view toggle ─────────────────────────── -->
   <div class="news-topbar">
     <div class="news-tabs">
-      <button class="ntab active" data-tab="market">📰 Market News</button>
+      <button class="ntab active" data-tab="ai">✦ AI Picks</button>
+      <button class="ntab" data-tab="market">📰 Market News</button>
       <button class="ntab" data-tab="pulse">📊 Market Pulse</button>
       <button class="ntab" data-tab="etf">🏦 ETFs</button>
       <button class="ntab" data-tab="crypto">₿ Crypto</button>
@@ -177,39 +178,80 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return all.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
   }
 
-  // ─── Render: By Time (flat sorted list) ──────────────────────────────────
+  // ─── Render: By Time (flat sorted list — no featured hero image) ─────────
   function renderByTime(items, limit) {
     if (!items.length) return '<div class="news-empty">No articles found.</div>';
     const visible = items.slice(0, limit);
-    const [first, ...rest] = visible;
-
-    const rowHtml = (item) => `
+    return visible.map(item => `
       <a class="ni" href="${escHtml(item.link)}" target="_blank" rel="noopener noreferrer">
         <span class="ni-src" style="background:${item._color}20;color:${item._color};border-color:${item._color}40">${escHtml(item._source)}</span>
         <span class="ni-time">${relTime(item.pubDate)}</span>
         <div class="ni-title">${escHtml(item.title)}</div>
-      </a>`;
+      </a>`).join('');
+  }
 
-    if (first && first.thumbnail) {
-      return `
-        <div class="news-featured-wrapper" id="nfw-${Date.now()}">
-          <a class="nf-hero" href="${escHtml(first.link)}" target="_blank" rel="noopener noreferrer">
-            <div class="nf-hero-img-wrap">
-              <img class="nf-hero-img" src="${escHtml(first.thumbnail)}" alt="" loading="lazy"
-                   onerror="this.closest('.news-featured-wrapper').classList.add('nfw-no-img')">
-              <div class="nf-hero-overlay">
-                <span class="ni-src" style="background:${first._color}20;color:${first._color};border-color:${first._color}40">${escHtml(first._source)}</span>
-                <div class="nf-hero-title">${escHtml(first.title)}</div>
-                <span class="nf-hero-time">${relTime(first.pubDate)}</span>
-              </div>
+  // ─── AI Picks: load from /data/news.json ─────────────────────────────────
+  function timeAgo(iso) {
+    if (!iso) return '';
+    const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (mins < 2)  return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24)  return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  }
+
+  async function loadAIPicks() {
+    const mainFeed = document.getElementById('newsMainFeed');
+    const blogCol  = document.querySelector('.news-blog-col');
+    const mainCol  = document.querySelector('.news-main-col');
+    const body     = document.querySelector('.news-body');
+    blogCol.style.display = 'none';
+    body.style.gridTemplateColumns = '1fr';
+    mainFeed.innerHTML = '<div class="news-skeleton-list">' + Array(6).fill('<div class="news-skeleton"></div>').join('') + '</div>';
+    document.getElementById('newsLoading').style.display = 'block';
+    document.getElementById('loadMoreMain').style.display = 'none';
+    document.getElementById('loadMoreBlog').style.display = 'none';
+    document.getElementById('mainColTitle').textContent = 'AI Picks';
+
+    try {
+      const res  = await fetch('/data/news.json?t=' + Date.now(), { cache: 'no-store' });
+      const data = await res.json();
+      const articles = data.articles || [];
+      document.getElementById('mainCount').textContent = articles.length ? `${articles.length} articles` : '';
+
+      if (!articles.length) {
+        mainFeed.innerHTML = '<div class="news-empty">No AI picks available yet.</div>';
+      } else {
+        mainFeed.innerHTML = `<div class="ai-grid">${articles.map(a => `
+          <a class="ai-card" href="${escHtml(a.url||'#')}" target="_blank" rel="noopener noreferrer">
+            <div class="ai-card-cat">${escHtml(a.category||'News')}</div>
+            <div class="ai-card-meta">
+              <span class="ai-card-src">${escHtml(a.source||'')}</span>
+              <span class="ai-card-dot">·</span>
+              <span class="ai-card-time">${timeAgo(a.publishedAt||'')}</span>
             </div>
-          </a>
-          <div class="nf-list">${rest.map(rowHtml).join('')}</div>
+            <div class="ai-card-title">${escHtml(a.title||'')}</div>
+            ${(a.summary||a.excerpt) ? `
+            <div class="ai-card-summary">
+              <span class="ai-card-label">✦ AI Summary</span>
+              <p class="ai-card-text">${escHtml(a.summary||a.excerpt||'')}</p>
+            </div>` : ''}
+          </a>`).join('')}
         </div>`;
+      }
+    } catch {
+      mainFeed.innerHTML = '<div class="news-empty">Could not load AI picks.</div>';
     }
 
-    // No thumbnail — render all as plain rows
-    return visible.map(rowHtml).join('');
+    document.getElementById('newsLoading').style.display = 'none';
+  }
+
+  function restoreRSSLayout() {
+    const blogCol = document.querySelector('.news-blog-col');
+    const body    = document.querySelector('.news-body');
+    blogCol.style.display = '';
+    body.style.gridTemplateColumns = '';
   }
 
   // ─── Render: By Source (grouped) ─────────────────────────────────────────
@@ -271,6 +313,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     mainItems  = [];
     blogItems  = [];
 
+    if (tabKey === 'ai') {
+      await loadAIPicks();
+      return;
+    }
+
+    restoreRSSLayout();
+
     const tab = TABS[tabKey];
     document.getElementById('mainColTitle').textContent = 'News';
     document.getElementById('newsMainFeed').innerHTML   = '<div class="news-skeleton-list">' + Array(6).fill('<div class="news-skeleton"></div>').join('') + '</div>';
@@ -330,15 +379,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   });
 
   // ─── Init ─────────────────────────────────────────────────────────────────
-  loadTab('market');
-  // Auto-refresh every 10 minutes
+  loadTab('ai');
+  // Auto-refresh: AI picks every 30 min, RSS tabs every 10 min
   setInterval(() => {
-    // Clear caches for current tab then reload
-    const tab = TABS[currentTab];
-    [...tab.news, ...tab.blogs].forEach(f => {
-      try { localStorage.removeItem('nws_' + btoa(f.url).slice(0,32)); } catch {}
-    });
-    loadTab(currentTab);
+    if (currentTab === 'ai') {
+      loadAIPicks();
+    } else {
+      const tab = TABS[currentTab];
+      [...tab.news, ...tab.blogs].forEach(f => {
+        try { localStorage.removeItem('nws_' + btoa(f.url).slice(0,32)); } catch {}
+      });
+      loadTab(currentTab);
+    }
   }, 10 * 60 * 1000);
 </script>
 
@@ -631,6 +683,99 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     text-align: center;
   }
   .news-load-more:hover { background: var(--navy-2); }
+
+  /* ── AI Picks Grid ── */
+  .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 20px;
+  }
+  .ai-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #111009;
+    border: 1px solid rgba(212,169,64,0.15);
+    border-radius: 10px;
+    padding: 16px;
+    text-decoration: none;
+    transition: border-color .15s, box-shadow .15s, transform .15s;
+  }
+  .ai-card:hover {
+    border-color: rgba(212,169,64,0.45);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+    transform: translateY(-2px);
+  }
+  .ai-card-cat {
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: #0a0904;
+    background: #d4a940;
+    border-radius: 4px;
+    padding: 2px 8px;
+    align-self: flex-start;
+  }
+  .ai-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ai-card-src {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .ai-card-dot { font-size: 9px; color: rgba(255,255,255,.2); }
+  .ai-card-time { font-size: 10px; color: rgba(255,255,255,.35); }
+  .ai-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color .15s;
+  }
+  .ai-card:hover .ai-card-title { color: #e8c96a; }
+  .ai-card-summary {
+    background: rgba(212,169,64,0.07);
+    border-left: 2px solid rgba(212,169,64,0.4);
+    border-radius: 0 5px 5px 0;
+    padding: 8px 10px;
+    margin-top: 2px;
+  }
+  .ai-card-label {
+    display: block;
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .ai-card-text {
+    font-size: 11.5px;
+    color: rgba(255,255,255,.58);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+  }
+  @media (max-width: 860px) {
+    .ai-grid { grid-template-columns: repeat(2, 1fr); padding: 14px; gap: 12px; }
+  }
+  @media (max-width: 500px) {
+    .ai-grid { grid-template-columns: 1fr; padding: 10px; gap: 10px; }
+  }
 
   /* ── India Stock Rows (Stocks tab) ── */
   .ns-stock-head {
