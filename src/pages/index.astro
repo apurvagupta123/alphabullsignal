@@ -738,87 +738,157 @@ const SECTOR_TAGS: Record<string, string> = {
   font-style: italic;
 }
 
-/* ── Market News ─────────────────────────────────── */
+/* ── Market News (Moneycontrol style) ──────────────── */
 .mn-shell { }
 .mn-loading { color: var(--muted); font-size: 13px; padding: 16px 0; opacity: 0.5; }
 
+/* Two-column newspaper wrapper */
 .mn-wrap {
-  display: flex;
-  border: 1px solid rgba(212,169,64,0.18);
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  border: 1px solid rgba(212,169,64,0.15);
   border-radius: 10px;
   overflow: hidden;
   background: #0d0d0d;
 }
 
-/* Hero — hard fixed box, image absolutely fills it */
-.mn-hero {
+/* ── LEFT: featured story ── */
+.mn-left {
+  padding: 20px 22px 18px;
+  border-right: 1px solid rgba(212,169,64,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mn-feat-btn {
   all: unset;
-  display: block;
-  position: relative;
-  width: 220px;
-  min-width: 220px;
-  max-width: 220px;
-  height: 280px;
-  overflow: hidden;
-  flex-shrink: 0;
   cursor: pointer;
-  border-right: 1px solid rgba(212,169,64,0.12);
-  background: #111;
-  box-sizing: border-box;
-}
-.mn-hero-img {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  transition: transform .35s ease;
   display: block;
 }
-.mn-hero:hover .mn-hero-img { transform: scale(1.05); }
-.mn-hero-overlay {
+.mn-feat-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.3;
+  margin: 0 0 8px;
+  transition: color .15s;
+}
+.mn-feat-btn:hover .mn-feat-title { color: var(--gold); }
+.mn-feat-excerpt {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+/* Image container — absolutely positioned inside fixed-height box */
+.mn-feat-img-box {
+  width: 100%;
+  height: 185px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #111;
+  flex-shrink: 0;
+}
+.mn-feat-img-box img {
   position: absolute;
-  bottom: 0; left: 0; right: 0;
-  padding: 40px 12px 12px;
-  background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.5) 65%, transparent 100%);
-  pointer-events: none;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .35s ease;
 }
-.mn-hero-title {
-  font-size: 12px; font-weight: 600; color: #fff;
-  line-height: 1.35; margin: 0 0 6px;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-}
-.mn-hero-meta { display: flex; align-items: center; gap: 6px; }
-.mn-hero-src {
-  font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
-  color: #000; background: var(--gold); border-radius: 3px; padding: 1px 5px;
-}
-.mn-hero-time { font-size: 10px; color: rgba(255,255,255,.5); }
+.mn-feat-btn:hover .mn-feat-img-box img { transform: scale(1.03); }
 
-/* Side list */
-.mn-list {
-  flex: 1; display: flex; flex-direction: column;
-  overflow-y: auto; height: 280px;
+/* Bullet list below image */
+.mn-bullets {
+  list-style: none;
+  padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 7px;
 }
-.mn-row {
+.mn-bullet-btn {
   all: unset;
-  display: grid;
-  grid-template-columns: 88px 46px 1fr;
-  align-items: center;
-  gap: 0 8px;
-  padding: 0 14px;
-  height: 31px; min-height: 31px;
-  border-bottom: 1px solid rgba(255,255,255,.04);
-  cursor: pointer; transition: background .1s; box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  width: 100%;
 }
-.mn-row:last-child { border-bottom: none; }
-.mn-row:hover { background: rgba(255,255,255,.04); }
-.mn-row-src {
-  font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
-  color: var(--gold); opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.mn-bullet-btn::before {
+  content: '•';
+  color: var(--gold);
+  font-size: 18px;
+  line-height: 1.1;
+  flex-shrink: 0;
 }
-.mn-row-time { font-size: 10px; color: var(--muted); opacity: .5; white-space: nowrap; text-align: right; }
-.mn-row-title { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mn-bullet-btn:hover { color: #fff; }
 
+/* ── RIGHT: categorised sections ── */
+.mn-right {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.mn-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.mn-section:last-child { border-bottom: none; }
+.mn-sec-label {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gold);
+  border-bottom: 2px solid var(--gold);
+  padding-bottom: 2px;
+  margin-bottom: 10px;
+}
+.mn-sec-lead {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.35;
+  margin-bottom: 9px;
+  width: 100%;
+}
+.mn-sec-lead:hover { color: var(--gold); }
+.mn-sec-list {
+  list-style: none;
+  padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.mn-sec-item {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  width: 100%;
+}
+.mn-sec-item::before {
+  content: '•';
+  color: var(--gold);
+  opacity: .55;
+  font-size: 16px;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+.mn-sec-item:hover { color: var(--text); }
+
+/* footer */
 .mn-footer {
   display: flex; justify-content: space-between; align-items: center;
   padding: 7px 0 2px; border-top: 1px solid rgba(212,169,64,0.08); margin-top: 8px;
@@ -827,11 +897,9 @@ const SECTOR_TAGS: Record<string, string> = {
 .mn-more { font-size: 11px; font-weight: 600; color: var(--gold); text-decoration: none; }
 .mn-more:hover { opacity: .75; }
 
-@media (max-width: 600px) {
-  .mn-hero { width: 130px; min-width: 130px; max-width: 130px; height: 220px; }
-  .mn-list { height: 220px; }
-  .mn-row { grid-template-columns: 70px 1fr; }
-  .mn-row-time { display: none; }
+@media (max-width: 860px) {
+  .mn-wrap { grid-template-columns: 1fr; }
+  .mn-left  { border-right: none; border-bottom: 1px solid rgba(212,169,64,0.1); }
 }
 
 /* ── News Modal ─────────────────────────────────────────── */
@@ -1746,53 +1814,55 @@ const SECTOR_TAGS: Record<string, string> = {
     overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    function relTime(iso: string) {
-      const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-      if (m < 1) return 'now';
-      if (m < 60) return m + 'm';
-      const h = Math.floor(m / 60);
-      if (h < 24) return h + 'h';
-      return Math.floor(h / 24) + 'd';
-    }
-
-    // ── render news
+    // ── render: Moneycontrol newspaper layout ──────────────
     function renderNews(articles: any[]) {
       const grid   = document.getElementById('newsGrid')!;
       const footer = document.getElementById('newsFooter')! as HTMLElement;
       if (!articles.length) { grid.innerHTML = '<div class="mn-loading">No news available.</div>'; return; }
 
-      const hero = articles.find((a: any) => a.image) || articles[0];
-      const rest = articles.filter((a: any) => a !== hero).slice(0, 9);
-      _articles  = [hero, ...rest];
+      const hero    = articles.find((a: any) => a.image) || articles[0];
+      const rest    = articles.filter((a: any) => a !== hero);
+      _articles     = [hero, ...rest];
 
-      const heroHtml = `
-        <button class="mn-hero" data-idx="0">
-          ${hero.image ? `<img class="mn-hero-img" src="${hero.image}" alt="" loading="lazy">` : ''}
-          <div class="mn-hero-overlay">
-            <p class="mn-hero-title">${hero.title}</p>
-            <div class="mn-hero-meta">
-              <span class="mn-hero-src">${hero.source}</span>
-              <span class="mn-hero-time">${relTime(hero.publishedAt)}</span>
-            </div>
-          </div>
-        </button>`;
+      const bullets = rest.slice(0, 3);
+      const focus   = rest.slice(3, 7);
+      const inNews  = rest.slice(7, 12);
 
-      const rowsHtml = rest.map((a: any, i: number) => `
-        <button class="mn-row" data-idx="${i+1}">
-          <span class="mn-row-src">${a.source}</span>
-          <span class="mn-row-time">${relTime(a.publishedAt)}</span>
-          <span class="mn-row-title">${a.title}</span>
-        </button>`).join('');
+      // LEFT column
+      const leftHtml = `
+        <div class="mn-left">
+          <button class="mn-feat-btn" data-idx="0">
+            <h2 class="mn-feat-title">${hero.title}</h2>
+            ${hero.excerpt ? `<p class="mn-feat-excerpt">${hero.excerpt}</p>` : ''}
+            ${hero.image   ? `<div class="mn-feat-img-box"><img src="${hero.image}" alt="" loading="lazy"></div>` : ''}
+          </button>
+          <ul class="mn-bullets">
+            ${bullets.map((a: any) => `<li><button class="mn-bullet-btn" data-idx="${_articles.indexOf(a)}">${a.title}</button></li>`).join('')}
+          </ul>
+        </div>`;
 
-      grid.innerHTML = `<div class="mn-wrap">${heroHtml}<div class="mn-list">${rowsHtml}</div></div>`;
+      // RIGHT section helper
+      function sec(label: string, items: any[]) {
+        if (!items.length) return '';
+        const [lead, ...subs] = items;
+        return `<div class="mn-section">
+          <div class="mn-sec-label">${label}</div>
+          <button class="mn-sec-lead" data-idx="${_articles.indexOf(lead)}">${lead.title}</button>
+          <ul class="mn-sec-list">${subs.map((a: any) =>
+            `<li><button class="mn-sec-item" data-idx="${_articles.indexOf(a)}">${a.title}</button></li>`
+          ).join('')}</ul>
+        </div>`;
+      }
 
+      const rightHtml = `<div class="mn-right">${sec('In Focus', focus)}${sec('In The News', inNews)}</div>`;
+
+      grid.innerHTML = `<div class="mn-wrap">${leftHtml}${rightHtml}</div>`;
       grid.querySelectorAll<HTMLButtonElement>('[data-idx]').forEach(btn =>
         btn.addEventListener('click', () => openModal(parseInt(btn.dataset.idx||'0', 10)))
       );
       footer.style.display = '';
     }
 
-    // ── fetch /data/news.json and render
     async function fetchAndRenderNews() {
       const grid = document.getElementById('newsGrid');
       try {
