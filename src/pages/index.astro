@@ -738,9 +738,9 @@ const SECTOR_TAGS: Record<string, string> = {
   font-style: italic;
 }
 
-/* ── Recent News (Moneycontrol style) ──────────────── */
+/* ── Recent News — Row List Layout ─────────────────── */
 .mn-shell { }
-.mn-loading { color: var(--muted); font-size: 13px; padding: 16px 0; opacity: 0.5; }
+.mn-loading { color: var(--text-muted); font-size: 13px; padding: 16px 0; opacity: 0.5; }
 
 /* Golden section header */
 .news-section-head {
@@ -756,164 +756,116 @@ const SECTOR_TAGS: Record<string, string> = {
   font-size: 15px !important;
 }
 
-/* Two-column newspaper wrapper */
-.mn-wrap {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  border: 1px solid rgba(212,169,64,0.15);
-  border-radius: 10px;
+/* Outer box — matches Company Spotlight */
+.nr-box {
+  background: linear-gradient(135deg, rgba(212,169,64,0.08) 0%, rgba(184,134,11,0.04) 100%);
+  border: 1px solid rgba(212,169,64,0.18);
+  border-radius: 12px;
   overflow: hidden;
-  background: #0d0d0d;
+  box-shadow: 0 0 40px rgba(212,169,64,0.04);
 }
 
-/* ── LEFT: featured story ── */
-.mn-left {
-  padding: 20px 22px 18px;
-  border-right: 1px solid rgba(212,169,64,0.1);
+/* Each news row */
+.nr-row {
+  all: unset;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 12px;
-}
-.mn-feat-btn {
-  all: unset;
+  padding: 11px 18px;
+  background: rgba(212,169,64,0.055);
+  border-bottom: 1px solid rgba(212,169,64,0.10);
   cursor: pointer;
-  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background .15s;
 }
-.mn-feat-title {
-  font-size: 20px;
+.nr-row:last-child { border-bottom: none; }
+.nr-row:hover { background: rgba(212,169,64,0.13); }
+
+/* Row number */
+.nr-num {
+  font-size: 10px;
   font-weight: 800;
-  color: #fff;
-  line-height: 1.3;
-  margin: 0 0 8px;
-  transition: color .15s;
-}
-.mn-feat-btn:hover .mn-feat-title { color: var(--gold); }
-.mn-feat-excerpt {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.55;
-  margin: 0;
-}
-/* Image container — absolutely positioned inside fixed-height box */
-.mn-feat-img-box {
-  width: 100%;
-  height: 80px;
-  position: relative;
-  overflow: hidden;
-  border-radius: 6px;
-  background: #111;
+  color: rgba(212,169,64,0.4);
+  min-width: 20px;
   flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
-.mn-feat-img-box img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform .35s ease;
-}
-.mn-feat-btn:hover .mn-feat-img-box img { transform: scale(1.03); }
 
-/* Bullet list below image */
-.mn-bullets {
-  list-style: none;
-  padding: 0; margin: 0;
-  display: flex; flex-direction: column; gap: 7px;
-}
-.mn-bullet-btn {
-  all: unset;
-  cursor: pointer;
-  display: flex;
-  gap: 9px;
-  align-items: flex-start;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.4;
-  width: 100%;
-}
-.mn-bullet-btn::before {
-  content: '•';
-  color: var(--gold);
-  font-size: 18px;
-  line-height: 1.1;
-  flex-shrink: 0;
-}
-.mn-bullet-btn:hover { color: #fff; }
-
-/* ── RIGHT: categorised sections ── */
-.mn-right {
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-.mn-section {
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.05);
-}
-.mn-section:last-child { border-bottom: none; }
-.mn-sec-label {
-  display: inline-block;
-  font-size: 9px;
+/* Category badge */
+.nr-cat {
+  font-size: 8.5px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--gold);
-  border-bottom: 2px solid var(--gold);
-  padding-bottom: 2px;
-  margin-bottom: 10px;
+  letter-spacing: .7px;
+  color: #c9a84c;
+  background: rgba(212,169,64,0.15);
+  border-radius: 4px;
+  padding: 2px 7px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  border: 1px solid rgba(212,169,64,0.22);
 }
-.mn-sec-lead {
-  all: unset;
-  cursor: pointer;
-  display: block;
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #fff;
+
+/* Article title — single line, truncated */
+.nr-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ddd5c4;
   line-height: 1.35;
-  margin-bottom: 9px;
-  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  transition: color .15s;
 }
-.mn-sec-lead:hover { color: var(--gold); }
-.mn-sec-list {
-  list-style: none;
-  padding: 0; margin: 0;
-  display: flex; flex-direction: column; gap: 6px;
-}
-.mn-sec-item {
-  all: unset;
-  cursor: pointer;
+.nr-row:hover .nr-title { color: #fff; }
+
+/* Source + time */
+.nr-meta {
   display: flex;
-  gap: 7px;
-  align-items: flex-start;
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.4;
-  width: 100%;
-}
-.mn-sec-item::before {
-  content: '•';
-  color: var(--gold);
-  opacity: .55;
-  font-size: 16px;
-  line-height: 1.2;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
   flex-shrink: 0;
 }
-.mn-sec-item:hover { color: var(--text); }
+.nr-source {
+  font-size: 10px;
+  font-weight: 700;
+  color: #c9a84c;
+  white-space: nowrap;
+}
+.nr-time {
+  font-size: 9px;
+  color: rgba(255,255,255,0.3);
+  white-space: nowrap;
+}
 
-/* footer */
+/* Chevron */
+.nr-arrow {
+  font-size: 13px;
+  color: rgba(212,169,64,0.35);
+  flex-shrink: 0;
+  transition: color .15s, transform .15s;
+}
+.nr-row:hover .nr-arrow { color: var(--gold); transform: translateX(2px); }
+
+/* Footer */
 .mn-footer {
   display: flex; justify-content: space-between; align-items: center;
   padding: 7px 0 2px; border-top: 1px solid rgba(212,169,64,0.08); margin-top: 8px;
 }
-.mn-updated { font-size: 9.5px; color: var(--muted); opacity: .45; }
+.mn-updated { font-size: 9.5px; color: var(--text-muted); opacity: .45; }
 .mn-more { font-size: 11px; font-weight: 600; color: var(--gold); text-decoration: none; }
 .mn-more:hover { opacity: .75; }
 
-@media (max-width: 860px) {
-  .mn-wrap { grid-template-columns: 1fr; }
-  .mn-left  { border-right: none; border-bottom: 1px solid rgba(212,169,64,0.1); }
+/* Mobile: hide meta, tighten padding */
+@media (max-width: 600px) {
+  .nr-row   { padding: 10px 14px; gap: 8px; }
+  .nr-meta  { display: none; }
+  .nr-title { font-size: 12px; }
+  .nr-cat   { display: none; }
 }
 
 /* ── News Modal ─────────────────────────────────────────── */
@@ -1293,8 +1245,8 @@ const SECTOR_TAGS: Record<string, string> = {
   .hero-split  { flex-direction: column; align-items: flex-start; gap: 0; }
   .hero-content { width: 100%; }
 
-  /* News section right-panel: cap height so it scrolls */
-  .mn-right { max-height: 300px; }
+  /* News rows on tablet */
+  .nr-row { padding: 10px 16px; }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1310,13 +1262,7 @@ const SECTOR_TAGS: Record<string, string> = {
   .mood-donut  { width: 86px; height: 86px; }
   .fii-val     { font-size: 10px; width: 60px; }
 
-  /* News section — tighter text */
-  .mn-feat-title   { font-size: 16px; }
-  .mn-feat-excerpt { font-size: 12px; }
-  .mn-left         { padding: 14px 14px 12px; gap: 10px; }
-  .mn-section      { padding: 11px 13px; }
-  .mn-sec-lead     { font-size: 12.5px; }
-  .mn-right        { max-height: none; }
+  /* News rows on mobile — already handled in nr-row @media above */
 
   /* News modal — full-screen friendly */
   .nmodal-box {
@@ -1357,7 +1303,6 @@ const SECTOR_TAGS: Record<string, string> = {
    ═══════════════════════════════════════════════════════════ */
 @media (max-width: 400px) {
   .idx-strip  { grid-template-columns: repeat(2, 1fr); }
-  .mn-feat-title { font-size: 14px; }
   .pulse-card { padding: 12px 13px; }
   .gs-grid    { grid-template-columns: 1fr; }
 }
@@ -1909,50 +1854,44 @@ const SECTOR_TAGS: Record<string, string> = {
     overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    // ── render: Moneycontrol newspaper layout ──────────────
+    // ── render: row-list layout ──────────────────────────
+    function timeAgo(iso: string): string {
+      if (!iso) return '';
+      const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+      if (mins < 2)  return 'just now';
+      if (mins < 60) return `${mins}m ago`;
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24)  return `${hrs}h ago`;
+      return `${Math.floor(hrs / 24)}d ago`;
+    }
+
     function renderNews(articles: any[]) {
       const grid   = document.getElementById('newsGrid')!;
       const footer = document.getElementById('newsFooter')! as HTMLElement;
       if (!articles.length) { grid.innerHTML = '<div class="mn-loading">No news available.</div>'; return; }
 
-      const hero    = articles.find((a: any) => a.image) || articles[0];
-      const rest    = articles.filter((a: any) => a !== hero);
-      _articles     = [hero, ...rest];
+      _articles = articles;
 
-      const bullets = rest.slice(0, 3);
-      const focus   = rest.slice(3, 7);
-      const inNews  = rest.slice(7, 12);
+      const rows = articles.slice(0, 14).map((a: any, i: number) => {
+        const cat  = (a.category || 'News').replace(/[<>]/g, '');
+        const src  = (a.source   || '').replace(/[<>]/g, '');
+        const age  = timeAgo(a.publishedAt || '');
+        const title = (a.title  || '').replace(/[<>]/g, '');
+        return `<button class="nr-row" data-idx="${i}">
+          <span class="nr-num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="nr-cat">${cat}</span>
+          <span class="nr-title">${title}</span>
+          <span class="nr-meta">
+            <span class="nr-source">${src}</span>
+            <span class="nr-time">${age}</span>
+          </span>
+          <span class="nr-arrow">›</span>
+        </button>`;
+      }).join('');
 
-      // LEFT column
-      const leftHtml = `
-        <div class="mn-left">
-          <button class="mn-feat-btn" data-idx="0">
-            <h2 class="mn-feat-title">${hero.title}</h2>
-            ${hero.excerpt ? `<p class="mn-feat-excerpt">${hero.excerpt}</p>` : ''}
-          </button>
-          <ul class="mn-bullets">
-            ${bullets.map((a: any) => `<li><button class="mn-bullet-btn" data-idx="${_articles.indexOf(a)}">${a.title}</button></li>`).join('')}
-          </ul>
-        </div>`;
-
-      // RIGHT section helper
-      function sec(label: string, items: any[]) {
-        if (!items.length) return '';
-        const [lead, ...subs] = items;
-        return `<div class="mn-section">
-          <div class="mn-sec-label">${label}</div>
-          <button class="mn-sec-lead" data-idx="${_articles.indexOf(lead)}">${lead.title}</button>
-          <ul class="mn-sec-list">${subs.map((a: any) =>
-            `<li><button class="mn-sec-item" data-idx="${_articles.indexOf(a)}">${a.title}</button></li>`
-          ).join('')}</ul>
-        </div>`;
-      }
-
-      const rightHtml = `<div class="mn-right">${sec('In Focus', focus)}${sec('In The News', inNews)}</div>`;
-
-      grid.innerHTML = `<div class="mn-wrap">${leftHtml}${rightHtml}</div>`;
+      grid.innerHTML = `<div class="nr-box">${rows}</div>`;
       grid.querySelectorAll<HTMLButtonElement>('[data-idx]').forEach(btn =>
-        btn.addEventListener('click', () => openModal(parseInt(btn.dataset.idx||'0', 10)))
+        btn.addEventListener('click', () => openModal(parseInt(btn.dataset.idx || '0', 10)))
       );
       footer.style.display = '';
     }
