@@ -292,10 +292,10 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </section>
 
-  <!-- ── Market News ── -->
+  <!-- ── Recent News ── -->
   <section class="content-section" id="news">
-    <div class="section-head">
-      <h2 class="section-title">📰 Market News</h2>
+    <div class="section-head news-section-head">
+      <h2 class="section-title news-section-title">📰 Recent News</h2>
       <span class="section-live">LIVE</span>
     </div>
     <div id="newsGrid" class="mn-shell">
@@ -738,9 +738,23 @@ const SECTOR_TAGS: Record<string, string> = {
   font-style: italic;
 }
 
-/* ── Market News (Moneycontrol style) ──────────────── */
+/* ── Recent News (Moneycontrol style) ──────────────── */
 .mn-shell { }
 .mn-loading { color: var(--muted); font-size: 13px; padding: 16px 0; opacity: 0.5; }
+
+/* Golden section header */
+.news-section-head {
+  background: linear-gradient(90deg, #c9a84c 0%, #e8c96a 50%, #c9a84c 100%);
+  border-radius: 8px;
+  padding: 10px 18px !important;
+  border-bottom: none !important;
+  margin-bottom: 16px;
+}
+.news-section-title {
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,.35);
+  font-size: 15px !important;
+}
 
 /* Two-column newspaper wrapper */
 .mn-wrap {
