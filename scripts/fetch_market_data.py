@@ -554,7 +554,8 @@ def main():
             for row in raw:
                 date = row.get('date', '')
                 cat  = row.get('category', '').upper()
-                net  = float(row.get('netValue', row.get('fiiNet', row.get('fii_net', 0))) or 0)
+                raw_net = row.get('netValue', row.get('fiiNet', row.get('fii_net', 0))) or 0
+                net  = float(str(raw_net).replace(',', '')) if raw_net else 0.0
                 if date not in by_date:
                     by_date[date] = {'date': date, 'fiiNet': 0, 'diiNet': 0}
                 if cat.startswith('FII'):
@@ -562,8 +563,8 @@ def main():
                 elif cat == 'DII':
                     by_date[date]['diiNet'] = net
                 elif not cat:
-                    by_date[date]['fiiNet'] = float(row.get('fiiNet', 0) or 0)
-                    by_date[date]['diiNet'] = float(row.get('diiNet', 0) or 0)
+                    by_date[date]['fiiNet'] = float(str(row.get('fiiNet', 0) or 0).replace(',', ''))
+                    by_date[date]['diiNet'] = float(str(row.get('diiNet', 0) or 0).replace(',', ''))
             rows = sorted(by_date.values(), key=lambda x: x['date'], reverse=True)[:10]
             if not rows: raise ValueError('no usable rows')
             save('fii-dii.json', {'lastUpdated': NOW, 'data': rows})

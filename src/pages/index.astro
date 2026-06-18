@@ -292,6 +292,23 @@ const SECTOR_TAGS: Record<string, string> = {
     </div>
   </section>
 
+  <!-- ── Company Spotlight ─────────────────────────────── -->
+  <section class="content-section reveal reveal-d2">
+    <div class="section-head">
+      <h2 class="section-title">Company Spotlight</h2>
+    </div>
+    <div class="spotlight-box">
+      <div class="spotlight-search" style="position:relative">
+        <input id="slInput" type="text" class="sl-input" placeholder="Search company name or ticker (e.g. RELIANCE, HDFC Bank, TCS)" autocomplete="off" />
+        <button id="slBtn" class="sl-btn">Analyze →</button>
+        <div id="slDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1a1509;border:1px solid rgba(212,169,64,0.35);border-radius:10px;margin-top:4px;z-index:200;max-height:240px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.5)"></div>
+      </div>
+      <div id="slResult">
+        <p class="sl-hint">Search for any NSE company — by name or ticker symbol.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ── Recent News ── -->
   <section class="content-section" id="news">
     <div class="section-head news-section-head">
@@ -330,23 +347,6 @@ const SECTOR_TAGS: Record<string, string> = {
       </div>
     </div>
   </div>
-
-  <!-- ── Company Spotlight ─────────────────────────────── -->
-  <section class="content-section reveal reveal-d2">
-    <div class="section-head">
-      <h2 class="section-title">Company Spotlight</h2>
-    </div>
-    <div class="spotlight-box">
-      <div class="spotlight-search" style="position:relative">
-        <input id="slInput" type="text" class="sl-input" placeholder="Search company name or ticker (e.g. RELIANCE, HDFC Bank, TCS)" autocomplete="off" />
-        <button id="slBtn" class="sl-btn">Analyze →</button>
-        <div id="slDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1a1509;border:1px solid rgba(212,169,64,0.35);border-radius:10px;margin-top:4px;z-index:200;max-height:240px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.5)"></div>
-      </div>
-      <div id="slResult">
-        <p class="sl-hint">Search for any NSE company — by name or ticker symbol.</p>
-      </div>
-    </div>
-  </section>
 
   <!-- ── Morning Market Briefing ──────────────────────── -->
   <section class="content-section reveal" id="from-ledger">
