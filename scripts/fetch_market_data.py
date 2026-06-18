@@ -686,6 +686,28 @@ def main():
     print("\n[10/10] Conglomerate Stats (yfinance refresh)")
     fetch_conglomerate_stats()
 
+    # Auto-generate tickers.json from COMPANY_SYMBOLS + fetched names/sectors
+    # This replaces the old static file — any symbol added to COMPANY_SYMBOLS
+    # automatically appears in the Company Spotlight search on the next run.
+    print("\n[Auto] Regenerating tickers.json from COMPANY_SYMBOLS…")
+    ticker_list = []
+    for sym in COMPANY_SYMBOLS:
+        info  = info_map.get(sym, {})
+        fname = sym.replace('.', '-')          # e.g. ADANIPOWER-NS
+        symbol_key = sym.replace('.NS', '').replace('.BO', '')
+        long_name  = info.get('longName') or info.get('shortName') or symbol_key
+        sector     = info.get('sector', 'Equity')
+        ticker_list.append({
+            'symbol': symbol_key,
+            'name':   long_name,
+            'sector': sector,
+            'file':   fname,
+        })
+    # Sort alphabetically by symbol
+    ticker_list.sort(key=lambda t: t['symbol'])
+    save('tickers.json', ticker_list)
+    print(f"  tickers.json: {len(ticker_list)} companies")
+
     # Meta file (for "last updated" display on site)
     save('meta.json', {'lastUpdated': NOW, 'status': 'ok'})
 
