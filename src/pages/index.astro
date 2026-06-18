@@ -762,12 +762,12 @@ const SECTOR_TAGS: Record<string, string> = {
 .nc-outer {
   position: relative;
   padding: 0 48px;
+  overflow: hidden;
 }
 
-/* Clipping viewport */
+/* Clipping viewport — overflow: visible lets peek card show; nc-outer clips */
 .nc-track-wrap {
-  overflow: hidden;
-  border-radius: 12px;
+  overflow: visible;
 }
 
 /* Scrolling flex row */
@@ -779,9 +779,10 @@ const SECTOR_TAGS: Record<string, string> = {
   align-items: stretch;
 }
 
-/* Individual card — 3 per page desktop */
+/* Individual card — width set by JS based on visible container */
 .nc-card {
-  flex: 0 0 calc((100% - 32px) / 3);
+  flex: 0 0 auto;   /* JS sets width */
+  min-width: 0;
   background: #111009;
   border: 1px solid rgba(212,169,64,0.18);
   border-radius: 12px;
@@ -800,7 +801,7 @@ const SECTOR_TAGS: Record<string, string> = {
 /* Image area */
 .nc-img-wrap {
   width: 100%;
-  height: 165px;
+  height: 90px;
   position: relative;
   overflow: hidden;
   background: #1a1509;
@@ -986,16 +987,14 @@ const SECTOR_TAGS: Record<string, string> = {
 
 /* ── Carousel responsive ── */
 @media (max-width: 900px) {
-  .nc-card { flex: 0 0 calc((100% - 16px) / 2); }
   .nc-outer { padding: 0 42px; }
 }
 @media (max-width: 600px) {
-  .nc-card  { flex: 0 0 100%; }
-  .nc-outer { padding: 0 0 48px; }
-  .nc-btn   { top: auto; transform: none; bottom: 0; }
-  .nc-btn-prev { left: calc(50% - 48px); }
-  .nc-btn-next { right: calc(50% - 48px); left: auto; }
-  .nc-img-wrap { height: 180px; }
+  .nc-outer { padding: 0 0 52px; overflow: hidden; }
+  .nc-btn   { top: auto; transform: none; bottom: 0; width: 34px; height: 34px; font-size: 17px; }
+  .nc-btn-prev { left: calc(50% - 46px); }
+  .nc-btn-next { right: calc(50% - 46px); left: auto; }
+  .nc-img-wrap { height: 110px; }
 }
 
 /* ── News Modal ─────────────────────────────────────────── */
@@ -2065,6 +2064,25 @@ const SECTOR_TAGS: Record<string, string> = {
       const perPage = () => window.innerWidth <= 600 ? 1 : window.innerWidth <= 900 ? 2 : 3;
       const pages   = () => Math.ceil(list.length / perPage());
 
+      // Compute and set explicit pixel widths on every card.
+      // PEEK: on multi-card views show 0.35 of the next card so the user
+      // knows there are more — the card width is slightly reduced to achieve this.
+      function setCardSizes(): number {
+        const wrap  = grid.querySelector<HTMLElement>('.nc-track-wrap')!;
+        const pp    = perPage();
+        const gap   = 16;
+        const peek  = pp > 1 ? 0.35 : 0;           // fraction of next card to reveal
+        const wrapW = wrap.clientWidth;
+        // wrapW = pp*cardW + (pp-1)*gap + peek*(cardW+gap)
+        // => cardW = (wrapW - gap*(pp-1+peek)) / (pp+peek)
+        const cardW = Math.floor((wrapW - gap * (pp - 1 + peek)) / (pp + peek));
+        track.querySelectorAll<HTMLElement>('.nc-card').forEach(c => {
+          c.style.width     = cardW + 'px';
+          c.style.flexBasis = cardW + 'px';
+        });
+        return cardW;
+      }
+
       function buildDots() {
         dotsEl.innerHTML = Array.from({length: pages()}, (_,i) =>
           `<button class="nc-dot${i===page?' active':''}" data-p="${i}" aria-label="Page ${i+1}"></button>`
@@ -2076,11 +2094,10 @@ const SECTOR_TAGS: Record<string, string> = {
 
       function go(p: number) {
         page = Math.max(0, Math.min(p, pages() - 1));
-        const firstCard = track.querySelector<HTMLElement>('.nc-card');
-        if (!firstCard) return;
-        const cw  = firstCard.getBoundingClientRect().width;
-        const gap = 16;
-        track.style.transform = `translateX(-${page * perPage() * (cw + gap)}px)`;
+        const gap   = 16;
+        const pp    = perPage();
+        const cardW = setCardSizes();
+        track.style.transform = `translateX(-${page * pp * (cardW + gap)}px)`;
         prevBtn.disabled = page === 0;
         nextBtn.disabled = page >= pages() - 1;
         dotsEl.querySelectorAll<HTMLElement>('.nc-dot').forEach((d,i) =>
@@ -2102,8 +2119,8 @@ const SECTOR_TAGS: Record<string, string> = {
       buildDots();
       go(0);
 
-      // rebuild on resize (per-page count changes)
-      window.addEventListener('resize', () => { buildDots(); go(0); }, {passive:true});
+      // rebuild on resize — keep current page so position doesn't jump
+      window.addEventListener('resize', () => { buildDots(); go(page); }, {passive:true});
 
       footer.style.display = '';
     }
