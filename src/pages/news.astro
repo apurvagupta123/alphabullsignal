@@ -257,11 +257,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   async function loadAIPicks() {
-    const mainFeed = document.getElementById('newsMainFeed');
-    const blogCol  = document.querySelector('.news-blog-col');
-    const body     = document.querySelector('.news-body');
-    blogCol.style.display = 'none';
+    const mainFeed  = document.getElementById('newsMainFeed');
+    const blogCol   = document.querySelector('.news-blog-col');
+    const body      = document.querySelector('.news-body');
+    const viewToggle = document.querySelector('.news-view-toggle');
+    blogCol.style.display  = 'none';
     body.style.gridTemplateColumns = '1fr';
+    viewToggle.style.display = 'none';   // hide Time/Source — not relevant for AI Picks
     mainFeed.innerHTML = '<div class="news-skeleton-list">' + Array(8).fill('<div class="news-skeleton"></div>').join('') + '</div>';
     document.getElementById('newsLoading').style.display = 'block';
     document.getElementById('loadMoreMain').style.display = 'none';
@@ -278,19 +280,34 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       if (!articles.length) {
         mainFeed.innerHTML = '<div class="news-empty">No AI picks available yet.</div>';
       } else {
-        mainFeed.innerHTML = `<div class="ai-rows">${articles.map((a, i) => `
-          <div class="ai-row" data-idx="${i}">
-            <span class="ai-row-dot"></span>
-            <div class="ai-row-left">
-              <div class="ai-row-title">${escHtml(a.title||'')}</div>
-              <div class="ai-row-source">${escHtml(a.source||'')}${a.category ? ' · ' + escHtml(a.category) : ''}</div>
-            </div>
-            <div class="ai-row-right">
-              <div class="ai-row-time">${timeAgo(a.publishedAt||'')}</div>
-            </div>
-          </div>`).join('')}
-        </div>`;
-        mainFeed.querySelectorAll('.ai-row').forEach(row => {
+        // Inline styles bypass Astro's CSS scoping on JS-injected HTML
+        mainFeed.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:8px;padding:12px 20px;">
+            ${articles.map((a, i) => `
+              <div data-idx="${i}" style="
+                display:grid;
+                grid-template-columns:10px 1fr auto;
+                align-items:center;
+                gap:0 16px;
+                padding:14px 18px;
+                background:var(--navy-2,#0d1117);
+                border:1px solid var(--border,rgba(255,255,255,.07));
+                border-radius:10px;
+                cursor:pointer;
+                transition:border-color .15s;
+              " onmouseover="this.style.borderColor='rgba(212,169,64,.4)'"
+                 onmouseout="this.style.borderColor='var(--border,rgba(255,255,255,.07))'">
+                <span style="width:10px;height:10px;border-radius:50%;background:#d4a940;display:inline-block;flex-shrink:0;"></span>
+                <div style="min-width:0;">
+                  <div style="font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">${escHtml(a.title||'')}</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,.38);">${escHtml(a.source||'')}${a.category ? ' &middot; ' + escHtml(a.category) : ''}</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                  <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.55);white-space:nowrap;">${timeAgo(a.publishedAt||'')}</div>
+                </div>
+              </div>`).join('')}
+          </div>`;
+        mainFeed.querySelectorAll('[data-idx]').forEach(row => {
           row.addEventListener('click', () => openAIModal(parseInt(row.dataset.idx)));
         });
       }
@@ -302,10 +319,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   function restoreRSSLayout() {
-    const blogCol = document.querySelector('.news-blog-col');
-    const body    = document.querySelector('.news-body');
-    blogCol.style.display = '';
+    const blogCol    = document.querySelector('.news-blog-col');
+    const body       = document.querySelector('.news-body');
+    const viewToggle = document.querySelector('.news-view-toggle');
+    blogCol.style.display  = '';
     body.style.gridTemplateColumns = '';
+    viewToggle.style.display = '';   // show Time/Source again for RSS tabs
   }
 
   // ─── Render: By Source (grouped) ─────────────────────────────────────────
