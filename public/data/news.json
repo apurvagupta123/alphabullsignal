@@ -1,7 +1,17 @@
 {
-  "lastUpdated": "2026-06-18T19:46:23+05:30",
+  "lastUpdated": "2026-06-18T19:52:35+05:30",
   "count": 25,
   "articles": [
+    {
+      "title": "Wall Street rebounds as chipmakers jump on Iran peace deal optimism, Intel surges nearly 10%",
+      "excerpt": "At 09:36 a.m. ET, the Dow Jones Industrial Average rose 0.70%, the S&amp;P 500 gained 0.84%, the Nasdaq Composite gained 0.87%",
+      "url": "https://www.livemint.com/market/stock-market-news/wall-street-rebounds-as-chipmakers-jump-on-iran-peace-deal-optimism-intel-surges-nearly-10-11781790929673.html",
+      "source": "Mint",
+      "image": "https://www.livemint.com/lm-img/img/2026/06/18/1600x900/Financial-Markets-Wall-Street-6_1781791146335_1781791179312_6c10f93d-ccb8-43be-a5ea-60de823735ab.jpg",
+      "publishedAt": "2026-06-18T19:46:29+05:30",
+      "category": "Markets",
+      "summary": "At 09:36 a.m. ET, the Dow Jones Industrial Average rose 0.70%, the S&amp;P 500 gained 0.84%, the Nasdaq Composite gained 0.87%"
+    },
     {
       "title": "Inside SpaceX's historic $75 billion IPO: The elite law firms that shared $25.5 million legal fee windfall",
       "excerpt": "The regulatory filing did not identify a General Counsel for SpaceX and disclosed only the aggregate legal costs related to the offering, without specifying the amounts paid to individual law firms involved in the transa",
@@ -241,16 +251,6 @@
       "publishedAt": "2026-06-18T17:36:45+05:30",
       "category": "Markets",
       "summary": "Green Energy Stocks Drive Market Momentum As Sensex And Nifty End Higher (18 June 2026) SolarQuarter"
-    },
-    {
-      "title": "Dinosaurs In The Age Of Tech: Why Legacy Global Car Companies Trade Cheap",
-      "excerpt": "Many legacy automakers continue to generate healthy profits, particularly from premium SUVs and pickup trucks that command strong margins.",
-      "url": "https://www.ndtvprofit.com/business/dinosaurs-in-the-age-of-tech-why-legacy-global-car-companies-trade-cheap-11654654#publisher=newsstand",
-      "source": "NDTV Profit",
-      "image": "https://c.ndtvimg.com/2026-06/1hdb532s_cars_625x300_18_June_26.jpeg?im=FitAndFill,algorithm=dnn,width=1280,height=720",
-      "publishedAt": "2026-06-18T17:34:25+05:30",
-      "category": "Markets",
-      "summary": "Many legacy automakers continue to generate healthy profits, particularly from premium SUVs and pickup trucks that command strong margins."
     }
   ]
 }
