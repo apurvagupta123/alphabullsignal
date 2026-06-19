@@ -14,9 +14,9 @@ India's stock markets closed in the red on Friday, June 19, 2026 — with a shar
 
 The intraday damage was worse. During the session, Sensex plunged over 900 points and NIFTY briefly slipped below 24,000, before domestic buyers stepped in and cushioned the fall.
 
-Now the cap-size picture: **NIFTY 100 (Large Cap)** — which tracks India's top 100 companies — ended down **0.58%**. Meanwhile, **NIFTY MIDCAP 50** (mid-sized, fast-growing companies sitting between the giants and startups) actually closed *up* 0.10%. And **NIFTY SMALLCAP** (emerging, smaller companies) was essentially flat at 0.0%.
+Now the cap-size picture: **NIFTY 100 (Large Cap)** — which tracks India's top 100 companies — ended down **0.58%**. Meanwhile, **NIFTY MIDCAP 50** (mid-sized, fast-growing companies sitting between the giants and startups) actually closed *up* 0.10%. And **NIFTY SMALLCAP** (emerging, smaller companies) actually closed *up* **+0.56%** — quietly outperforming the large-cap slide.
 
-Translation: the big boys bled today. Mid and small companies quietly held their ground.
+Translation: the big boys bled today. Mid and small companies not only held their ground — they gained.
 
 ---
 
