@@ -10,7 +10,7 @@ tags: ["Indian Markets", "NIFTY", "Market Briefing", "Finance", "Large Cap", "Mi
 
 ## The Headline: IT Dragged Markets Down, But Domestic Investors Held the Floor
 
-India's stock markets closed in the red on Thursday, June 19, 2026 — with a sharp crash in IT (Information Technology) stocks doing most of the damage. NIFTY 50, which is essentially a report card for India's 50 biggest companies, closed at **24,013 — down 155 points (-0.64%)**. SENSEX, the older sibling tracking 30 Bombay Stock Exchange giants, ended at **76,803 — down 607 points (-0.78%)**.
+India's stock markets closed in the red on Friday, June 19, 2026 — with a sharp crash in IT (Information Technology) stocks doing most of the damage. NIFTY 50, which is essentially a report card for India's 50 biggest companies, closed at **24,013 — down 155 points (-0.64%)**. SENSEX, the older sibling tracking 30 Bombay Stock Exchange giants, ended at **76,803 — down 607 points (-0.78%)**.
 
 The intraday damage was worse. During the session, Sensex plunged over 900 points and NIFTY briefly slipped below 24,000, before domestic buyers stepped in and cushioned the fall.
 
