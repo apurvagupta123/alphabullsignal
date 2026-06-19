@@ -1,7 +1,17 @@
 {
-  "lastUpdated": "2026-06-19T17:04:19+05:30",
+  "lastUpdated": "2026-06-19T17:13:47+05:30",
   "count": 25,
   "articles": [
+    {
+      "title": "Why MPC held interest rates in June policy",
+      "excerpt": "At its 3-5 June meeting, the Monetary Policy Committee kept the key repo rate unchanged at 5.25%, while acknowledging that there were considerable risks to its assessments of inflation and growth.",
+      "url": "https://www.livemint.com/economy/rbi-rbi-mpc-interest-rates-inflation-gdp-growth-mpc-minutes-rbi-governor-repo-rate-banks-11781850214122.html",
+      "source": "Mint",
+      "image": "https://www.livemint.com/lm-img/img/2026/06/19/1600x900/logo/INDIA-CENBANK-INTEREST-RATES-0_1744095799648_1781851717146_f2086a7e-3ac8-4934-8085-8cdba4c83e01.JPG",
+      "publishedAt": "2026-06-19T17:07:02+05:30",
+      "category": "Economy",
+      "summary": "At its 3-5 June meeting, the Monetary Policy Committee kept the key repo rate unchanged at 5.25%, while acknowledging that there were considerable risks to its assessments of inflation and growth."
+    },
     {
       "title": "NCW Calls For Mandatory POSH Audits, Safety Mechanisms; Issues Advisory To States",
       "excerpt": "The goal of the NCW's national campaign is to transform organisational compliance into practical safety procedures rather than just a paper formality",
@@ -241,16 +251,6 @@
       "publishedAt": "2026-06-19T15:17:31+05:30",
       "category": "Markets",
       "summary": "Israeli minister's remarks come after military reports four soldiers killed in Hezbollah attack, amid claims of repeated ceasefire violations in southern Lebanon."
-    },
-    {
-      "title": "Small-cap stock under  ₹50 Indiabulls hits upper circuit despite stock market crash",
-      "excerpt": "Indiabulls Ltd shares reached a 52-week high of ₹26.48, rising 5% while broader markets declined. The stock surged 196% from its low in February, driven by founder Sameer Gehlaut's return and restructuring efforts, leadi",
-      "url": "https://www.livemint.com/market/stock-market-news/smallcap-stock-under-rs-50-indiabulls-share-price-hits-upper-circuit-despite-stock-market-crash-11781860969312.html",
-      "source": "Mint",
-      "image": "https://www.livemint.com/lm-img/img/2026/06/19/1600x900/logo/indiabulls_share_price_1781861708365_1781861708714_01124b5e-09a4-441b-809a-2c53281f733c.jpg",
-      "publishedAt": "2026-06-19T15:14:44+05:30",
-      "category": "Markets",
-      "summary": "Indiabulls Ltd shares reached a 52-week high of ₹26.48, rising 5% while broader markets declined. The stock surged 196% from its low in February, driven by founder Sameer Gehlaut's return and restructuring efforts, leadi"
     }
   ]
 }
