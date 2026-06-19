@@ -134,7 +134,7 @@ Despite the IT selloff and intraday volatility, VIX at 12.97 tells us the market
 
 2. **IT stocks stabilization:** After a brutal session, watch whether buyers step in at lower levels in Infosys and TCS. If they do, it signals the selloff is overdone. If they sell again, the sector could test new lows.
 
-3. **Jio IPO buzz:** Institutional investors and analysts will begin dissecting Jio Platforms' DRHP over the weekend. Initial valuations estimates will emerge — expect significant media coverage. Reliance stock could recover if the IPO valuation impressess markets.
+3. **Jio IPO buzz:** Institutional investors and analysts will begin dissecting Jio Platforms' DRHP over the weekend. Initial valuations estimates will emerge — expect significant media coverage. Reliance stock could recover if the IPO valuation impresses markets.
 
 ---
 
