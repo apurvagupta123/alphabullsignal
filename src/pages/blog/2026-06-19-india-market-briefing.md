@@ -140,4 +140,8 @@ Despite the IT selloff and intraday volatility, VIX at 12.97 tells us the market
 
 *Markets close at 3:30 PM IST every weekday. This briefing is for information and education only — not investment advice. Always consult a SEBI-registered financial advisor before making investment decisions.*
 
+---
+
+*Sources: NSE/BSE closing data via Yahoo Finance, FII/DII provisional data via NSE, news from public market disclosures. This briefing is for education only — not investment advice.*
+
 *Created with Claude AI*
