@@ -1,0 +1,164 @@
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0f1e"/>
+      <stop offset="50%" style="stop-color:#0d1b2a"/>
+      <stop offset="100%" style="stop-color:#0a0f1e"/>
+    </linearGradient>
+    <linearGradient id="redGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ff1a1a;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#ff1a1a;stop-opacity:0"/>
+    </linearGradient>
+    <linearGradient id="greenGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00c853;stop-opacity:0"/>
+      <stop offset="100%" style="stop-color:#00c853;stop-opacity:0.15"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="redGlowFilter">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid lines -->
+  <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1">
+    <line x1="0" y1="105" x2="1200" y2="105"/>
+    <line x1="0" y1="210" x2="1200" y2="210"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="420" x2="1200" y2="420"/>
+    <line x1="0" y1="525" x2="1200" y2="525"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+
+  <!-- Red zone left side (India IT down) -->
+  <rect x="0" y="0" width="600" height="630" fill="url(#redGlow)"/>
+  <!-- Green zone right side (US up) -->
+  <rect x="600" y="0" width="600" height="630" fill="url(#greenGlow)"/>
+
+  <!-- Red candlestick chart (India IT crashing) — left side -->
+  <g opacity="0.5">
+    <rect x="60" y="380" width="18" height="120" rx="2" fill="#ff4444"/>
+    <rect x="90" y="340" width="18" height="160" rx="2" fill="#ff4444"/>
+    <rect x="120" y="300" width="18" height="180" rx="2" fill="#ff4444"/>
+    <rect x="150" y="250" width="18" height="210" rx="2" fill="#ff3333"/>
+    <rect x="180" y="200" width="18" height="250" rx="2" fill="#ff2222"/>
+    <rect x="210" y="150" width="18" height="280" rx="2" fill="#ff1111"/>
+    <!-- wicks -->
+    <line x1="69" y1="370" x2="69" y2="380" stroke="#ff4444" stroke-width="2"/>
+    <line x1="99" y1="330" x2="99" y2="340" stroke="#ff4444" stroke-width="2"/>
+    <line x1="129" y1="290" x2="129" y2="300" stroke="#ff4444" stroke-width="2"/>
+    <line x1="159" y1="240" x2="159" y2="250" stroke="#ff3333" stroke-width="2"/>
+    <line x1="189" y1="185" x2="189" y2="200" stroke="#ff2222" stroke-width="2"/>
+    <line x1="219" y1="135" x2="219" y2="150" stroke="#ff1111" stroke-width="2"/>
+  </g>
+
+  <!-- Green candlestick chart (US rallying) — right side -->
+  <g opacity="0.5">
+    <rect x="950" y="390" width="18" height="80" rx="2" fill="#00c853"/>
+    <rect x="980" y="360" width="18" height="80" rx="2" fill="#00c853"/>
+    <rect x="1010" y="320" width="18" height="80" rx="2" fill="#00c853"/>
+    <rect x="1040" y="280" width="18" height="90" rx="2" fill="#00d45a"/>
+    <rect x="1070" y="230" width="18" height="100" rx="2" fill="#00e064"/>
+    <rect x="1100" y="170" width="18" height="110" rx="2" fill="#00eb6e"/>
+    <!-- wicks -->
+    <line x1="959" y1="380" x2="959" y2="390" stroke="#00c853" stroke-width="2"/>
+    <line x1="989" y1="350" x2="989" y2="360" stroke="#00c853" stroke-width="2"/>
+    <line x1="1019" y1="310" x2="1019" y2="320" stroke="#00c853" stroke-width="2"/>
+    <line x1="1049" y1="270" x2="1049" y2="280" stroke="#00d45a" stroke-width="2"/>
+    <line x1="1079" y1="218" x2="1079" y2="230" stroke="#00e064" stroke-width="2"/>
+    <line x1="1109" y1="155" x2="1109" y2="170" stroke="#00eb6e" stroke-width="2"/>
+  </g>
+
+  <!-- Center dividing line -->
+  <line x1="600" y1="0" x2="600" y2="630" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1" stroke-dasharray="8,8"/>
+
+  <!-- BullSignal logo/brand top left -->
+  <text x="60" y="70" font-size="18" font-weight="700" fill="#ffffff" opacity="0.5" letter-spacing="3">BULLSIGNAL</text>
+  <text x="60" y="90" font-size="11" fill="#ffffff" opacity="0.3" letter-spacing="2">MARKET INTELLIGENCE</text>
+
+  <!-- Date badge -->
+  <rect x="1060" y="50" width="110" height="28" rx="4" fill="#ffffff" fill-opacity="0.08"/>
+  <text x="1115" y="68" font-size="12" fill="#ffffff" opacity="0.6" text-anchor="middle" letter-spacing="1">JUN 19, 2026</text>
+
+  <!-- Main headline -->
+  <text x="600" y="195" font-size="58" font-weight="900" fill="#ffffff" text-anchor="middle" filter="url(#glow)" letter-spacing="-1">
+    India IT Bloodbath
+  </text>
+  <text x="600" y="255" font-size="58" font-weight="900" fill="#ffffff" text-anchor="middle" filter="url(#glow)" letter-spacing="-1">
+    vs US Chip Rally
+  </text>
+
+  <!-- Subheading -->
+  <text x="600" y="305" font-size="22" fill="#aab4c8" text-anchor="middle" letter-spacing="0.5">
+    Same industry. Opposite directions. Here's what it means.
+  </text>
+
+  <!-- Divider line -->
+  <line x1="200" y1="330" x2="1000" y2="330" stroke="#ffffff" stroke-opacity="0.12" stroke-width="1"/>
+
+  <!-- Stats row -->
+  <!-- NIFTY IT stat -->
+  <g>
+    <rect x="90" y="355" width="220" height="80" rx="8" fill="#ff1a1a" fill-opacity="0.12"/>
+    <rect x="90" y="355" width="220" height="80" rx="8" stroke="#ff4444" stroke-opacity="0.4" stroke-width="1" fill="none"/>
+    <text x="200" y="388" font-size="13" fill="#ff8888" text-anchor="middle" letter-spacing="1">NIFTY IT</text>
+    <text x="200" y="420" font-size="30" font-weight="800" fill="#ff4444" text-anchor="middle" filter="url(#redGlowFilter)">−5.72%</text>
+  </g>
+
+  <!-- Infosys stat -->
+  <g>
+    <rect x="330" y="355" width="200" height="80" rx="8" fill="#ff1a1a" fill-opacity="0.10"/>
+    <rect x="330" y="355" width="200" height="80" rx="8" stroke="#ff4444" stroke-opacity="0.3" stroke-width="1" fill="none"/>
+    <text x="430" y="388" font-size="13" fill="#ff8888" text-anchor="middle" letter-spacing="1">INFOSYS</text>
+    <text x="430" y="420" font-size="30" font-weight="800" fill="#ff4444" text-anchor="middle">−8.14%</text>
+  </g>
+
+  <!-- Intel stat -->
+  <g>
+    <rect x="660" y="355" width="200" height="80" rx="8" fill="#00c853" fill-opacity="0.10"/>
+    <rect x="660" y="355" width="200" height="80" rx="8" stroke="#00c853" stroke-opacity="0.3" stroke-width="1" fill="none"/>
+    <text x="760" y="388" font-size="13" fill="#66ffaa" text-anchor="middle" letter-spacing="1">INTEL</text>
+    <text x="760" y="420" font-size="30" font-weight="800" fill="#00e064" text-anchor="middle">+10.64%</text>
+  </g>
+
+  <!-- NASDAQ stat -->
+  <g>
+    <rect x="880" y="355" width="220" height="80" rx="8" fill="#00c853" fill-opacity="0.12"/>
+    <rect x="880" y="355" width="220" height="80" rx="8" stroke="#00c853" stroke-opacity="0.4" stroke-width="1" fill="none"/>
+    <text x="990" y="388" font-size="13" fill="#66ffaa" text-anchor="middle" letter-spacing="1">NASDAQ</text>
+    <text x="990" y="420" font-size="30" font-weight="800" fill="#00e064" text-anchor="middle">+1.91%</text>
+  </g>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="555" width="1200" height="75" fill="#000000" fill-opacity="0.4"/>
+
+  <!-- TCS stat -->
+  <text x="200" y="585" font-size="13" fill="#888ea8" text-anchor="middle" letter-spacing="1">TCS</text>
+  <text x="200" y="610" font-size="20" font-weight="700" fill="#ff6666" text-anchor="middle">−6.03%</text>
+
+  <!-- HCL stat -->
+  <text x="420" y="585" font-size="13" fill="#888ea8" text-anchor="middle" letter-spacing="1">HCL TECH</text>
+  <text x="420" y="610" font-size="20" font-weight="700" fill="#ff6666" text-anchor="middle">−5.04%</text>
+
+  <!-- FII stat -->
+  <text x="600" y="585" font-size="13" fill="#888ea8" text-anchor="middle" letter-spacing="1">FII FLOW</text>
+  <text x="600" y="610" font-size="20" font-weight="700" fill="#ff6666" text-anchor="middle">−₹1,025 Cr</text>
+
+  <!-- AMD stat -->
+  <text x="800" y="585" font-size="13" fill="#888ea8" text-anchor="middle" letter-spacing="1">AMD</text>
+  <text x="800" y="610" font-size="20" font-weight="700" fill="#44dd88" text-anchor="middle">+4.86%</text>
+
+  <!-- QCOM stat -->
+  <text x="1000" y="585" font-size="13" fill="#888ea8" text-anchor="middle" letter-spacing="1">QUALCOMM</text>
+  <text x="1000" y="610" font-size="20" font-weight="700" fill="#44dd88" text-anchor="middle">+6.17%</text>
+</svg>

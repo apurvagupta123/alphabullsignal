@@ -6,16 +6,16 @@ const sorted = posts.sort((a: any, b: any) =>
   new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
 );
 
-// Morning posts: filename contains "morning-market-watch"
-const allMorningPosts = sorted.filter((p: any) =>
-  (p.file || '').includes('morning-market-watch')
-);
-// Evening posts: filename contains "india-market-briefing"
-const allEveningPosts = sorted.filter((p: any) =>
-  (p.file || '').includes('india-market-briefing')
-);
-const morningPosts = allMorningPosts.slice(0, 5);
-const eveningPosts = allEveningPosts.slice(0, 5);
+// Latest 2 briefings (morning + evening combined) for homepage teaser
+const latestBriefings = sorted
+  .filter((p: any) => {
+    const f = p.file || '';
+    const tags: string[] = p.frontmatter?.tags || [];
+    return f.includes('morning-market-watch') ||
+      f.includes('india-market-briefing') ||
+      tags.some((t: string) => t.toLowerCase().includes('morning') || t.toLowerCase().includes('briefing'));
+  })
+  .slice(0, 2);
 
 const SECTOR_TAGS: Record<string, string> = {
   'RELIANCE.NS':   '⚡ Energy',
@@ -363,85 +363,35 @@ const SECTOR_TAGS: Record<string, string> = {
   </section>
 
 
-  <!-- ── Morning Market Briefing ──────────────────────── -->
+  <!-- ── Daily Briefing Teaser ──────────────────────────── -->
   <section class="content-section reveal" id="from-ledger">
     <div class="section-head">
-      <h2 class="section-title">🌅 Morning Market Briefing</h2>
-      <span class="section-live">MORNING</span>
+      <h2 class="section-title">📋 Daily Briefing</h2>
+      <a href="/briefing" class="section-more">View all →</a>
     </div>
-    <div class="tl-list">
-      {morningPosts.length > 0 ? morningPosts.map((post: any) => {
-        const d = new Date(post.frontmatter.date);
-        const day   = d.toLocaleDateString('en-IN', { day: 'numeric' });
-        const month = d.toLocaleDateString('en-IN', { month: 'short' });
-        const year  = d.getFullYear();
+    <div class="briefing-teaser">
+      {latestBriefings.length > 0 ? latestBriefings.map((post: any) => {
+        const isMorning = (post.file || '').includes('morning-market-watch') ||
+          (post.frontmatter?.tags || []).some((t: string) => t.toLowerCase().includes('morning'));
         return (
-          <a href={post.url} class="tl-item">
-            <div class="tl-date-col">
-              <span class="tl-day">{day}</span>
-              <span class="tl-mon">{month} {year}</span>
+          <a href={post.url} class="bt-card">
+            <span class="bt-icon">{isMorning ? '🌅' : '🌆'}</span>
+            <div class="bt-body">
+              <span class="bt-label">{isMorning ? 'Morning Watch' : 'Evening Briefing'}</span>
+              <span class="bt-title">{post.frontmatter.title}</span>
+              {post.frontmatter.excerpt && <span class="bt-excerpt">{post.frontmatter.excerpt}</span>}
             </div>
-            <div class="tl-dot-col">
-              <div class="tl-dot"></div>
-              <div class="tl-line"></div>
-            </div>
-            <div class="tl-body">
-              <h3 class="tl-title">{post.frontmatter.title}</h3>
-              {post.frontmatter.excerpt && <p class="tl-desc">{post.frontmatter.excerpt}</p>}
-              <span class="tl-read">Read more →</span>
-            </div>
+            <span class="bt-arrow">→</span>
           </a>
         );
       }) : (
-        <p class="tl-empty">Morning briefings publish weekdays at 10 AM IST — check back soon.</p>
-      )}
-    </div>
-    {allMorningPosts.length > 5 && (
-      <div class="tl-viewall-wrap">
-        <a href="/blog" class="tl-viewall">View all morning briefings →</a>
-      </div>
-    )}
-  </section>
-
-  <!-- ── Evening Indian Market Briefing ─────────────────── -->
-  {eveningPosts.length > 0 && (
-    <section class="content-section reveal" id="evening-briefing">
-      <div class="section-head">
-        <h2 class="section-title">🌆 Evening Indian Market Briefing</h2>
-        <span class="section-live">EVENING</span>
-      </div>
-      <div class="tl-list">
-        {eveningPosts.map((post: any) => {
-          const d = new Date(post.frontmatter.date);
-          const day   = d.toLocaleDateString('en-IN', { day: 'numeric' });
-          const month = d.toLocaleDateString('en-IN', { month: 'short' });
-          const year  = d.getFullYear();
-          return (
-            <a href={post.url} class="tl-item">
-              <div class="tl-date-col">
-                <span class="tl-day">{day}</span>
-                <span class="tl-mon">{month} {year}</span>
-              </div>
-              <div class="tl-dot-col">
-                <div class="tl-dot"></div>
-                <div class="tl-line"></div>
-              </div>
-              <div class="tl-body">
-                <h3 class="tl-title">{post.frontmatter.title}</h3>
-                {post.frontmatter.excerpt && <p class="tl-desc">{post.frontmatter.excerpt}</p>}
-                <span class="tl-read">Read more →</span>
-              </div>
-            </a>
-          );
-        })}
-      </div>
-      {allEveningPosts.length > 5 && (
-        <div class="tl-viewall-wrap">
-          <a href="/blog" class="tl-viewall">View all evening briefings →</a>
+        <div class="bt-empty">
+          <p>Briefings publish weekdays at 10 AM & 4 PM IST.</p>
+          <a href="/briefing" class="tl-read">Go to Briefing page →</a>
         </div>
       )}
-    </section>
-  )}
+    </div>
+  </section>
 
 </BaseLayout>
 
@@ -730,6 +680,63 @@ const SECTOR_TAGS: Record<string, string> = {
 .gs-icon { font-size: 20px; margin-bottom: 6px; }
 .gs-name { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 3px; }
 .gs-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+/* ── Briefing Teaser ─────────────────────────────────── */
+.briefing-teaser {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bt-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--navy-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.bt-card:hover {
+  background: rgba(212,169,64,0.06);
+  border-color: rgba(212,169,64,0.3);
+  transform: translateX(3px);
+}
+.bt-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 1px; line-height: 1; }
+.bt-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.bt-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.bt-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+}
+.bt-excerpt {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.bt-arrow {
+  color: rgba(212,169,64,0.4);
+  font-size: 1rem;
+  align-self: center;
+  flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
+}
+.bt-card:hover .bt-arrow { color: var(--gold); transform: translateX(3px); }
+.bt-empty { padding: 14px 0; color: var(--text-muted); font-size: 13px; }
 
 /* ── Timeline Blog Layout ────────────────────────────── */
 .tl-list { display: flex; flex-direction: column; }
