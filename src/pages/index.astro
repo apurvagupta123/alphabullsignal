@@ -6,14 +6,11 @@ const sorted = posts.sort((a: any, b: any) =>
   new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
 );
 
-// Latest 2 briefings (morning + evening combined) for homepage teaser
+// Latest 2 briefings (morning + evening) — strict filename match
 const latestBriefings = sorted
   .filter((p: any) => {
     const f = p.file || '';
-    const tags: string[] = p.frontmatter?.tags || [];
-    return f.includes('morning-market-watch') ||
-      f.includes('india-market-briefing') ||
-      tags.some((t: string) => t.toLowerCase().includes('morning') || t.toLowerCase().includes('briefing'));
+    return f.includes('morning-market-watch') || f.includes('india-market-briefing');
   })
   .slice(0, 2);
 

@@ -3,24 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const allPosts = await Astro.glob('./blog/*.md');
 
-// Classify each post
+// Classify each post — strict matching on filename only
 function classify(post: any): 'morning' | 'evening' | null {
-  const tags: string[] = post.frontmatter.tags || [];
   const file: string = post.file || '';
-  const title: string = (post.frontmatter.title || '').toLowerCase();
 
-  if (
-    tags.some((t: string) => t.toLowerCase().includes('morning')) ||
-    file.includes('morning') ||
-    title.includes('morning')
-  ) return 'morning';
-
-  if (
-    tags.some((t: string) => ['market briefing','indian markets','nifty','india market'].some(k => t.toLowerCase().includes(k))) ||
-    file.includes('india-market-briefing') ||
-    title.includes('briefing') ||
-    title.includes('evening')
-  ) return 'evening';
+  if (file.includes('morning-market-watch')) return 'morning';
+  if (file.includes('india-market-briefing')) return 'evening';
 
   return null;
 }
