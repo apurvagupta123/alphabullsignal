@@ -10,13 +10,13 @@ tags: ["Indian Markets", "NIFTY", "Market Briefing", "Finance", "Large Cap", "Mi
 
 ## The Headline: IT Dragged Markets Down, But Domestic Investors Held the Floor
 
-India's stock markets closed in the red on Thursday, June 19, 2026 — with a sharp crash in IT (Information Technology) stocks doing most of the damage. NIFTY 50, which is essentially a report card for India's 50 biggest companies, closed at **24,013 — down 155 points (-0.64%)**. SENSEX, the older sibling tracking 30 Bombay Stock Exchange giants, ended at **76,803 — down 607 points (-0.78%)**.
+India's stock markets closed in the red on Friday, June 19, 2026 — with a sharp crash in IT (Information Technology) stocks doing most of the damage. NIFTY 50, which is essentially a report card for India's 50 biggest companies, closed at **24,013 — down 155 points (-0.64%)**. SENSEX, the older sibling tracking 30 Bombay Stock Exchange giants, ended at **76,803 — down 607 points (-0.78%)**.
 
 The intraday damage was worse. During the session, Sensex plunged over 900 points and NIFTY briefly slipped below 24,000, before domestic buyers stepped in and cushioned the fall.
 
-Now the cap-size picture: **NIFTY 100 (Large Cap)** — which tracks India's top 100 companies — ended down **0.58%**. Meanwhile, **NIFTY MIDCAP 50** (mid-sized, fast-growing companies sitting between the giants and startups) actually closed *up* 0.10%. And **NIFTY SMALLCAP** (emerging, smaller companies) was essentially flat at 0.0%.
+Now the cap-size picture: **NIFTY 100 (Large Cap)** — which tracks India's top 100 companies — ended down **0.58%**. Meanwhile, **NIFTY MIDCAP 50** (mid-sized, fast-growing companies sitting between the giants and startups) actually closed *up* 0.10%. And **NIFTY SMALLCAP** (emerging, smaller companies) actually closed *up* **+0.56%** — quietly outperforming the large-cap slide.
 
-Translation: the big boys bled today. Mid and small companies quietly held their ground.
+Translation: the big boys bled today. Mid and small companies not only held their ground — they gained.
 
 ---
 
@@ -134,10 +134,14 @@ Despite the IT selloff and intraday volatility, VIX at 12.97 tells us the market
 
 2. **IT stocks stabilization:** After a brutal session, watch whether buyers step in at lower levels in Infosys and TCS. If they do, it signals the selloff is overdone. If they sell again, the sector could test new lows.
 
-3. **Jio IPO buzz:** Institutional investors and analysts will begin dissecting Jio Platforms' DRHP over the weekend. Initial valuations estimates will emerge — expect significant media coverage. Reliance stock could recover if the IPO valuation impressess markets.
+3. **Jio IPO buzz:** Institutional investors and analysts will begin dissecting Jio Platforms' DRHP over the weekend. Initial valuations estimates will emerge — expect significant media coverage. Reliance stock could recover if the IPO valuation impresses markets.
 
 ---
 
 *Markets close at 3:30 PM IST every weekday. This briefing is for information and education only — not investment advice. Always consult a SEBI-registered financial advisor before making investment decisions.*
+
+---
+
+*Sources: NSE/BSE closing data via Yahoo Finance, FII/DII provisional data via NSE, news from public market disclosures. This briefing is for education only — not investment advice.*
 
 *Created with Claude AI*

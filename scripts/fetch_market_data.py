@@ -151,9 +151,9 @@ COMPANY_SYMBOLS = list(dict.fromkeys([
     # Misc
     'TITAN.NS','M&M.NS','ADANIENT.NS',
     # Adani Group (extended)
-    'ADANIPOWER.NS','ADANIENSOL.NS','ADANIWILMAR.NS','AMBUJACEMENT.NS','ACC.NS',
+    'ADANIPOWER.NS','ADANIENSOL.NS','AWL.NS','AMBUJACEM.NS','ACC.NS',
     # Consumer & New-age
-    'ZOMATO.NS','DMART.NS','TRENT.NS','NYKAA.NS','PAYTM.NS','POLICYBZR.NS',
+    'ETERNAL.NS','DMART.NS','TRENT.NS','NYKAA.NS','PAYTM.NS','POLICYBZR.NS',
     # Industrials / Materials
     'PIDILITIND.NS','HAVELLS.NS','POLYCAB.NS','DIXON.NS','IRCTC.NS',
     # Small/Mid cap additions
@@ -216,9 +216,35 @@ def fetch_batch(symbols: list) -> dict:
                 result[sym] = _empty(sym)
                 continue
             price = float(series.iloc[-1])
-            prev  = float(series.iloc[-2]) if len(series) >= 2 else price
-            chg   = price - prev
-            pct   = (chg / prev * 100) if prev else 0
+            if len(series) >= 2:
+                prev = float(series.iloc[-2])
+                chg  = price - prev
+                pct  = (chg / prev * 100) if prev else 0
+            else:
+                # Only 1 row of daily data — fall back to 60-min intraday grouped by date
+                print(f"  Daily data has only 1 row for {sym}, trying 60-min intraday fallback...")
+                try:
+                    hist = yf.Ticker(sym).history(period='5d', interval='60m')
+                    if not hist.empty:
+                        hist['_date'] = hist.index.normalize()
+                        daily = hist.groupby('_date')['Close'].last().dropna()
+                        if len(daily) >= 2:
+                            price = float(daily.iloc[-1])
+                            prev  = float(daily.iloc[-2])
+                            chg   = price - prev
+                            pct   = (chg / prev * 100) if prev else 0
+                            print(f"  Fallback OK for {sym}: {price:.2f} vs prev {prev:.2f} ({pct:+.2f}%)")
+                            result[sym] = {
+                                'symbol': sym,
+                                'regularMarketPrice':         round(price, 2),
+                                'regularMarketChange':        round(chg,   2),
+                                'regularMarketChangePercent': round(pct,   2),
+                            }
+                            continue
+                except Exception as fe:
+                    print(f"  60-min fallback failed for {sym}: {fe}")
+                chg = 0.0
+                pct = 0.0
             result[sym] = {
                 'symbol': sym,
                 'regularMarketPrice':         round(price, 2),

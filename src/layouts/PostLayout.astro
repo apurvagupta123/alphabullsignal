@@ -1,6 +1,36 @@
 ---
 const { frontmatter } = Astro.props;
 import BaseLayout from './BaseLayout.astro';
+
+const siteBase = 'https://thebusinessledger.theapurva.com';
+const canonicalUrl = `${siteBase}${Astro.url.pathname}`;
+const ogImage = frontmatter.image
+  ? (frontmatter.image.startsWith('http') ? frontmatter.image : `${siteBase}${frontmatter.image}`)
+  : `${siteBase}/og-image.png`;
+const metaDesc = frontmatter.excerpt || 'Market insights, NIFTY analysis, and investor education from BullSignal.';
+const postTitle = `${frontmatter.title} | BullSignal`;
+const publishedDate = frontmatter.date ? new Date(frontmatter.date).toISOString() : new Date().toISOString();
+const author = frontmatter.author || 'Apurva Gupta';
+const tags = frontmatter.tags || [];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": frontmatter.title,
+  "description": metaDesc,
+  "image": [ogImage],
+  "datePublished": publishedDate,
+  "dateModified": publishedDate,
+  "author": { "@type": "Person", "name": author, "url": siteBase },
+  "publisher": {
+    "@type": "Organization",
+    "name": "BullSignal",
+    "logo": { "@type": "ImageObject", "url": `${siteBase}/logo.svg` }
+  },
+  "url": canonicalUrl,
+  "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
+  "keywords": tags.join(', ')
+});
 ---
 <BaseLayout title={frontmatter.title}>
   <!-- ── Animated Background Orbs ── -->
@@ -83,6 +113,50 @@ import BaseLayout from './BaseLayout.astro';
     </div>
 
   </div>
+
+  <!-- ── SEO: JSON-LD Structured Data (valid anywhere in document) ── -->
+  <script type="application/ld+json" set:html={jsonLd} />
+
+  <!-- ── SEO: Override BaseLayout's generic meta tags with post-specific values ── -->
+  <script define:vars={{ postTitle, metaDesc, ogImage, canonicalUrl, publishedDate }}>
+    (function () {
+      // Helper: update or create a <meta> tag
+      function setMeta(selector, attr, value) {
+        var el = document.head.querySelector(selector);
+        if (!el) { el = document.createElement('meta'); document.head.appendChild(el); }
+        el.setAttribute(attr, value);
+      }
+      function setLink(rel, href) {
+        var el = document.head.querySelector('link[rel="' + rel + '"]');
+        if (!el) { el = document.createElement('link'); el.rel = rel; document.head.appendChild(el); }
+        el.href = href;
+      }
+
+      // Page title
+      document.title = postTitle;
+
+      // Canonical URL
+      setLink('canonical', canonicalUrl);
+
+      // Description
+      setMeta('meta[name="description"]', 'content', metaDesc);
+
+      // Open Graph
+      setMeta('meta[property="og:type"]', 'content', 'article');
+      setMeta('meta[property="og:title"]', 'content', postTitle);
+      setMeta('meta[property="og:description"]', 'content', metaDesc);
+      setMeta('meta[property="og:image"]', 'content', ogImage);
+      setMeta('meta[property="og:url"]', 'content', canonicalUrl);
+      setMeta('meta[property="article:published_time"]', 'content', publishedDate);
+
+      // Twitter Card
+      setMeta('meta[name="twitter:card"]', 'content', 'summary_large_image');
+      setMeta('meta[name="twitter:title"]', 'content', postTitle);
+      setMeta('meta[name="twitter:description"]', 'content', metaDesc);
+      setMeta('meta[name="twitter:image"]', 'content', ogImage);
+    })();
+  </script>
+
 </BaseLayout>
 
 <style>
