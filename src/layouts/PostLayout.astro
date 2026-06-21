@@ -2,7 +2,7 @@
 const { frontmatter } = Astro.props;
 import BaseLayout from './BaseLayout.astro';
 
-const siteBase = 'https://thebusinessledger.theapurva.com';
+const siteBase = 'https://alphabullsignal.theapurva.com';
 const canonicalUrl = `${siteBase}${Astro.url.pathname}`;
 const ogImage = frontmatter.image
   ? (frontmatter.image.startsWith('http') ? frontmatter.image : `${siteBase}${frontmatter.image}`)
@@ -10,7 +10,7 @@ const ogImage = frontmatter.image
 const metaDesc = frontmatter.excerpt || 'Market insights, NIFTY analysis, and investor education from BullSignal.';
 const postTitle = `${frontmatter.title} | BullSignal`;
 const publishedDate = frontmatter.date ? new Date(frontmatter.date).toISOString() : new Date().toISOString();
-const author = frontmatter.author || 'Apurva Gupta';
+const author = frontmatter.author || 'Apurva Gupta'
 const tags = frontmatter.tags || [];
 
 const jsonLd = JSON.stringify({
